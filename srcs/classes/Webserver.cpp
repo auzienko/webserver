@@ -6,7 +6,7 @@
 /*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:45:07 by zcris             #+#    #+#             */
-/*   Updated: 2022/02/08 10:53:24 by zcris            ###   ########.fr       */
+/*   Updated: 2022/02/08 11:51:41 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,12 +143,47 @@ int Webserver::sendResult(int fd, char* buf) {
 
 int Webserver::getRequest(int fd, char* buf) {
   int nbytes;
-
+  
+//https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages
+//https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
 //необходимо сделать чтение пока не встретим пустую строку (типа гетнекст лайна)
 //далее необходимо сделать разбор заголовка с сложить в структуру t_requestHeader
 //т.е читаем из входящего fd пока не встретим пустую строку, думаю можно побайтово пока не встретим комбинацию \r\n\r\n
 //все что читали куда-то сохраняли
 //то что насохраняли отдаем в парсер, который собирает структуру.
+
+
+// GET /hello.htm HTTP/1.1
+// User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
+// Host: www.tutorialspoint.com
+// Accept-Language: en-us
+// Accept-Encoding: gzip, deflate
+// Connection: Keep-Alive
+
+// POST /cgi-bin/process.cgi HTTP/1.1
+// User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
+// Host: www.tutorialspoint.com
+// Content-Type: application/x-www-form-urlencoded
+// Content-Length: length
+// Accept-Language: en-us
+// Accept-Encoding: gzip, deflate
+// Connection: Keep-Alive
+// пустая строка
+// licenseID=string&content=string&/paramsXML=string
+
+
+// POST /cgi-bin/process.cgi HTTP/1.1
+// User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
+// Host: www.tutorialspoint.com
+// Content-Type: text/xml; charset=utf-8
+// Content-Length: length
+// Accept-Language: en-us
+// Accept-Encoding: gzip, deflate
+// Connection: Keep-Alive
+// пустая строка
+// <?xml version="1.0" encoding="utf-8"?>
+// <string xmlns="http://clearforest.com/">string</string>
+
 
 
   nbytes = recv(fd, buf, DEFAULT_BUFLEN, 0);
