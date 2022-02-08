@@ -6,7 +6,7 @@
 /*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:29:26 by zcris             #+#    #+#             */
-/*   Updated: 2022/02/07 12:09:17 by zcris            ###   ########.fr       */
+/*   Updated: 2022/02/08 10:50:35 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,3 +33,7 @@ typedef struct tag_server {
   std::string mime_conf_path;
   std::vector<t_location> locations;
 } t_server;
+
+typedef struct tag_requestHeader {
+    int i;
+} t_requestHeader;

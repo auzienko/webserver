@@ -6,7 +6,7 @@
 /*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:45:07 by zcris             #+#    #+#             */
-/*   Updated: 2022/02/07 18:19:57 by zcris            ###   ########.fr       */
+/*   Updated: 2022/02/08 10:53:24 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,6 +144,13 @@ int Webserver::sendResult(int fd, char* buf) {
 int Webserver::getRequest(int fd, char* buf) {
   int nbytes;
 
+//необходимо сделать чтение пока не встретим пустую строку (типа гетнекст лайна)
+//далее необходимо сделать разбор заголовка с сложить в структуру t_requestHeader
+//т.е читаем из входящего fd пока не встретим пустую строку, думаю можно побайтово пока не встретим комбинацию \r\n\r\n
+//все что читали куда-то сохраняли
+//то что насохраняли отдаем в парсер, который собирает структуру.
+
+
   nbytes = recv(fd, buf, DEFAULT_BUFLEN, 0);
   fprintf(stdout, "reading %d bytes from socket %d\n", nbytes, fd);
   if (nbytes < 0) {
@@ -202,9 +209,10 @@ int Webserver::run(void) {
             //добавить обработчик
             exit(EXIT_FAILURE);
           }
-          if (_connectionCount < _maxConnection)
+          if (_connectionCount < _maxConnection) {
             addConnection(new_sock, POLLIN);
-          else {
+            fcntl(new_sock, F_SETFL, O_NONBLOCK);
+          } else {
             ws::printE(ERROR_SOCKET_COUNT_LIMIT, "\n");
             close(new_sock);
           }

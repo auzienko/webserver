@@ -6,7 +6,7 @@
 /*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 10:09:50 by zcris             #+#    #+#             */
-/*   Updated: 2022/02/07 18:11:27 by zcris            ###   ########.fr       */
+/*   Updated: 2022/02/08 10:41:56 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <netinet/in.h>
 #include <poll.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 
 #include "default_settings.hpp"
