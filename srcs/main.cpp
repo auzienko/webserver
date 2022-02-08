@@ -6,18 +6,24 @@
 /*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 10:10:48 by zcris             #+#    #+#             */
-/*   Updated: 2022/02/07 20:29:32 by zcris            ###   ########.fr       */
+/*   Updated: 2022/02/08 14:48:17 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/main.hpp"
 
 int main(int argc, char** argv) {
-  if (argc != 2) {
+  std::string path;
+
+  if (argc == 1)
+    path = DEFAULT_CONFIG_FILE;
+  else if (argc == 2) {
+    path = argv[1];
+  } else {
     ws::printE(ERROR_PROGRAM_ARGS, "\n");
     return -1;
   }
-  Config* cnfg = new Config(argv[1]);
+  Config* cnfg = new Config(path);
   if (cnfg->checkAndParse() < 0) {
     delete cnfg;
     return -1;

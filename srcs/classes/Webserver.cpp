@@ -6,7 +6,7 @@
 /*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:45:07 by zcris             #+#    #+#             */
-/*   Updated: 2022/02/08 11:51:41 by zcris            ###   ########.fr       */
+/*   Updated: 2022/02/08 12:26:33 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ int Webserver::getRequest(int fd, char* buf) {
 // Accept-Language: en-us
 // Accept-Encoding: gzip, deflate
 // Connection: Keep-Alive
-// пустая строка
+// r\n\r\n
 // licenseID=string&content=string&/paramsXML=string
 
 
