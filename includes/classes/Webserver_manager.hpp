@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Webserver_manager.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
+/*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/10 07:44:23 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/10 09:51:10 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/10 18:30:48 by wgaunt           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class Webserver_manager {
   Webserver_manager(void);
   Webserver_manager(Webserver_manager const& src);
   Webserver_manager& operator=(Webserver_manager const& rhs);
-  int _Create_webservers(void);
+  int _Create_webserver(t_server &newServerConfig);
   void _Banner(void) const;
 };
 
