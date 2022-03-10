@@ -6,7 +6,7 @@
 /*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:29:26 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/10 16:35:36 by wgaunt           ###   ########.fr       */
+/*   Updated: 2022/03/10 18:01:35 by wgaunt           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,7 @@ typedef struct tag_location {
   t_methods   methods;
   std::string index;
   size_t      client_max_body_size;
-  std::string mime_conf_path;
-  std::string redirect;
-  std::string cgi_path;
+  std::string uploads_path;
   bool        autoindex;
   bool        file_uploads;
 } t_location;
@@ -37,9 +35,10 @@ typedef struct tag_server {
   size_t                      port;
   std::string                 server_name;
   size_t                      client_max_body_size;
-  std::string                 mime_conf_path;
   std::vector<t_location>     locations;
   std::map<int, std::string>  error_pages;
+  std::string                 cgi_extention;
+  std::string                 cgi_path;
 } t_server;
 
 typedef struct tag_requestHeader {
