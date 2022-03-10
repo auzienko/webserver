@@ -1,0 +1,12 @@
+server <name> {                 #name может отсутствовать
+  host:port;                    #первая строка всегда имеет такой формат
+  error_page <num> some.html;
+  limit_size <num>;
+  location <path> {             #path обязательно (HTTP redirection)
+    methods <name> ...;         #доступные методы, перечисление через пробел
+    root <path>;                #где будут искаться файлы
+    autoindex <on/off>;
+    index <file>;               #default file to answer if the request is a directory
+    upload <path>;              #path - путь сохранения файлов. Загрузка файлов разрешена, когда есть эта строка
+  }
+}
