@@ -3,27 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   Webserver.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
+/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:45:07 by zcris             #+#    #+#             */
-/*   Updated: 2022/02/08 12:26:33 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/10 13:08:34 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/classes/Webserver.hpp"
 
-Webserver::Webserver(Config* config, int maxConnection)
-    : _config(config), _connectionCount(0), _maxConnection(maxConnection) {}
+Webserver::Webserver(int maxConnection)
+    : _connectionCount(0), _maxConnection(maxConnection), _fd_max(-1) {
+  FD_ZERO(&_connections);
+}
 
 Webserver::~Webserver() {}
-
-void Webserver::banner(void) const {
-  ws::print("==================================", "\n");
-  ws::print(PROGRAMM_NAME, " ");
-  ws::print(PROGRAMM_VERSION, "\n");
-  ws::print(AUTHORS, "\n");
-  ws::print("==================================", "\n");
-}
 
 int const& Webserver::getClientsCount(void) const { return _connectionCount; }
 
@@ -35,186 +29,71 @@ void Webserver::minusConnection(void) {
   if (_connectionCount != 0) --_connectionCount;
 }
 
-void Webserver::addConnection(int fd, short events) {
-  pollfd tmp;
-
-  tmp.fd = fd;
-  tmp.events = events;
-  tmp.revents = 0;
-  _connections.push_back(tmp);
+void Webserver::addConnection(int fd) {
+  FD_SET(fd, &_connections);
   plusConnection();
+  if (fd > _fd_max) _fd_max = fd;
 }
 
-int Webserver::createServerListenSockets(void) {
-  int sock, err;
+int Webserver::createServerListenSocket(void) {
+  int err;
   struct sockaddr_in addr;
-  pollfd tmp;
 
-  //сдеалать в цикле при разборе конфига
-  //добавить проверку, чтобы слушашие соединения не превысили количество
-  //коннектинов максимальное
-  for (int i = 0; i < 1; ++i) {
-    sock = socket(PF_INET, SOCK_STREAM, 0);
-    if (sock < 0) {
-      ws::printE(ERROR_CREATE_SOCKET, "\n");
-      return -1;
-    }
-    int const opt = 1;
-    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
-    addr.sin_family = PF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port = htons(DEFAULT_SERVER_PORT);
-    err = bind(sock, (struct sockaddr*)&addr, sizeof(addr));
-    if (err < 0) {
-      ws::printE(ERROR_BIND_SOCKET, "\n");
-      close(sock);
-      return -1;
-    }
-    err = listen(sock, DEFAULT_LISTEN_QUEUE);
-    if (err < 0) {
-      ws::printE(ERROR_LISTEN_SOCKET, "\n");
-      close(sock);
-      return -1;
-    }
-    tmp.fd = sock;
-    tmp.events = POLLIN;
-    tmp.revents = 0;
-    _connections.push_back(tmp);
-    _listenSockets.push_back(sock);
-    plusConnection();
+  _listenSocket = socket(PF_INET, SOCK_STREAM, 0);
+  if (_listenSocket < 0) {
+    ws::printE(ERROR_CREATE_SOCKET, "\n");
+    return -1;
   }
+
+  int const opt = 1;
+  err = setsockopt(_listenSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&opt,
+                   sizeof(opt));
+  if (err < 0) {
+    ws::printE(ERROR_SOCKET_OPTIONS, "\n");
+    close(_listenSocket);
+    return -1;
+  }
+
+  memset(&addr, 0, sizeof(addr));
+  addr.sin_family = PF_INET;
+  //берем из конфига
+  addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  //берем из конфига
+  addr.sin_port = htons(DEFAULT_SERVER_PORT);
+  err = bind(_listenSocket, (struct sockaddr*)&addr, sizeof(addr));
+  if (err < 0) {
+    ws::printE(ERROR_BIND_SOCKET, "\n");
+    close(_listenSocket);
+    return -1;
+  }
+
+  err = listen(_listenSocket, DEFAULT_LISTEN_QUEUE);
+  if (err < 0) {
+    ws::printE(ERROR_LISTEN_SOCKET, "\n");
+    close(_listenSocket);
+    return -1;
+  }
+
+  addConnection(_listenSocket);
+  _fd_max = _listenSocket;
   return 0;
 }
 
 void Webserver::closeConnection(int index) {
-  close(_connections[index].fd);
-  _connections.erase(_connections.begin() + index);
-  minusConnection();
-}
-
-int Webserver::sendResult(int fd, char* buf) {
-  int nbytes, ret;
-  std::stringstream http;
-  std::stringstream html;
-
-  char* p = strstr(buf, "index.html");
-
-  if (p && p - buf < 20) {
-    html << "<!DOCTYPE html>\r\n";
-    html << "<html>\r\n";
-    html << "<head>\r\n";
-    html << "<meta charset=\"UTF-8\">\r\n";
-    html << "<title>Title test</title>\r\n";
-    html << "</head>\r\n";
-    html << "<body>\r\n";
-    html << "<h2> TEST </h2> \r\n";
-    html << "<p>poll — это более новый метод опроса сокетов, созданный после "
-            "того, как люди начали пытаться писать большие и высоконагруженные "
-            "сетевые сервисы. Он спроектирован намного лучше и не страдает от "
-            "большинства недостатков метода select. В большинстве случаев при "
-            "написании современных приложений вы будете выбирать между "
-            "использованием poll и epoll/libevent.</p>\r\n";
-    html << "</body>\r\n";
-    html << "</html>\r\n";
-
-    http << "HTTP/1.1 200 OK\r\n";
-    http << "Connection: keep-alive\r\n";
-    http << "Content-type: text/html\r\n";
-    http << "Content-lenght: " << html.str().length() << "\r\n";
-    http << "\r\n";
-    http << html.str();
-    ret = 0;
-  } else {
-    http << "HTTP/1.1 404 Not Found\r\n";
-    http << "Connection: close\r\n";
-    http << "Content-lenght: 0\r\n";
-    http << "Content-Type: text/html\r\n";
-    http << "\r\n";
-    ret = -1;
-  }
-
-  nbytes = send(fd, http.str().c_str(), http.str().length() + 1, 0);
-  if (nbytes < 0) ret = -1;
-
-  printf("Server: write return %d\n", ret);
-
-  return ret;
-}
-
-int Webserver::getRequest(int fd, char* buf) {
-  int nbytes;
-  
-//https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages
-//https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
-//необходимо сделать чтение пока не встретим пустую строку (типа гетнекст лайна)
-//далее необходимо сделать разбор заголовка с сложить в структуру t_requestHeader
-//т.е читаем из входящего fd пока не встретим пустую строку, думаю можно побайтово пока не встретим комбинацию \r\n\r\n
-//все что читали куда-то сохраняли
-//то что насохраняли отдаем в парсер, который собирает структуру.
-
-
-// GET /hello.htm HTTP/1.1
-// User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-// Host: www.tutorialspoint.com
-// Accept-Language: en-us
-// Accept-Encoding: gzip, deflate
-// Connection: Keep-Alive
-
-// POST /cgi-bin/process.cgi HTTP/1.1
-// User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-// Host: www.tutorialspoint.com
-// Content-Type: application/x-www-form-urlencoded
-// Content-Length: length
-// Accept-Language: en-us
-// Accept-Encoding: gzip, deflate
-// Connection: Keep-Alive
-// r\n\r\n
-// licenseID=string&content=string&/paramsXML=string
-
-
-// POST /cgi-bin/process.cgi HTTP/1.1
-// User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-// Host: www.tutorialspoint.com
-// Content-Type: text/xml; charset=utf-8
-// Content-Length: length
-// Accept-Language: en-us
-// Accept-Encoding: gzip, deflate
-// Connection: Keep-Alive
-// пустая строка
-// <?xml version="1.0" encoding="utf-8"?>
-// <string xmlns="http://clearforest.com/">string</string>
-
-
-
-  nbytes = recv(fd, buf, DEFAULT_BUFLEN, 0);
-  fprintf(stdout, "reading %d bytes from socket %d\n", nbytes, fd);
-  if (nbytes < 0) {
-    //ошибка чтения
-    perror("Server: read failture");
-    return -1;
-  } else if (nbytes == 0) {
-    fprintf(stdout, "reading no data\n");
-    return 0;
-  } else {
-    int cnt = 0;
-    printf("\n\nServer gets %d bytes:\n", nbytes);
-
-    for (int i = 0; i < nbytes && cnt < 2; ++i) {
-      write(1, &buf[i], 1);
-    }
-    write(1, "\n\n", 2);
-    return 0;
+  if (FD_ISSET(index, &_connections)) {
+    close(index);
+    FD_CLR(index, &_connections);
+    minusConnection();
   }
 }
 
 int Webserver::run(void) {
-  char buf[DEFAULT_BUFLEN];
+  fd_set read_fds;
+  // fd_set write_fds;
 
   ws::print(MESSAGE_TRY_START_SERV, "\n");
-  // create _listenSockets (серверные сокеты из конфига)
-  // подумать как корректно выходить.
-  ws::print(MESSAGE_CREATE_LISTEN_SOCKETS, " ");
-  if (createServerListenSockets() != 0) {
+  ws::print(MESSAGE_CREATE_LISTEN_SOCKET, " ");
+  if (createServerListenSocket() != 0) {
     ws::print(MESSAGE_FAIL, "\n");
     exit(EXIT_FAILURE);
   }
@@ -222,47 +101,56 @@ int Webserver::run(void) {
   ws::print(MESSAGE_SERVER_STARTED, "\n");
 
   // слушаем известные сокеты на предмет изменений в вечном цикле
+  struct timeval tv;
+  tv.tv_sec = 2;
+  tv.tv_usec = 0;
+
   while (1) {
-    int ret = poll((pollfd*)&_connections[0], _connectionCount, -1);
-    //-1 задержка. если -1 то происходит блокировка на этой функции.
-    if (ret < 0) {
-      ws::printE(ERROR_POLL, "\n");
+    //FD_ZERO(&read_fds);
+    FD_COPY(&_connections, &read_fds);
+    //read_fds = _connections;
+    // if (select(_listenSocket + 1, &read_fds, NULL, NULL, &tv) < 0) {
+    if (select(_listenSocket + 1, &read_fds, NULL, NULL, NULL) < 0) {
+      ws::printE(ERROR_SELECT, "\n");
       //добавить обработчик
       exit(EXIT_FAILURE);
     }
-    for (int i = 0; i < _connectionCount; ++i) {
-      if (_connections[i].revents & POLLIN) {
-        _connections[i].revents &= ~POLLIN;
-        //добавить функцию выбора листен соединений а не только 0
-        if (i == 0) {
+//    std::cout << "hello\n";
+    for (int i = 0; i <= _fd_max; ++i) {
+      if (FD_ISSET(i, &read_fds)) {
+        if (i == _listenSocket) {
           struct sockaddr_in client;
           socklen_t size = sizeof(client);
           int new_sock =
-              accept(_connections[i].fd, (struct sockaddr*)&client, &size);
+              accept(_listenSocket, (struct sockaddr*)&client, &size);
           if (new_sock < 0) {
             ws::printE(ERROR_ACCEPT, "\n");
             //добавить обработчик
             exit(EXIT_FAILURE);
           }
           if (_connectionCount < _maxConnection) {
-            addConnection(new_sock, POLLIN);
             fcntl(new_sock, F_SETFL, O_NONBLOCK);
+            addConnection(new_sock);
+            //break ;
+            FD_SET(new_sock, &read_fds);
           } else {
             ws::printE(ERROR_SOCKET_COUNT_LIMIT, "\n");
             close(new_sock);
           }
         } else {
-          if (getRequest(_connections[i].fd, buf) < 0) {
+          if (Request_manager::getRequest(i) < 0) {
             //ошибка или конец данных
             ws::printE(ERROR_READ_FROM_CLIENT, "\n");
             closeConnection(i);
+            FD_CLR(i, &read_fds);
             --i;
           } else {
             ws::print(MESSAGE_TRY_SEND_DATA, " ");
-            if (sendResult(_connections[i].fd, buf) < 0) {
+            if (Request_manager::sendResult(i) < 0) {
               ws::print(MESSAGE_FAIL, "\n");
               ws::printE(ERROR_SEND_TO_CLIENT, "\n");
               closeConnection(i);
+              FD_CLR(i, &read_fds);
               --i;
             } else {
               ws::print(MESSAGE_SUCCESS, "\n");

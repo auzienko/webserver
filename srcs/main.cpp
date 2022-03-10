@@ -3,37 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
+/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 10:10:48 by zcris             #+#    #+#             */
-/*   Updated: 2022/02/08 14:48:17 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/10 08:45:13 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/main.hpp"
 
 int main(int argc, char** argv) {
-  std::string path;
-
-  if (argc == 1)
-    path = DEFAULT_CONFIG_FILE;
-  else if (argc == 2) {
-    path = argv[1];
-  } else {
+  if (argc != 2) {
     ws::printE(ERROR_PROGRAM_ARGS, "\n");
     return -1;
   }
-  Config* cnfg = new Config(path);
-  if (cnfg->checkAndParse() < 0) {
-    delete cnfg;
+  try {
+    Webserver_manager wsm(argv[1]);
+    wsm.start();    
+  } catch (std::exception) {
+    ws::printE(ERROR_SERVER_START, "\n");
     return -1;
-  } else {
-    Webserver wbs(cnfg);
-    wbs.banner();
-    wbs.run();
   }
-
-  delete cnfg;
   return 0;
 }
 

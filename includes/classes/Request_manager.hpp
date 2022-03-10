@@ -1,21 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   print.cpp                                          :+:      :+:    :+:   */
+/*   Request_manager.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
+/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/02/07 10:29:18 by zcris             #+#    #+#             */
-/*   Updated: 2022/02/07 12:11:01 by zcris            ###   ########.fr       */
+/*   Created: 2022/03/10 10:10:38 by zcris             #+#    #+#             */
+/*   Updated: 2022/03/10 10:19:01 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/main.hpp"
+#ifndef REQUEST_MANAGER_HPP
+#define REQUEST_MANAGER_HPP
 
-void ws::printE(std::string const& msg, std::string const& divider) {
-  std::cerr << msg << divider;
-}
+#include "../main.hpp"
 
-void ws::print(std::string const& msg, std::string const& divider) {
-  std::cout << msg << divider;
-}
+class Request_manager {
+ public:
+  Request_manager();
+  ~Request_manager();
+
+  static int sendResult(int fd);
+  static int getRequest(int fd);
+};
+
+#endif

@@ -6,7 +6,7 @@
 /*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:29:26 by zcris             #+#    #+#             */
-/*   Updated: 2022/02/08 12:11:50 by zcris            ###   ########.fr       */
+/*   Updated: 2022/02/08 12:27:02 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ typedef struct tag_requestHeader {
     std::string Request_URI;
     std::string HTTP_Version;
     std::string Host;
+    
     std::string Connection;
     int Content_Length;
 

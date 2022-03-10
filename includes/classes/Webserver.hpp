@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Webserver.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
+/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:41:06 by zcris             #+#    #+#             */
-/*   Updated: 2022/02/07 17:21:56 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/10 10:22:30 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,29 +20,26 @@ class Socket;
 
 class Webserver {
  private:
-  Config* _config;
   int _connectionCount;
   int _maxConnection;
-  std::vector<int> _listenSockets;
-  std::vector<pollfd> _connections;
-
-  Webserver(void);
-  Webserver(Webserver const& src);
-  Webserver& operator=(Webserver const& rhs);
+  int _listenSocket;
+  int _fd_max;
+  fd_set _connections;
 
  public:
-  Webserver(Config* config, int maxConnection = MAX_CLIENTS);
+  Webserver(int maxConnection = MAX_CLIENTS);
   ~Webserver(void);
-  void banner(void) const;
   int run(void);
   int const& getClientsCount(void) const;
-  int createServerListenSockets(void);
+  int createServerListenSocket(void);
   void plusConnection(void);
   void minusConnection(void);
-  void addConnection(int fd, short events);
+  void addConnection(int fd);
   void closeConnection(int index);
-  int sendResult(int fd, char* buf);
-  int getRequest(int fd, char* buf);
+
+ private:
+  Webserver(Webserver const& src);
+  Webserver& operator=(Webserver const& rhs);
 };
 
 #endif
