@@ -1,36 +1,40 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Request_manager.hpp                                :+:      :+:    :+:   */
+/*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/10 10:10:38 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/11 11:18:36 by zcris            ###   ########.fr       */
+/*   Created: 2022/03/11 09:55:20 by zcris             #+#    #+#             */
+/*   Updated: 2022/03/11 11:24:50 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef REQUEST_MANAGER_HPP
-#define REQUEST_MANAGER_HPP
+#ifndef REQUEST_HPP
+#define REQUEST_HPP
 
 #include "../main.hpp"
 
-class Request;
+enum Status { NEW, READY, DONE };
 
-class Request_manager {
+class Request {
  private:
-  std::map<int, Request*> _list;
+  int _fd;
+  int _status;
 
  public:
-  Request_manager();
-  ~Request_manager(); //реализовать, там зачистка с указателей
+  Request(void);
+  Request(int const& fd);
+  ~Request();
+  int getFd(void) const;
+  int getStatus(void) const;
+  void setStatus(int status);
+  int getRequest(void);
+  int sendResult(void);
 
-  void add(int fd);
-  void remove(int fd);
-  Request* at(int fd) const;
-  int getRequest(int fd);
-  int sendResult(int fd);
-  
+ private:
+  Request(Request const& src);
+  Request& operator=(Request const& rhs);
 };
 
 #endif

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
+/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 10:09:50 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/10 16:37:48 by wgaunt           ###   ########.fr       */
+/*   Updated: 2022/03/11 10:50:37 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@
 #include "./classes/Config.hpp"
 #include "./classes/Webserver.hpp"
 #include "./classes/Webserver_manager.hpp"
+#include "./classes/Request.hpp"
 #include "./classes/Request_manager.hpp"
 
 #define PROGRAMM_NAME "21_WEBSERVER"

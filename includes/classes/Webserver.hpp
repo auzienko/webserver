@@ -6,7 +6,7 @@
 /*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:41:06 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/10 10:22:30 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/11 12:08:53 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 class Config;
 class Socket;
+class Request_manager;
 
 class Webserver {
  private:
@@ -25,6 +26,7 @@ class Webserver {
   int _listenSocket;
   int _fd_max;
   fd_set _connections;
+  Request_manager* _rm;
 
  public:
   Webserver(int maxConnection = MAX_CLIENTS);
@@ -40,6 +42,8 @@ class Webserver {
  private:
   Webserver(Webserver const& src);
   Webserver& operator=(Webserver const& rhs);
+  void _ReadHandler(int fd);
+  void _WriteHandler(int fd);
 };
 
 #endif

@@ -6,7 +6,7 @@
 #    By: zcris <zcris@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/03 17:56:13 by zcris             #+#    #+#              #
-#    Updated: 2022/03/10 10:37:24 by zcris            ###   ########.fr        #
+#    Updated: 2022/03/11 11:16:49 by zcris            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,6 +21,7 @@ ws/print.cpp \
 classes/Config.cpp \
 classes/Webserver.cpp \
 classes/Webserver_manager.cpp \
+classes/Request.cpp \
 classes/Request_manager.cpp
 
 HEADER_LIST = \
@@ -33,6 +34,7 @@ messages.hpp \
 classes/Config.hpp \
 classes/Webserver.hpp \
 classes/Webserver_manager.hpp \
+classes/Request.hpp \
 classes/Request_manager.hpp
 
 SRCS = $(addprefix $(SRC_FOLDER), $(SRC_LIST))
