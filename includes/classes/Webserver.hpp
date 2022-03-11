@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Webserver.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
+/*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:41:06 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/10 10:22:30 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/10 18:24:56 by wgaunt           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,10 @@ class Webserver {
   int _listenSocket;
   int _fd_max;
   fd_set _connections;
+  t_server _serverConfig;
 
  public:
-  Webserver(int maxConnection = MAX_CLIENTS);
+  Webserver(t_server &src, int maxConnection = MAX_CLIENTS);
   ~Webserver(void);
   int run(void);
   int const& getClientsCount(void) const;
