@@ -6,7 +6,7 @@
 /*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 10:55:56 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/10 20:29:43 by wgaunt           ###   ########.fr       */
+/*   Updated: 2022/03/11 14:34:45 by wgaunt           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	Config::_setDefaultServer()
 	_server.server_name.clear();
 }
 
-static void	serverNameLine(std::string &line, bool &is_server, bool &is_inserver)
+void	Config::_serverNameLine(std::string &line, bool &is_server, bool &is_inserver)
 {
 	is_server = true;
 	line = line.c_str() + 6;
@@ -51,7 +51,7 @@ static void	serverNameLine(std::string &line, bool &is_server, bool &is_inserver
 	if (!line.size() || line[0] == '#' || line[0] == '{')
 		return ;
 	const char	*ptr = line.c_str();
-	std::string	spaces = WHITE_SPACES + "#{";
+	std::string	spaces = std::strcat(WHITE_SPACES, "#{");
 	size_t		len = 0;
 	while (ptr && !spaces.find(*ptr))
 	{
@@ -68,9 +68,9 @@ static void	serverNameLine(std::string &line, bool &is_server, bool &is_inserver
 		skipWS(line);
 		if (!line.size() || line[0] == '#')
 			return ;
-		throw std::system_error("Find unsuspected char in config file" + " " + line);   //debug mode (+)
+		throw std::logic_error("Find unsuspected char in config file " + line);   //debug mode (+)
 	}
-	throw std::system_error("Find unsuspected char in config file" + " " + line);   //debug mode (+)
+	throw std::logic_error("Find unsuspected char in config file " + line);   //debug mode (+)
 }
 
 int	Config::checkAndParse(void)
@@ -88,7 +88,7 @@ int	Config::checkAndParse(void)
 		if (!line.size() || line[0] == '#')
 			continue;
 		if (!is_server && line.substr(0, 6) == "server")
-			serverNameLine(line, is_server, is_inserver);
+			_serverNameLine(line, is_server, is_inserver);
 	}
 	return 0;
 }
