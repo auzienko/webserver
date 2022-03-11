@@ -6,7 +6,7 @@
 /*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:29:26 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/10 18:01:35 by wgaunt           ###   ########.fr       */
+/*   Updated: 2022/03/11 19:23:50 by wgaunt           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@ typedef struct tag_methods {
   bool  get;
   bool  post;
   bool  del;
+
+  tag_methods(void) : get(false), post(false), del(false) {}
 } t_methods;
 
 typedef struct tag_location {
@@ -28,17 +30,18 @@ typedef struct tag_location {
   std::string uploads_path;
   bool        autoindex;
   bool        file_uploads;
+
+  tag_location(void) : client_max_body_size(0), autoindex(false), file_uploads(false) {}
 } t_location;
 
 typedef struct tag_server {
-  std::string                 listen;
-  size_t                      port;
-  std::string                 server_name;
-  size_t                      client_max_body_size;
-  std::vector<t_location>     locations;
-  std::map<int, std::string>  error_pages;
-  std::string                 cgi_extention;
-  std::string                 cgi_path;
+  std::string                         listen;
+  size_t                              port;
+  std::string                         server_name;
+  size_t                              client_max_body_size;
+  std::vector<t_location>             locations;
+  std::map<int, std::string>          error_pages;
+  std::map<std::string, std::string>  cgi;                  //расширение - ключ, значение - путь к cgi-файлу
 } t_server;
 
 typedef struct tag_requestHeader {

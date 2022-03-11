@@ -6,7 +6,7 @@
 /*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 10:47:43 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/11 14:26:56 by wgaunt           ###   ########.fr       */
+/*   Updated: 2022/03/11 17:33:45 by wgaunt           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,9 @@ class Config {
   Config& operator=(Config const& rhs);
 
   void  _setDefaultServer(void);
+  void  _locationArgs(std::string &line);
+  void  _serverArgs(std::string &line, bool &is_location, bool &is_inlocation);
+  void  _locationNameLine(std::string &line, bool &is_location, bool &is_inlocation);
   void  _serverNameLine(std::string &line, bool &is_server, bool &is_inserver);
 
  public:

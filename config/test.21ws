@@ -1,0 +1,13 @@
+server test {                     #name может отсутствовать
+  127.0.0.1:8081                  #первая строка всегда имеет такой формат
+  error_page 404 ../../some.html  #
+  limit_size 1000                 #
+  location /usr {                 #path обязательно (HTTP redirection)
+    methods GET POST LOL          #доступные методы, перечисление через пробел
+    root /Desktop                 #где будут искаться файлы (это может быть 1 файл)
+    autoindex on                  #
+    index /Desktop/index.html     #default file to answer if the request is a directory
+    upload /Downloads             #path - путь сохранения файлов. Загрузка файлов разрешена, когда есть эта строка
+  }                               #
+  cgi .php /Some/way/to/php-cgi   #
+}
