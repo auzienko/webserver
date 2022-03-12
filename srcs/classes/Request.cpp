@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
+/*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/11 10:03:34 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/12 12:02:21 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/12 13:53:50 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ int Request::_MakeResponseBody(void) {
   std::string url = "./www-static-site" +  _header.Request_URI;
 
   if (_header.Method == "GET") {
-    std::ifstream tmp(url);
+    std::ifstream tmp(url, std::ifstream::binary);
     if (!tmp.is_open()) {
       std::cout << "Can't GET file " << _header.Request_URI << std::endl;
       return 404;
@@ -120,7 +120,7 @@ int Request::sendResult(void) {
 
   int nbytes, ret;
   ret = 0;
-  nbytes = send(_fd, _response.str().c_str(), _response.str().length() + 1, 0);
+  nbytes = send(_fd, _response.str().c_str(), _response.str().length(), 0);
   if (nbytes < 0) ret = -1;
   printf("Server: write return %d ", ret);
   setStatus(DONE);
