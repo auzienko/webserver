@@ -6,7 +6,7 @@
 /*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/10 10:13:52 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/11 11:29:55 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/12 08:07:19 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,6 @@ int Request_manager::getRequest(int fd) {
 
 int Request_manager::sendResult(int fd) {
   Request* tmp = at(fd);
-  if (tmp != nullptr && tmp->getStatus() == READY) return tmp->sendResult();
+  if (tmp != nullptr && tmp->getStatus() == READY_TO_SEND) return tmp->sendResult();
   return 0;
 }

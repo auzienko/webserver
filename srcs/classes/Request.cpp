@@ -6,13 +6,14 @@
 /*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/11 10:03:34 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/11 11:48:34 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/12 12:02:21 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/classes/Request.hpp"
 
-Request::Request(void) : _fd(-1), _status(NEW) {}
+Request::Request(void) : _fd(-1), _status(NEW) {
+}
 
 Request::~Request(void) {}
 
@@ -24,64 +25,108 @@ int Request::getStatus(void) const { return _status; }
 
 void Request::setStatus(int status) { _status = status; }
 
-int Request::sendResult(void) {
-  int nbytes, ret;
-  int fd = _fd;
-//   char buf[DEFAULT_BUFLEN];
-  std::stringstream http;
-  std::stringstream html;
-
-//   char* p = strstr(buf, "index.html");
-
-//   if (p && p - buf < 20) {
-	if(1){
-    html << "<!DOCTYPE html>\r\n";
-    html << "<html>\r\n";
-    html << "<head>\r\n";
-    html << "<meta charset=\"UTF-8\">\r\n";
-    html << "<title>Title test</title>\r\n";
-    html << "</head>\r\n";
-    html << "<body>\r\n";
-    html << "<h2> TEST </h2> \r\n";
-    html << "<p>poll — это более новый метод опроса сокетов, созданный после "
-            "того, как люди начали пытаться писать большие и высоконагруженные "
-            "сетевые сервисы. Он спроектирован намного лучше и не страдает от "
-            "большинства недостатков метода select. В большинстве случаев при "
-            "написании современных приложений вы будете выбирать между "
-            "использованием poll и epoll/libevent.</p>\r\n";
-    html << "</body>\r\n";
-    html << "</html>\r\n";
-
-    http << "HTTP/1.1 200 OK\r\n";
-    http << "Connection: keep-alive\r\n";
-    http << "Content-type: text/html\r\n";
-    http << "Content-lenght: " << html.str().length() << "\r\n";
-    http << "\r\n";
-    http << html.str();
-    ret = 0;
-  } else {
-    http << "HTTP/1.1 404 Not Found\r\n";
-    http << "Connection: close\r\n";
-    http << "Content-lenght: 0\r\n";
-    http << "Content-Type: text/html\r\n";
-    http << "\r\n";
-    ret = -1;
-  }
-
-  nbytes = send(fd, http.str().c_str(), http.str().length() + 1, 0);
-  if (nbytes < 0) ret = -1;
-
-  printf("Server: write return %d ", ret);
-
-  setStatus(DONE);
-
-  return ret;
-}
-
 int Request::getRequest(void) {
+  if (getStatus() >= READY_TO_HANDLE) return 0;
+
   int nbytes;
   char buf[DEFAULT_BUFLEN];
   int fd = _fd;
+  nbytes = recv(fd, buf, DEFAULT_BUFLEN, 0);
+  fprintf(stdout, "\n\n🤓 Reading %d bytes from socket %d...\n", nbytes, fd);
+  if (nbytes < 0) {
+    //ошибка чтения
+    perror("~~ 😞 Server: read failture");
+    return -1;
+  } else if (nbytes == 0) {
+    fprintf(stdout, "reading no data\n");
+    return 0;
+  } else {
+    int cnt = 0;
+    printf("~~ ✔️Server gets %d bytes\nHEADERS:\n", nbytes);
+
+//header print
+    for (int i = 0; i < nbytes && cnt < 2; ++i) {
+      write(1, &buf[i], 1);
+    }
+    write(1, "\n\n", 2);
+//end header print
+
+//костыль получения урла
+    int j = 0;
+    while (buf[j++] != ' ');
+    while (buf[j] != ' ') {
+      _header.Request_URI += buf[j];
+       ++j;
+    }
+    for (int i = 0; i < nbytes && cnt < 2; ++i) {
+      write(1, &buf[i], 1);
+    }
+//end костыль получения урла
+
+    setStatus(READY_TO_HANDLE);
+
+    if (getStatus() == READY_TO_HANDLE) _RequestHandler();
+
+    return 0;
+  }
+}
+
+int Request::_RequestHandler(void) {
+  _MakeResponseBody();
+  _MakeResponseHeaders();
+  _AssembleRespose();
+  return 0;
+}
+
+int Request::_MakeResponseBody(void) {
+  _responseBody.clear();
+
+  _header.Method = "GET";
+ // _header.Request_URI = "/index.html";
+  std::string url = "./www-static-site" +  _header.Request_URI;
+
+  if (_header.Method == "GET") {
+    std::ifstream tmp(url);
+    if (!tmp.is_open()) {
+      std::cout << "Can't GET file " << _header.Request_URI << std::endl;
+      return 404;
+    }
+    _responseBody << tmp.rdbuf();
+    tmp.close();
+  }
+  return 0;
+}
+
+int Request::_MakeResponseHeaders(void) {
+  _responseHeader.clear();
+  _responseHeader << "HTTP/1.1 200 OK\r\n";
+  _responseHeader << "Connection: keep-alive\r\n";
+  _responseHeader << "Content-type: " << Mime_types::getMimeType(_header.Request_URI) << "\r\n";
+  return 0;
+}
+
+int Request::_AssembleRespose(void) {
+  _response.clear();
+  _response << _responseHeader.str();
+  _response << "Content-lenght: " << _responseBody.str().length() << "\r\n";
+  _response << "\r\n";
+  _response << _responseBody.str();
+  setStatus(READY_TO_SEND);
+  return 0;
+}
+
+int Request::sendResult(void) {
+  setStatus(SENDING);
+
+  int nbytes, ret;
+  ret = 0;
+  nbytes = send(_fd, _response.str().c_str(), _response.str().length() + 1, 0);
+  if (nbytes < 0) ret = -1;
+  printf("Server: write return %d ", ret);
+  setStatus(DONE);
+  return ret;
+}
+
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages
   // https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
   //необходимо сделать чтение пока не встретим пустую строку (типа гетнекст
@@ -120,28 +165,3 @@ int Request::getRequest(void) {
   // пустая строка
   // <?xml version="1.0" encoding="utf-8"?>
   // <string xmlns="http://clearforest.com/">string</string>
-
-  nbytes = recv(fd, buf, DEFAULT_BUFLEN, 0);
-  fprintf(stdout, "reading %d bytes from socket %d\n", nbytes, fd);
-  if (nbytes < 0) {
-    //ошибка чтения
-    perror("Server: read failture");
-    return -1;
-  } else if (nbytes == 0) {
-    fprintf(stdout, "reading no data\n");
-    return 0;
-  } else {
-    int cnt = 0;
-    printf("\n\nServer gets %d bytes:\n", nbytes);
-
-    for (int i = 0; i < nbytes && cnt < 2; ++i) {
-      write(1, &buf[i], 1);
-    }
-    write(1, "\n\n", 2);
-
-
-	setStatus(READY);
-	
-    return 0;
-  }
-}

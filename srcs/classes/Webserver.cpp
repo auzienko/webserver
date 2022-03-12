@@ -6,14 +6,14 @@
 /*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:45:07 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/11 12:18:07 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/12 11:03:46 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/classes/Webserver.hpp"
 
 Webserver::Webserver(int maxConnection)
-    : _connectionCount(0), _maxConnection(maxConnection), _fd_max(-1) {
+    : _connectionCount(0), _maxConnection(maxConnection), _maxFd(-1) {
   FD_ZERO(&_connections);
   _rm = new Request_manager();
 }
@@ -33,8 +33,9 @@ void Webserver::minusConnection(void) {
 void Webserver::addConnection(int fd) {
   FD_SET(fd, &_connections);
   plusConnection();
-  if (fd > _fd_max) _fd_max = fd;
+  if (fd > _maxFd) _maxFd = fd;
   _rm->add(fd);
+  std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> NEW CONNECTION : " << fd << std::endl;
 }
 
 void Webserver::closeConnection(int fd) {
@@ -42,11 +43,12 @@ void Webserver::closeConnection(int fd) {
     close(fd);
     FD_CLR(fd, &_connections);
     minusConnection();
-    if (fd == _fd_max) {
-      while (FD_ISSET(_fd_max, &_connections) == false) _fd_max -= 1;
+    if (fd == _maxFd) {
+      while (FD_ISSET(_maxFd, &_connections) == false) _maxFd -= 1;
     }
   }
   _rm->remove(fd);
+  std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> CLOSE CONNECTION : " << fd << std::endl;
 }
 
 int Webserver::createServerListenSocket(void) {
@@ -89,7 +91,7 @@ int Webserver::createServerListenSocket(void) {
   }
 
   addConnection(_listenSocket);
-  _fd_max = _listenSocket;
+  _maxFd = _listenSocket;
   return 0;
 }
 
@@ -120,7 +122,7 @@ void Webserver::_ReadHandler(int fd) {
 
 void Webserver::_WriteHandler(int fd) {
   if (fd == _listenSocket) return;
-  if (_rm->at(fd) == nullptr || _rm->at(fd)->getStatus() != READY) return;
+  if (_rm->at(fd) == nullptr || _rm->at(fd)->getStatus() != READY_TO_SEND) return;
   ws::print(MESSAGE_TRY_SEND_DATA, " ");
   if (_rm->sendResult(fd) < 0) {
     ws::print(MESSAGE_FAIL, "\n");
@@ -128,6 +130,8 @@ void Webserver::_WriteHandler(int fd) {
     closeConnection(fd);
   } else {
     ws::print(MESSAGE_SUCCESS, "\n");
+    //понять когда закрывать коннекшены корректно
+     closeConnection(fd);
   }
 }
 
@@ -147,7 +151,7 @@ int Webserver::run(void) {
   ws::print(MESSAGE_SUCCESS, "\n");
   ws::print(MESSAGE_SERVER_STARTED, "\n");
 
-  // timeout
+  // timeout брать из конфига наверно, но это не точно...
   struct timeval tv;
   tv.tv_sec = 2;
   tv.tv_usec = 0;
@@ -155,12 +159,12 @@ int Webserver::run(void) {
   while (1) {
     read_fds = _connections;
     write_fds = _connections;
-    if (select(_fd_max + 1, &read_fds, &write_fds, 0, &tv) < 0) {
+    if (select(_maxFd + 1, &read_fds, &write_fds, 0, &tv) < 0) {
       ws::printE(ERROR_SELECT, "\n");
       //добавить обработчик
       exit(EXIT_FAILURE);
     }
-    int max_fd = _fd_max;
+    int max_fd = _maxFd;
     for (int i = 0; i <= max_fd; ++i) {
       if (FD_ISSET(i, &read_fds)) _ReadHandler(i);
       if (FD_ISSET(i, &write_fds)) _WriteHandler(i);

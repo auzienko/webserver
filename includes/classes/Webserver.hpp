@@ -6,7 +6,7 @@
 /*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:41:06 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/11 12:08:53 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/12 09:40:39 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ class Webserver {
   int _connectionCount;
   int _maxConnection;
   int _listenSocket;
-  int _fd_max;
+  int _maxFd;
   fd_set _connections;
   Request_manager* _rm;
 
