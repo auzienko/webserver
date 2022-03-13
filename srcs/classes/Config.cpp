@@ -12,7 +12,7 @@ static void	skipWS(std::string &line)
 	const char	*ptr = line.c_str();
 	std::string	spaces = WHITE_SPACES;
 
-	while (spaces.find(*ptr) != std::string::npos && *ptr)
+	while (*ptr && spaces.find(*ptr) != std::string::npos)
 	{
 		ptr++;
 	}
@@ -53,7 +53,7 @@ void	Config::_serverNameLine(std::string &line, bool &is_server, bool &is_inserv
 	const char	*ptr = line.c_str();
 	std::string	spaces = WHITE_SPACES "#{";
 	size_t		len = 0;
-	while (ptr && spaces.find(*ptr) == std::string::npos)
+	while (*ptr && spaces.find(*ptr) == std::string::npos)
 	{
 		len++;
 		ptr++;
@@ -74,7 +74,7 @@ static void	savePath(std::string &line, std::string &field, int debugLine)
 	size_t		len = 0;
 	std::string	spaces = WHITE_SPACES "#";
 
-	while (spaces.find(line[len]) == std::string::npos && line[len])
+	while (line[len] && spaces.find(line[len]) == std::string::npos)
 		len++;
 	field = line.substr(0, len);
 	line = line.c_str() + len;
@@ -96,7 +96,7 @@ void	Config::_locationNameLine(std::string &line, bool &is_location, bool &is_in
 	{
 		throw std::logic_error("There are no argument when it's need in config file line " + std::to_string(_debugLine));
 	}
-	while (spaces.find(line[len]) == std::string::npos)
+	while (line[len] && spaces.find(line[len]) == std::string::npos)
 		len++;
 	cur.path = line.substr(0, len);
 	line = line.c_str() + len;
@@ -138,7 +138,7 @@ void	Config::_locationArgs(std::string &line)
 			{
 				size_t	len = 0;
 				std::string	spaces = WHITE_SPACES "#";
-				while (spaces.find(line[len]) == std::string::npos)
+				while (line[len] && spaces.find(line[len]) == std::string::npos)
 					len++;
 				line = line.c_str() + len;
 			}
@@ -198,7 +198,7 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 		line = line.c_str() + len + 1;
 		len = 0;
 
-		while (spaces.find(line[len]) == std::string::npos)
+		while (line[len] && spaces.find(line[len]) == std::string::npos)
 			len++;
 		_server.port = atoi(line.substr(0, len).c_str());
 		line = line.c_str() + len;
@@ -214,7 +214,7 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 
 		line = line.c_str() + 10;
 		skipWS(line);
-		while (spaces.find(line[len]) == std::string::npos)
+		while (line[len] && spaces.find(line[len]) == std::string::npos)
 			len++;
 		error_page.first = atoi(line.substr(0, len).c_str());
 		line = line.c_str() + len;
@@ -231,7 +231,7 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 
 		line = line.c_str() + 10;
 		skipWS(line);
-		while (spaces.find(line[len]) == std::string::npos)
+		while (line[len] && spaces.find(line[len]) == std::string::npos)
 			len++;
 		_server.client_max_body_size = atoi(line.substr(0, len).c_str());
 		line = line.c_str() + len;
@@ -251,7 +251,7 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 
 		line = line.c_str() + 3;
 		skipWS(line);
-		while (spaces.find(line[len]) == std::string::npos)
+		while (line[len] && spaces.find(line[len]) == std::string::npos)
 			len++;
 		cgi.first = line.substr(0, len);
 		line = line.c_str() + len;
