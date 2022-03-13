@@ -1,31 +1,24 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Mime_types.cpp                                     :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/12 11:34:32 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/12 12:09:10 by zcris            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../../includes/classes/Mime_types.hpp"
 
 Mime_types::Mime_types(void) {}
 
 Mime_types::~Mime_types(void) {}
 
-std::string Mime_types::getMimeType(std::string const& ext) {
+std::string Mime_types::getMimeType(std::string const &ext)
+{
   size_t len = ext.length() - 1;
   std::string tmp;
-  while (len && ext[len] != '.') {
+  while (len && ext[len] != '.')
+  {
     tmp.insert(0, 1, ext[len]);
     --len;
   }
-  for (int i = 0; i < MIMETYPESCOUNT; ++i) {
-    if (tmp == _types[i].fileExtension) return _types[i].mimeType;
+  for (int i = 0; i < MIMETYPESCOUNT; ++i)
+  {
+    if (tmp == _types[i].fileExtension)
+      return _types[i].mimeType;
   }
+
   return "*/*";
 }
 

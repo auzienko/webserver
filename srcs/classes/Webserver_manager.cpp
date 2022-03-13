@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Webserver_manager.cpp                              :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/10 07:49:54 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/10 19:15:36 by wgaunt           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../../includes/classes/Webserver_manager.hpp"
 
 Webserver_manager::Webserver_manager(std::string const& config_path) {

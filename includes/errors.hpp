@@ -8,7 +8,6 @@
 #define ERROR_CREATE_SOCKET "Socket was not created"
 #define ERROR_BIND_SOCKET "Socket was not binded"
 #define ERROR_LISTEN_SOCKET "Listen queue failure"
-//#define ERROR_POLL "Poll failure"
 #define ERROR_SELECT "Select failure"
 #define ERROR_ACCEPT "Accept failure"
 #define ERROR_SOCKET_COUNT_LIMIT "No more sockets for client"
