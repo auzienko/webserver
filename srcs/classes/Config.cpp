@@ -119,29 +119,12 @@ void	Config::_locationArgs(std::string &line)
 		skipWS(line);
 		while (line.length() && line[0] != '#')
 		{
-			if (line.substr(0, 3) == "GET")
-			{
-				cur.methods.get = true;
-				line = line.c_str() + 3;
-			}
-			if (line.substr(0, 6) == "DELETE")
-			{
-				cur.methods.del = true;
-				line = line.c_str() + 6;
-			}
-			if (line.substr(0, 4) == "POST")
-			{
-				cur.methods.post = true;
-				line = line.c_str() + 4;
-			}
-			else
-			{
-				size_t	len = 0;
-				std::string	spaces = WHITE_SPACES "#";
-				while (line[len] && spaces.find(line[len]) == std::string::npos)
-					len++;
-				line = line.c_str() + len;
-			}
+			size_t	len = 0;
+			std::string	spaces = WHITE_SPACES "#";
+			while (line[len] && spaces.find(line[len]) == std::string::npos)
+				len++;
+			cur.methods.insert(line.substr(0, len));
+			line = line.c_str() + len;
 			skipWS(line);
 		}
 	}
@@ -180,6 +163,7 @@ void	Config::_locationArgs(std::string &line)
 		line = line.c_str() + 6;
 		skipWS(line);
 		savePath(line, cur.uploads_path, _debugLine);
+		cur.file_uploads = true;
 	}
 	else
 		throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
