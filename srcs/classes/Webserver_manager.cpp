@@ -3,22 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   Webserver_manager.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
+/*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/10 07:49:54 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/10 08:55:14 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/10 19:15:36 by wgaunt           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/classes/Webserver_manager.hpp"
 
 Webserver_manager::Webserver_manager(std::string const& config_path) {
-  _config = new Config(config_path);
-  if (_config->checkAndParse() < 0) {
+  int res;
+  _config = new Config(config_path);     //Нужна проверка найден файл или нет
+  res = _config->checkAndParse();
+  while (res > 0)
+  {
+    _Create_webserver(_config->get_server());
+    res = _config->checkAndParse();
+  }
+  if (res < 0) {
     delete _config;
+    //_Delete_webservers();             Если ошибка в конфиге на очередном сервере, прошлые не валидны?
     throw new std::exception;
-  } else {
-    _Create_webservers();
   }
 }
 
@@ -36,8 +42,8 @@ Webserver_manager::~Webserver_manager() {
   for (; i != e; ++i) delete (*i);
 }
 
-int Webserver_manager::_Create_webservers(void) {
-  _webservers.push_back(new Webserver());
+int Webserver_manager::_Create_webserver(t_server &newServerConfig) {
+  _webservers.push_back(new Webserver(newServerConfig));
   return 0;
 }
 

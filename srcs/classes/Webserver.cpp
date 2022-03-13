@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Webserver.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
+/*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 11:45:07 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/12 11:03:46 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/13 12:22:21 by wgaunt           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/classes/Webserver.hpp"
 
-Webserver::Webserver(int maxConnection)
-    : _connectionCount(0), _maxConnection(maxConnection), _maxFd(-1) {
+Webserver::Webserver(t_server &src, int maxConnection)
+    : _connectionCount(0), _maxConnection(maxConnection), _maxFd(-1), _serverConfig(src) {
   FD_ZERO(&_connections);
   _rm = new Request_manager();
 }
