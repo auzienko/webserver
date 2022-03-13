@@ -8,8 +8,9 @@ int main(int argc, char** argv) {
   try {
     Webserver_manager wsm(argv[1]);
     wsm.start();    
-  } catch (std::exception) {
-    ws::printE(ERROR_SERVER_START, "\n");
+  } catch (const std::exception& e) {
+    ws::printE(ERROR_SERVER_START, ":\n");
+    ws::printE(e.what(), "\n");
     return -1;
   }
   return 0;

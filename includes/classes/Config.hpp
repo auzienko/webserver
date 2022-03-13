@@ -6,8 +6,9 @@
 
 class Config {
  private:
-  std::string   _config_file;
-  std::ifstream _file_stream;
+  std::string   _configFile;
+  std::ifstream _fileStream;
+  int           _debugLine;
   t_server      _server;
 
   Config(void);
