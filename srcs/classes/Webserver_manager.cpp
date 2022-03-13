@@ -3,18 +3,18 @@
 Webserver_manager::Webserver_manager(std::string const& config_path) {
   int res;
   _config = new Config(config_path);     //Нужна проверка найден файл или нет
-  res = _config->checkAndParse();
-  // while (res > 0)
-  // {
-  //   _Create_webserver(_config->get_server());
-  //   res = _config->checkAndParse();
-  // }
+  res = 1;
+  while (res > 0)
+  {
+    res = _config->checkAndParse();
+    if (res >= 0)
+      _Create_webserver(_config->get_server());
+  }
   if (res < 0) {
     delete _config;
     //_Delete_webservers();             Если ошибка в конфиге на очередном сервере, прошлые не валидны?
     throw new std::exception;
   }
-  _Create_webserver(_config->get_server());
 }
 
 int Webserver_manager::start(void) {
