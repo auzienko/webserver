@@ -6,7 +6,7 @@
 #    By: zcris <zcris@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/03 17:56:13 by zcris             #+#    #+#              #
-#    Updated: 2022/03/10 10:37:24 by zcris            ###   ########.fr        #
+#    Updated: 2022/03/12 11:59:02 by zcris            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,9 @@ ws/print.cpp \
 classes/Config.cpp \
 classes/Webserver.cpp \
 classes/Webserver_manager.cpp \
-classes/Request_manager.cpp
+classes/Request.cpp \
+classes/Request_manager.cpp \
+classes/Mime_types.cpp
 
 HEADER_LIST = \
 main.hpp \
@@ -33,7 +35,9 @@ messages.hpp \
 classes/Config.hpp \
 classes/Webserver.hpp \
 classes/Webserver_manager.hpp \
-classes/Request_manager.hpp
+classes/Request.hpp \
+classes/Request_manager.hpp \
+classes/Mime_types.hpp
 
 SRCS = $(addprefix $(SRC_FOLDER), $(SRC_LIST))
 HEADERS = $(addprefix $(HEADER_FOLDER), $(HEADER_LIST))

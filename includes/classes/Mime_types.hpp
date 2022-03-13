@@ -1,36 +1,36 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Request_manager.hpp                                :+:      :+:    :+:   */
+/*   Mime_types.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/10 10:10:38 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/11 11:18:36 by zcris            ###   ########.fr       */
+/*   Created: 2022/03/12 11:26:08 by zcris             #+#    #+#             */
+/*   Updated: 2022/03/12 12:01:31 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef REQUEST_MANAGER_HPP
-#define REQUEST_MANAGER_HPP
+#ifndef MIME_TYPES_HPP
+#define MIME_TYPES_HPP
 
-#include "../main.hpp"
+#define MIMETYPESCOUNT 347
 
-class Request;
+#include <iostream>
 
-class Request_manager {
+class Mime_types {
  private:
-  std::map<int, Request*> _list;
+  struct pair {
+    std::string fileExtension;
+    std::string mimeType;
+  };
+  static Mime_types::pair _types[MIMETYPESCOUNT];
+  Mime_types(Mime_types const& src);
+  Mime_types& operator=(Mime_types const& rhs);
 
  public:
-  Request_manager();
-  ~Request_manager(); //реализовать, там зачистка с указателей
-
-  void add(int fd);
-  void remove(int fd);
-  Request* at(int fd) const;
-  int getRequest(int fd);
-  int sendResult(int fd);
-  
+  Mime_types(void);
+  ~Mime_types(void);
+  static std::string getMimeType(std::string const& ext);
 };
 
 #endif

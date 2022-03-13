@@ -6,7 +6,7 @@
 /*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/07 10:09:50 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/10 18:59:08 by wgaunt           ###   ########.fr       */
+/*   Updated: 2022/03/13 12:21:00 by wgaunt           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <map>
 #include <unistd.h>
 #include <fcntl.h>
+#include <fstream>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
@@ -34,7 +35,9 @@
 #include "./classes/Config.hpp"
 #include "./classes/Webserver.hpp"
 #include "./classes/Webserver_manager.hpp"
+#include "./classes/Request.hpp"
 #include "./classes/Request_manager.hpp"
+#include "./classes/Mime_types.hpp"
 
 #define PROGRAMM_NAME "21_WEBSERVER"
 #define PROGRAMM_VERSION "0.01"
