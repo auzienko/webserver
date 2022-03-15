@@ -6,6 +6,7 @@
 #define ERROR_PROGRAM_ARGS \
   "Incorrect argument count.\nusage: ./webserver congig_file_name.21ws"
 #define ERROR_CREATE_SOCKET "Socket was not created"
+#define ERROR_CREATE_IP "Make IP listen error"
 #define ERROR_BIND_SOCKET "Socket was not binded"
 #define ERROR_LISTEN_SOCKET "Listen queue failure"
 #define ERROR_SELECT "Select failure"

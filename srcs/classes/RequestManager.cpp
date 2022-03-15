@@ -1,17 +1,17 @@
-#include "../../includes/classes/Request_manager.hpp"
+#include "../../includes/classes/RequestManager.hpp"
 
-Request_manager::Request_manager() {}
+RequestManager::RequestManager() {}
 
-Request_manager::~Request_manager() {
+RequestManager::~RequestManager() {
   //тут утечка
 }
 
-void Request_manager::add(int fd) {
+void RequestManager::add(int fd) {
   Request* tmp = new Request(fd);
   _list.insert(std::pair<int, Request*>(fd, tmp));
 }
 
-void Request_manager::remove(int fd) {
+void RequestManager::remove(int fd) {
   std::map<int, Request*>::iterator it;
   it = _list.find(fd);
   if (it != _list.end()) {
@@ -20,7 +20,7 @@ void Request_manager::remove(int fd) {
   }
 }
 
-Request* Request_manager::at(int fd) const {
+Request* RequestManager::at(int fd) const {
   std::map<int, Request*>::const_iterator it;
   it = _list.find(fd);
   if (it != _list.end()) {
@@ -29,13 +29,13 @@ Request* Request_manager::at(int fd) const {
   return nullptr;
 }
 
-int Request_manager::getRequest(int fd) {
+int RequestManager::getRequest(int fd, t_server const& server_config) {
   Request* tmp = at(fd);
-  if (tmp != nullptr) return tmp->getRequest();
+  if (tmp != nullptr) return tmp->getRequest(server_config);
   return 0;
 }
 
-int Request_manager::sendResult(int fd) {
+int RequestManager::sendResult(int fd) {
   Request* tmp = at(fd);
   if (tmp != nullptr && tmp->getStatus() == READY_TO_SEND) return tmp->sendResult();
   return 0;

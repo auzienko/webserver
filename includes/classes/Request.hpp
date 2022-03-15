@@ -22,14 +22,14 @@ class Request {
   int getFd(void) const;
   int getStatus(void) const;
   void setStatus(int status);
-  int getRequest(void);
+  int getRequest(t_server const& server_config);
   int sendResult(void);
 
  private:
   Request(Request const& src);
   Request& operator=(Request const& rhs);
-  int _RequestHandler(void);
-  int _MakeResponseBody(void);
+  int _RequestHandler(t_server const& server_config);
+  int _MakeResponseBody(t_server const& server_config);
   int _MakeResponseHeaders(void);
   int _AssembleRespose(void);
 };

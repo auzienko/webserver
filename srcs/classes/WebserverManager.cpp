@@ -1,6 +1,6 @@
-#include "../../includes/classes/Webserver_manager.hpp"
+#include "../../includes/classes/WebserverManager.hpp"
 
-Webserver_manager::Webserver_manager(std::string const& config_path) {
+WebserverManager::WebserverManager(std::string const& config_path) {
   int res;
   _config = new Config(config_path);     //Нужна проверка найден файл или нет
   res = 1;
@@ -17,26 +17,26 @@ Webserver_manager::Webserver_manager(std::string const& config_path) {
   }
 }
 
-int Webserver_manager::start(void) {
+int WebserverManager::start(void) {
   _Banner();
   //пока один
   _webservers[0]->run();
   return 0;
 }
 
-Webserver_manager::~Webserver_manager() {
+WebserverManager::~WebserverManager() {
   delete _config;
   std::vector<Webserver*>::iterator i = _webservers.begin();
   std::vector<Webserver*>::iterator e = _webservers.end();
   for (; i != e; ++i) delete (*i);
 }
 
-int Webserver_manager::_Create_webserver(t_server &newServerConfig) {
+int WebserverManager::_Create_webserver(t_server &newServerConfig) {
   _webservers.push_back(new Webserver(newServerConfig));
   return 0;
 }
 
-void Webserver_manager::_Banner(void) const {
+void WebserverManager::_Banner(void) const {
   ws::print("==================================", "\n");
   ws::print(PROGRAMM_NAME, " ");
   ws::print(PROGRAMM_VERSION, "\n");

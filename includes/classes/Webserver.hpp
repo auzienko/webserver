@@ -5,7 +5,7 @@
 
 class Config;
 class Socket;
-class Request_manager;
+class RequestManager;
 
 class Webserver {
  private:
@@ -14,7 +14,7 @@ class Webserver {
   int _listenSocket;
   int _maxFd;
   fd_set _connections;
-  Request_manager* _rm;
+  RequestManager* _rm;
   t_server _serverConfig;
 
  public:

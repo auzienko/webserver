@@ -1,10 +1,10 @@
-#include "../../includes/classes/Mime_types.hpp"
+#include "../../includes/classes/MimeTypes.hpp"
 
-Mime_types::Mime_types(void) {}
+MimeTypes::MimeTypes(void) {}
 
-Mime_types::~Mime_types(void) {}
+MimeTypes::~MimeTypes(void) {}
 
-std::string Mime_types::getMimeType(std::string const &ext)
+std::string MimeTypes::getMimeType(std::string const &ext)
 {
   size_t len = ext.length() - 1;
   std::string tmp;
@@ -23,7 +23,7 @@ std::string Mime_types::getMimeType(std::string const &ext)
 }
 
 // Source: https://raw.githubusercontent.com/broofa/node-mime/master/types/standard.json
-Mime_types::pair Mime_types::_types[MIMETYPESCOUNT] =  {
+MimeTypes::pair MimeTypes::_types[MIMETYPESCOUNT] =  {
   {"*3gpp", "audio/3gpp"},
   {"*jpm", "video/jpm"},
   {"*mp3", "audio/mp3"},
