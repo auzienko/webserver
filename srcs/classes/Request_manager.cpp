@@ -29,9 +29,9 @@ Request* Request_manager::at(int fd) const {
   return nullptr;
 }
 
-int Request_manager::getRequest(int fd) {
+int Request_manager::getRequest(int fd, t_server const& server_config) {
   Request* tmp = at(fd);
-  if (tmp != nullptr) return tmp->getRequest();
+  if (tmp != nullptr) return tmp->getRequest(server_config);
   return 0;
 }
 

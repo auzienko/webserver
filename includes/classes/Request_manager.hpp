@@ -16,7 +16,7 @@ class Request_manager {
   void add(int fd);
   void remove(int fd);
   Request* at(int fd) const;
-  int getRequest(int fd);
+  int getRequest(int fd, t_server const& server_config);
   int sendResult(int fd);
   
 };

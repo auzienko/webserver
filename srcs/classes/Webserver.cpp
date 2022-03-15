@@ -59,11 +59,12 @@ int Webserver::createServerListenSocket(void) {
   }
   
   addr.sin_family = AF_INET;
-  //берем из конфига
-  addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  //берем из конфига
-  addr.sin_port = htons(DEFAULT_SERVER_PORT);
-  
+  if (inet_pton(addr.sin_family, _serverConfig.listen.c_str(), &(addr.sin_addr)) < 0){
+    ws::printE(ERROR_CREATE_IP, "\n");
+    close(_listenSocket);
+    return -1;
+  }
+  addr.sin_port = htons(_serverConfig.port);
   err = bind(_listenSocket, (struct sockaddr*)&addr, sizeof(addr));
   if (err < 0) {
     ws::printE(ERROR_BIND_SOCKET, "\n");
@@ -101,7 +102,7 @@ void Webserver::_ReadHandler(int fd) {
       close(new_sock);
     }
   } else {
-    if (_rm->getRequest(fd) < 0) {
+    if (_rm->getRequest(fd, _serverConfig) < 0) {
       ws::printE(ERROR_READ_FROM_CLIENT, "\n");
       closeConnection(fd);
     }

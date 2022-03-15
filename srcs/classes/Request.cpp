@@ -13,24 +13,24 @@ int Request::getStatus(void) const { return _status; }
 
 void Request::setStatus(int status) { _status = status; }
 
-int Request::getRequest(void) {
+int Request::getRequest(t_server const& server_config) {
   if (getStatus() >= READY_TO_HANDLE) return 0;
 
   int nbytes;
   char buf[DEFAULT_BUFLEN];
   int fd = _fd;
   nbytes = recv(fd, buf, DEFAULT_BUFLEN, 0);
-  fprintf(stdout, "\n\n🤓 Reading %d bytes from socket %d...\n", nbytes, fd);
+  std::cout << "\n\n🤓 Reading " << nbytes << " bytes from socket " << fd << "...\n";
   if (nbytes < 0) {
     //ошибка чтения
-    perror("~~ 😞 Server: read failture");
+    ws::printE("~~ 😞 Server: read failture", "\n");
     return -1;
   } else if (nbytes == 0) {
-    fprintf(stdout, "reading no data\n");
+    ws::print("reading no data", "\n");
     return 0;
   } else {
     int cnt = 0;
-    printf("~~ ✔️Server gets %d bytes\nHEADERS:\n", nbytes);
+    std::cout << "~~ ✔️Server gets " << nbytes << " bytes\nHEADERS:\n";
 
 //header print
     for (int i = 0; i < nbytes && cnt < 2; ++i) {
@@ -53,26 +53,29 @@ int Request::getRequest(void) {
 
     setStatus(READY_TO_HANDLE);
 
-    if (getStatus() == READY_TO_HANDLE) _RequestHandler();
+    if (getStatus() == READY_TO_HANDLE) _RequestHandler(server_config);
 
     return 0;
   }
 }
 
-int Request::_RequestHandler(void) {
-  _MakeResponseBody();
+int Request::_RequestHandler(t_server const& server_config) {
+  _MakeResponseBody(server_config);
   _MakeResponseHeaders();
   _AssembleRespose();
   return 0;
 }
 
-int Request::_MakeResponseBody(void) {
+int Request::_MakeResponseBody(t_server const& server_config) {
   _responseBody.clear();
 
+//// заглушка на ГЕТ
   _header.Method = "GET";
- // _header.Request_URI = "/index.html";
-  std::string url = "./www-static-site" +  _header.Request_URI;
 
+  std::pair<std::string, t_location const*> p =
+      ConfigUtils::getLocationSettings(server_config, _header.Request_URI);
+  if (p.second == nullptr) return -1;
+  std::string url = p.second->root + p.first;
   if (_header.Method == "GET") {
     std::ifstream tmp(url, std::ifstream::binary);
     if (!tmp.is_open()) {
@@ -89,7 +92,7 @@ int Request::_MakeResponseHeaders(void) {
   _responseHeader.clear();
   _responseHeader << "HTTP/1.1 200 OK\r\n";
   _responseHeader << "Connection: keep-alive\r\n";
-  _responseHeader << "Content-type: " << Mime_types::getMimeType(_header.Request_URI) << "\r\n";
+  _responseHeader << "Content-type: " << MimeTypes::getMimeType(_header.Request_URI) << "\r\n";
   return 0;
 }
 

@@ -14,6 +14,7 @@
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 
 #include "default_settings.hpp"
@@ -26,7 +27,8 @@
 #include "./classes/Webserver_manager.hpp"
 #include "./classes/Request.hpp"
 #include "./classes/Request_manager.hpp"
-#include "./classes/Mime_types.hpp"
+#include "./classes/MimeTypes.hpp"
+#include "./classes/ConfigUtils.hpp"
 
 #define PROGRAMM_NAME "21_WEBSERVER"
 #define PROGRAMM_VERSION "0.01"
