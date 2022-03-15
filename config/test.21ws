@@ -2,11 +2,18 @@ server test {
   127.0.0.1:8081
   error_page 404 ../../some.html
   limit_size 1000
-  location /usr {
+  location / {
     methods GET POST LOL
     root /Desktop
     autoindex on
-    index /Desktop/index.html
+    index index.html
+    upload /Downloads
+  }
+  location /usr/ {
+    methods GET POST LOL
+    root ./www-static-site/
+    autoindex on
+    index index.html
     upload /Downloads
   }
   cgi .php /Some/way/to/php-cgi
