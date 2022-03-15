@@ -3,7 +3,7 @@
 Webserver::Webserver(t_server &src, int maxConnection)
     : _connectionCount(0), _maxConnection(maxConnection), _maxFd(-1), _serverConfig(src) {
   FD_ZERO(&_connections);
-  _rm = new Request_manager();
+  _rm = new RequestManager();
 }
 
 Webserver::~Webserver() { delete _rm; }

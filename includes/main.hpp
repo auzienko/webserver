@@ -24,9 +24,9 @@
 #include "structs.hpp"
 #include "./classes/Config.hpp"
 #include "./classes/Webserver.hpp"
-#include "./classes/Webserver_manager.hpp"
+#include "./classes/WebserverManager.hpp"
 #include "./classes/Request.hpp"
-#include "./classes/Request_manager.hpp"
+#include "./classes/RequestManager.hpp"
 #include "./classes/MimeTypes.hpp"
 #include "./classes/ConfigUtils.hpp"
 

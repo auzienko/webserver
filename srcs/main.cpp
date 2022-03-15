@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
     return -1;
   }
   try {
-    Webserver_manager wsm(argv[1]);
+    WebserverManager wsm(argv[1]);
     wsm.start();    
   } catch (const std::exception& e) {
     ws::printE(ERROR_SERVER_START, ":\n");

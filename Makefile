@@ -6,7 +6,7 @@
 #    By: zcris <zcris@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/03 17:56:13 by zcris             #+#    #+#              #
-#    Updated: 2022/03/15 09:06:58 by zcris            ###   ########.fr        #
+#    Updated: 2022/03/15 11:04:32 by zcris            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,9 +20,9 @@ main.cpp \
 ws/print.cpp \
 classes/Config.cpp \
 classes/Webserver.cpp \
-classes/Webserver_manager.cpp \
+classes/WebserverManager.cpp \
 classes/Request.cpp \
-classes/Request_manager.cpp \
+classes/RequestManager.cpp \
 classes/MimeTypes.cpp \
 classes/ConfigUtils.cpp
 
@@ -35,9 +35,9 @@ errors.hpp \
 messages.hpp \
 classes/Config.hpp \
 classes/Webserver.hpp \
-classes/Webserver_manager.hpp \
+classes/WebserverManager.hpp \
 classes/Request.hpp \
-classes/Request_manager.hpp \
+classes/RequestManager.hpp \
 classes/MimeTypes.hpp \
 classes/ConfigUtils.hpp
 
