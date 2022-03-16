@@ -6,7 +6,7 @@
 #    By: zcris <zcris@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/03 17:56:13 by zcris             #+#    #+#              #
-#    Updated: 2022/03/15 11:04:32 by zcris            ###   ########.fr        #
+#    Updated: 2022/03/16 11:40:21 by zcris            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,6 +18,7 @@ HEADER_FOLDER = ./includes/
 SRC_LIST = \
 main.cpp \
 ws/print.cpp \
+ws/files.cpp \
 classes/Config.cpp \
 classes/Webserver.cpp \
 classes/WebserverManager.cpp \

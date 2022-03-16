@@ -32,6 +32,7 @@ class Request {
   int _MakeResponseBody(t_server const& server_config);
   int _MakeResponseHeaders(void);
   int _AssembleRespose(void);
+  int _MakeAutoIndex(std::string const& show_path, std::string const& real_path);
 };
 
 #endif
