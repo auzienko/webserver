@@ -4,14 +4,14 @@ server test {
   limit_size 1000
   location / {
     methods GET POST LOL
-    root /Desktop
-    autoindex on
+    root ./www-static-site/
+    autoindex off
     index index.html
     upload /Downloads
   }
   location /usr/ {
     methods GET POST LOL
-    root ./www-static-site/
+    root /Users/zcris/Downloads/
     autoindex on
     index index.html
     upload /Downloads

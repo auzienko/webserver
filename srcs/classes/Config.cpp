@@ -112,7 +112,7 @@ void	Config::_locationNameLine(std::string &line, bool &is_location, bool &is_in
 
 void	Config::_locationArgs(std::string &line)
 {
-	t_location	&cur = _server.locations.front();
+	t_location	&cur = _server.locations.back();
 	if (line.substr(0, 7) == "methods")
 	{
 		line = line.c_str() + 7;

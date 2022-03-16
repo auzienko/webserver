@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Request.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/03/16 09:59:24 by zcris             #+#    #+#             */
+/*   Updated: 2022/03/16 12:54:07 by zcris            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../includes/classes/Request.hpp"
 
 Request::Request(void) : _fd(-1), _status(NEW) {
@@ -75,6 +87,14 @@ int Request::_MakeResponseBody(t_server const& server_config) {
   std::pair<std::string, t_location const*> p =
       ConfigUtils::getLocationSettings(server_config, _header.Request_URI);
   if (p.second == nullptr) return -1;
+
+  // autoindex - сейчас игнорим индекс настройку если есть автоиндекс
+if (_header.Request_URI.at(_header.Request_URI.length() - 1) == '/' && p.second->autoindex){
+    std::cout << "🖖 Autoindex hadler\n";
+    _MakeAutoIndex(_header.Request_URI, p.second->root);
+    return 0;
+}
+
   std::string url = p.second->root + p.first;
   if (_header.Method == "GET") {
     std::ifstream tmp(url, std::ifstream::binary);
@@ -103,6 +123,47 @@ int Request::_AssembleRespose(void) {
   _response << "\r\n";
   _response << _responseBody.str();
   setStatus(READY_TO_SEND);
+  return 0;
+}
+
+int Request::_MakeAutoIndex(std::string const& show_path,
+                            std::string const& real_path) {
+  _responseBody.clear();
+  std::pair<bool, std::vector<std::string> > content =
+      ws::filesReadDirectory(real_path);
+  if (content.first) {
+    _responseBody
+        << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n";
+    _responseBody << "<html><head><title>Index of " << show_path
+                  << "</title></head>\n";
+    _responseBody << "<body><h1>Index of " << show_path << "</h1>";
+    _responseBody << "<pre>Name                                      ";
+    _responseBody << "Last modified        ";
+    _responseBody << "Size        ";
+    _responseBody << "Description<hr>";
+    std::vector<std::string>::iterator i = content.second.begin();
+    std::vector<std::string>::iterator e = content.second.end();
+    while (i != e) {
+      std::string file_dir_name = *i;
+      std::string dummy;
+      dummy.insert(0, 42 - file_dir_name.length(), ' ');
+      struct stat st;
+      stat((real_path + file_dir_name).c_str(), &st);
+      char last_modif[36];
+      strftime(last_modif, 36, "%d.%m.%Y %H:%M:%S", localtime(&st.st_mtime));
+      size_t size = st.st_size;
+      _responseBody << "<a href=\"" << file_dir_name << "\">" << file_dir_name
+                    << "</a>" << dummy << last_modif << "  ";
+      if (S_ISDIR(st.st_mode))
+        _responseBody << "-   \n";
+      else
+        _responseBody << size << "  \n";
+      ++i;
+    }
+    _responseBody << "<hr></pre></body></html>";
+  } else {
+    return -1;
+  }
   return 0;
 }
 

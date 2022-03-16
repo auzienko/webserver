@@ -9,13 +9,14 @@
 #include <set>
 #include <unistd.h>
 #include <fcntl.h>
+#include <dirent.h>
 #include <fstream>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
 
 #include "default_settings.hpp"
 #include "errors.hpp"
@@ -37,6 +38,7 @@
 namespace ws {
 void printE(std::string const& msg, std::string const& divider);
 void print(std::string const& msg, std::string const& divider);
+std::pair<bool, std::vector<std::string> > filesReadDirectory(std::string const& path);
 }  // namespace ws
 
 #endif
