@@ -28,7 +28,7 @@ static void	checkisin(std::string &line, bool &isIn, int debugLine)
 		skipWS(line);
 		if (!line.length() || line[0] == '#')
 			return ; 
-		throw std::logic_error("Find unsuspected char in config file line " + std::to_string(debugLine));   //debug mode (+)
+		throw std::logic_error("Find unsuspected char in config file line " + std::to_string(debugLine));
 	}
 }
 
@@ -48,6 +48,15 @@ void	Config::_serverNameLine(std::string &line, bool &is_server, bool &is_inserv
 	is_server = true;
 	line = line.c_str() + 6;
 	skipWS(line);
+	if (line[0] == '{')
+	{
+		is_inserver = true;
+		line = line.c_str() + 1;
+		skipWS(line);
+		if (line.length() && line[0] != '#')
+			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
+		return ;
+	}
 	if (!line.length() || line[0] == '#' || line[0] == '{')
 		return ;
 	const char	*ptr = line.c_str();
@@ -66,7 +75,7 @@ void	Config::_serverNameLine(std::string &line, bool &is_server, bool &is_inserv
 	checkisin(line, is_inserver, _debugLine);
 	if (!line.length() || line[0] == '#')
 		return ;
-	throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
+	throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 }
 
 static void	savePath(std::string &line, std::string &field, int debugLine)
@@ -76,11 +85,13 @@ static void	savePath(std::string &line, std::string &field, int debugLine)
 
 	while (line[len] && spaces.find(line[len]) == std::string::npos)
 		len++;
+	if (!len)
+		throw std::logic_error("There are no argument when it's need in config file line " + std::to_string(debugLine));
 	field = line.substr(0, len);
 	line = line.c_str() + len;
 	skipWS(line);
 	if (line.length() && line[0] != '#')
-		throw std::logic_error("Find unsuspected char in config file line " + std::to_string(debugLine));   //debug mode (+)
+		throw std::logic_error("Find unsuspected char in config file line " + std::to_string(debugLine));
 }
 
 void	Config::_locationNameLine(std::string &line, bool &is_location, bool &is_inlocation)
@@ -107,7 +118,7 @@ void	Config::_locationNameLine(std::string &line, bool &is_location, bool &is_in
 	checkisin(line, is_inlocation, _debugLine);
 	if (!line.length() || line[0] == '#')
 		return ;
-	throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
+	throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 }
 
 void	Config::_locationArgs(std::string &line)
@@ -117,6 +128,8 @@ void	Config::_locationArgs(std::string &line)
 	{
 		line = line.c_str() + 7;
 		skipWS(line);
+		if (!line.length())
+			throw std::logic_error("End of line in config file when waiting an argument line " + std::to_string(_debugLine));
 		while (line.length() && line[0] != '#')
 		{
 			size_t	len = 0;
@@ -148,9 +161,11 @@ void	Config::_locationArgs(std::string &line)
 			cur.autoindex = false;
 			line = line.c_str() + 3;
 		}
+		else
+			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 		skipWS(line);
 		if (line.length() && line[0] != '#')
-			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
+			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 	}
 	else if (line.substr(0, 10) == "limit_size")
 	{
@@ -161,11 +176,13 @@ void	Config::_locationArgs(std::string &line)
 		skipWS(line);
 		while (line[len] && spaces.find(line[len]) == std::string::npos)
 			len++;
+		if (!len)
+			throw std::logic_error("End of line in config file when waiting an argument line " + std::to_string(_debugLine));
 		cur.client_max_body_size = atoi(line.substr(0, len).c_str());
 		line = line.c_str() + len;
 		skipWS(line);
 		if (line.length() && line[0] != '#')
-			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
+			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 	}
 	else if (line.substr(0, 5) == "index")
 	{
@@ -181,7 +198,7 @@ void	Config::_locationArgs(std::string &line)
 		cur.file_uploads = true;
 	}
 	else
-		throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
+		throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 }
 
 void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocation)
@@ -193,17 +210,23 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 
 		while (line[len] && line[len] != ':')
 			len++;
+		if (!len)
+			throw std::logic_error("There is no host in config file line " + std::to_string(_debugLine));
 		_server.listen = line.substr(0, len);
 		line = line.c_str() + len + 1;
 		len = 0;
 
 		while (line[len] && spaces.find(line[len]) == std::string::npos)
 			len++;
+		if (!len)
+			throw std::logic_error("End of line in config file when waiting an argument line " + std::to_string(_debugLine));
 		_server.port = atoi(line.substr(0, len).c_str());
+		if (!_server.port)
+			throw std::logic_error("1 line of server properties must be host:port. Error in line " + std::to_string(_debugLine));
 		line = line.c_str() + len;
 		skipWS(line);
 		if (line.length() && line[0] != '#')
-			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
+			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 	}
 	else if (line.substr(0, 10) == "error_page")
 	{
@@ -215,6 +238,8 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 		skipWS(line);
 		while (line[len] && spaces.find(line[len]) == std::string::npos)
 			len++;
+		if (!len)
+			throw std::logic_error("End of line in config file when waiting an argument line " + std::to_string(_debugLine));
 		error_page.first = atoi(line.substr(0, len).c_str());
 		line = line.c_str() + len;
 		skipWS(line);
@@ -232,11 +257,13 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 		skipWS(line);
 		while (line[len] && spaces.find(line[len]) == std::string::npos)
 			len++;
+		if (!len)
+			throw std::logic_error("End of line in config file when waiting an argument line " + std::to_string(_debugLine));
 		_server.client_max_body_size = atoi(line.substr(0, len).c_str());
 		line = line.c_str() + len;
 		skipWS(line);
 		if (line.length() && line[0] != '#')
-			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
+			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 	}
 	else if (line.substr(0, 8) == "location")
 	{
@@ -252,6 +279,8 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 		skipWS(line);
 		while (line[len] && spaces.find(line[len]) == std::string::npos)
 			len++;
+		if (!len)
+			throw std::logic_error("End of line in config file when waiting an argument line " + std::to_string(_debugLine));
 		cgi.first = line.substr(0, len);
 		line = line.c_str() + len;
 		skipWS(line);
@@ -260,6 +289,8 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 		savePath(line, cgi.second, _debugLine);
 		_server.cgi.insert(cgi);
 	}
+	else
+		throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 }
 
 int	Config::checkAndParse(void)
@@ -280,7 +311,7 @@ int	Config::checkAndParse(void)
 		if (!is_server && line.substr(0, 6) == "server")
 			_serverNameLine(line, is_server, is_inserver);
 		else if (!is_server)
-			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
+			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 		else if (line[0] == '{')
 		{
 			if (!is_inserver && is_server)
@@ -288,20 +319,26 @@ int	Config::checkAndParse(void)
 			else if (!is_inlocation && is_location)
 				checkisin(line, is_inlocation, _debugLine);
 			else
-				throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
+				throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 		}
 		else if (line[0] == '}')
 		{
 			if (is_inlocation)
+			{
 				is_inlocation = false;
+				is_location = false;
+			}
 			else if (is_inserver)
+			{
 				is_inserver = false;
+				is_server = false;
+			}
 			else
-				throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
+				throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 			line = line.c_str() + 1;
 			skipWS(line);
 			if (!is_inserver && (line.length() || line[0] == '#'))
-				throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
+				throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 		}
 		else if (is_inlocation)
 			_locationArgs(line);
