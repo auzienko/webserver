@@ -33,6 +33,7 @@ class Request {
   int _MakeResponseHeaders(void);
   int _AssembleRespose(void);
   int _MakeAutoIndex(std::string const& show_path, std::string const& real_path);
+  int _MakeCgiRequest(void);
 };
 
 #endif

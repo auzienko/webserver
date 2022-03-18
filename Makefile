@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: zcris <zcris@student.42.fr>                +#+  +:+       +#+         #
+#    By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/03 17:56:13 by zcris             #+#    #+#              #
-#    Updated: 2022/03/16 11:40:21 by zcris            ###   ########.fr        #
+#    Updated: 2022/03/18 16:48:14 by zcris            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,6 +19,8 @@ SRC_LIST = \
 main.cpp \
 ws/print.cpp \
 ws/files.cpp \
+ws/int.cpp \
+ws/string.cpp \
 classes/Config.cpp \
 classes/Webserver.cpp \
 classes/WebserverManager.cpp \

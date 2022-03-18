@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.42.fr>                +#+  +:+       +#+        */
+/*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 09:59:24 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/16 12:54:07 by zcris            ###   ########.fr       */
+/*   Updated: 2022/03/18 16:47:34 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/classes/Request.hpp"
+
 
 Request::Request(void) : _fd(-1), _status(NEW) {
 }
@@ -104,6 +105,7 @@ if (_header.Request_URI.at(_header.Request_URI.length() - 1) == '/' && p.second-
     }
     _responseBody << tmp.rdbuf();
     tmp.close();
+  } else if (_header.Method == "POST") {
   }
   return 0;
 }
@@ -166,6 +168,42 @@ int Request::_MakeAutoIndex(std::string const& show_path,
   }
   return 0;
 }
+
+
+//https://datatracker.ietf.org/doc/html/rfc3875
+//https://firststeps.ru/cgi/cgi1.html
+int Request::_MakeCgiRequest(void){
+  std::map<std::string, std::string> env;
+  env.insert(std::make_pair("AUTH_TYPE", _header.Authorization));
+  env.insert(std::make_pair("CONTENT_LENGTH", ws::intToStr(_header.Content_Length)));
+  env.insert(std::make_pair("GATEWAY_INTERFACE", "CGI/1.1"));
+
+  std::string path_info =
+      ws::stringUrlDecode(ws::stringTail(_header.Request_URI, '/'));
+  if (path_info.length())
+    path_info = '/' + path_info;
+  else
+    path_info = "";
+  env.insert(std::make_pair("PATH_INFO", path_info));  //не точно
+  env.insert(std::make_pair("PATH_TRANSLATED", ""));
+
+  env.insert(std::make_pair("CONTENT_TYPE", "empty"));
+  env.insert(std::make_pair("QUERY_STRING", "empty"));
+  env.insert(std::make_pair("REMOTE_ADDR", "empty"));
+  env.insert(std::make_pair("REMOTE_HOST", "empty"));
+  env.insert(std::make_pair("REMOTE_IDENT", "empty"));
+  env.insert(std::make_pair("REMOTE_USER", "empty"));
+  env.insert(std::make_pair("REQUEST_METHOD", "empty"));
+  env.insert(std::make_pair("SCRIPT_NAME", "empty"));
+  env.insert(std::make_pair("SERVER_NAME", "empty"));
+  env.insert(std::make_pair("SERVER_PORT", "empty"));
+  env.insert(std::make_pair("SERVER_PROTOCOL", "empty"));
+  env.insert(std::make_pair("SERVER_SOFTWARE", "empty"));
+  //env.insert(std::make_pair("AUTH_TYPE", "empty"));
+  //env.insert(std::make_pair("AUTH_TYPE", "empty"));
+  
+}
+
 
 int Request::sendResult(void) {
   setStatus(SENDING);
