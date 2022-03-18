@@ -152,6 +152,21 @@ void	Config::_locationArgs(std::string &line)
 		if (line.length() && line[0] != '#')
 			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
 	}
+	else if (line.substr(0, 10) == "limit_size")
+	{
+		size_t		len = 0;
+		std::string	spaces = WHITE_SPACES "#";
+
+		line = line.c_str() + 10;
+		skipWS(line);
+		while (line[len] && spaces.find(line[len]) == std::string::npos)
+			len++;
+		cur.client_max_body_size = atoi(line.substr(0, len).c_str());
+		line = line.c_str() + len;
+		skipWS(line);
+		if (line.length() && line[0] != '#')
+			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));   //debug mode (+)
+	}
 	else if (line.substr(0, 5) == "index")
 	{
 		line = line.c_str() + 5;

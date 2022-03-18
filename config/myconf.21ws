@@ -6,6 +6,7 @@ server <name> {                 #name может отсутствовать
     methods <name> ...          #доступные методы, перечисление через пробел
     root <path>                 #где будут искаться файлы (это может быть 1 файл)
     autoindex <on/off>
+    limit_size <num>
     index <file>                #default file to answer if the request is a directory
     upload <path>               #path - путь сохранения файлов. Загрузка файлов разрешена, когда есть эта строка
   }
