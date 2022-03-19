@@ -7,7 +7,7 @@ WebserverManager::WebserverManager(std::string const& config_path) {
   while (res > 0) {
     try {
       res = _config->checkAndParse();
-      if (res >= 0) _Create_webserver(_config->get_server());
+      if (res > 0) _Create_webserver(_config->get_server());
     } catch (...) {
       delete _config;
       //_Delete_webservers();             Если ошибка в конфиге на очередном

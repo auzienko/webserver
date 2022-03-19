@@ -332,6 +332,7 @@ int	Config::checkAndParse(void)
 			{
 				is_inserver = false;
 				is_server = false;
+				return (1);
 			}
 			else
 				throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
