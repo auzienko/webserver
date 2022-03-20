@@ -2,18 +2,18 @@
 
 WebserverManager::WebserverManager(std::string const& config_path) {
   int res;
-  _config = new Config(config_path);     //Нужна проверка найден файл или нет
+  _config = new Config(config_path);  //Нужна проверка найден файл или нет
   res = 1;
-  while (res > 0)
-  {
-    res = _config->checkAndParse();
-    if (res >= 0)
-      _Create_webserver(_config->get_server());
-  }
-  if (res < 0) {
-    delete _config;
-    //_Delete_webservers();             Если ошибка в конфиге на очередном сервере, прошлые не валидны?
-    throw new std::exception;
+  while (res > 0) {
+    try {
+      res = _config->checkAndParse();
+      if (res > 0) _Create_webserver(_config->get_server());
+    } catch (...) {
+      delete _config;
+      //_Delete_webservers();             Если ошибка в конфиге на очередном
+      //сервере, прошлые не валидны?
+      throw ;
+    }
   }
 }
 
