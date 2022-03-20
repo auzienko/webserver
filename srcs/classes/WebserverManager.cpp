@@ -21,7 +21,12 @@ int WebserverManager::start(void) {
   _Banner();
   //пока один
   //цикл запуска всех серверов
-  _webservers[0]->run();
+  std::vector<Webserver *>::iterator it = _webservers.begin();
+  std::vector<Webserver *>::iterator e = _webservers.end();
+  while (it != e) {
+    (*it)->run();
+    ++it;
+  }
 
   // основной цикл
   fd_set all_fds;

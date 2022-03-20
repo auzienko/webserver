@@ -88,6 +88,7 @@ int Webserver::readHandler(int fd) {
   if (fd != _listenSocket && _connections.find(fd) == _connections.end())
     return -1;
   if (fd == _listenSocket) {
+  
     struct sockaddr_in client;
     socklen_t size = sizeof(client);
     int new_sock = accept(_listenSocket, (struct sockaddr*)&client, &size);
@@ -96,6 +97,9 @@ int Webserver::readHandler(int fd) {
       //добавить обработчик
       exit(EXIT_FAILURE);
     }
+
+std::cout << "\n листен " << fd << "\n";
+
     // char ip[sizeof(client)];
     // inet_ntop(AF_INET, &(client.sin_addr), ip, sizeof(client));
     // std::cout << "client: " << ip << ":" << ntohs(client.sin_port) << " ";

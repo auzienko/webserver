@@ -20,13 +20,13 @@ server test {
   cgi .php /Some/way/to/php-cgi
 }
 server test2 {
-  127.0.0.1:8081
+  127.0.0.1:4242
   error_page 404 ../../some.html
   limit_size 1000
   location / {
     methods GET POST LOL
     root ./www-static-site/
-    autoindex off
+    autoindex on
     index index.html
     upload /Downloads
   }
