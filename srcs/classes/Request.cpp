@@ -46,9 +46,6 @@ int Request::getRequest(t_server const& server_config) {
       _header.Request_URI += buf[j];
        ++j;
     }
-    for (int i = 0; i < nbytes && cnt < 2; ++i) {
-      write(1, &buf[i], 1);
-    }
 //end костыль получения урла
 
     setStatus(READY_TO_HANDLE);

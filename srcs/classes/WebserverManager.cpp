@@ -1,6 +1,7 @@
 #include "../../includes/classes/WebserverManager.hpp"
 
-WebserverManager::WebserverManager(std::string const& config_path) : _maxFd(-1) {
+WebserverManager::WebserverManager(std::string const &config_path)
+    : _maxFd(-1) {
   int res;
   _config = new Config(config_path);  //Нужна проверка найден файл или нет
   res = 1;
@@ -12,23 +13,21 @@ WebserverManager::WebserverManager(std::string const& config_path) : _maxFd(-1) 
       delete _config;
       //_Delete_webservers();             Если ошибка в конфиге на очередном
       //сервере, прошлые не валидны?
-      throw ;
+      throw;
     }
   }
 }
 
 int WebserverManager::start(void) {
+  int select_result;
+
   _Banner();
-  //пока один
-  //цикл запуска всех серверов
   std::vector<Webserver *>::iterator it = _webservers.begin();
   std::vector<Webserver *>::iterator e = _webservers.end();
   while (it != e) {
     (*it)->run();
     ++it;
   }
-
-  // основной цикл
   fd_set all_fds;
   fd_set read_fds;
   fd_set write_fds;
@@ -38,23 +37,34 @@ int WebserverManager::start(void) {
   FD_ZERO(&write_fds);
 
   // timeout брать из конфига наверно, но это не точно...
-  struct timeval tv;
-  tv.tv_sec = 2;
-  tv.tv_usec = 0;
+  // struct timeval tv;
+  // tv.tv_sec = 2;
+  // tv.tv_usec = 0;
 
   while (1) {
     all_fds = _GetAllSocketsFds();
     read_fds = all_fds;
     write_fds = all_fds;
-    if (select(_maxFd + 1, &read_fds, &write_fds, 0, NULL) < 0) {
+   // std::cout << "\n😴 Waiting on select()...\n";
+    select_result = select(_maxFd + 1, &read_fds, &write_fds, 0, NULL);
+    if (select_result < 0) {
       ws::printE(ERROR_SELECT, "\n");
-      //добавить обработчик
+      //добавить обработчик для < 0 + if select == 0 -> timeout;
       exit(EXIT_FAILURE);
     }
+   // std::cout << "Check to see if this descriptor is ready...\n";
     int max_fd = _maxFd;
-    for (int i = 0; i <= max_fd; ++i) {
-      if (FD_ISSET(i, &read_fds)) _ReadHandler(i);
-      if (FD_ISSET(i, &write_fds)) _WriteHandler(i);
+    for (int i = 0; i <= max_fd && select_result > 0; ++i) {
+      if (FD_ISSET(i, &read_fds)) {
+      //  std::cout << "FD: " << i << " is ready for Reading..." << std::endl; 
+        _ReadHandler(i);
+        --select_result;
+      }
+      if (FD_ISSET(i, &write_fds)) {
+       // std::cout << "FD: " << i << " is ready for Writing..." << std::endl;
+        _WriteHandler(i);
+        --select_result;
+      }
     }
   }
   return 0;
@@ -62,8 +72,8 @@ int WebserverManager::start(void) {
 
 WebserverManager::~WebserverManager() {
   delete _config;
-  std::vector<Webserver*>::iterator i = _webservers.begin();
-  std::vector<Webserver*>::iterator e = _webservers.end();
+  std::vector<Webserver *>::iterator i = _webservers.begin();
+  std::vector<Webserver *>::iterator e = _webservers.end();
   for (; i != e; ++i) delete (*i);
 }
 
@@ -96,7 +106,7 @@ void WebserverManager::_ReadHandler(int fd) {
   std::vector<Webserver *>::iterator i = _webservers.begin();
   std::vector<Webserver *>::iterator e = _webservers.end();
   while (i != e) {
-    if ((*i)->readHandler(fd) == 0) return ;
+    if ((*i)->readHandler(fd) == 0) return;
     ++i;
   }
 }
@@ -105,7 +115,7 @@ void WebserverManager::_WriteHandler(int fd) {
   std::vector<Webserver *>::iterator i = _webservers.begin();
   std::vector<Webserver *>::iterator e = _webservers.end();
   while (i != e) {
-    if ((*i)->writeHandler(fd) == 0) return ;
+    if ((*i)->writeHandler(fd) == 0) return;
     ++i;
   }
 }

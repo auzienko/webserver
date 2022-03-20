@@ -97,12 +97,6 @@ int Webserver::readHandler(int fd) {
       //добавить обработчик
       exit(EXIT_FAILURE);
     }
-
-std::cout << "\n листен " << fd << "\n";
-
-    // char ip[sizeof(client)];
-    // inet_ntop(AF_INET, &(client.sin_addr), ip, sizeof(client));
-    // std::cout << "client: " << ip << ":" << ntohs(client.sin_port) << " ";
     if (_connectionCount < _maxConnection) {
       fcntl(new_sock, F_SETFL, O_NONBLOCK);
       addConnection(new_sock);
@@ -128,12 +122,11 @@ int Webserver::writeHandler(int fd) {
   if (_rm->sendResult(fd) < 0) {
     ws::print(MESSAGE_FAIL, "\n");
     ws::printE(ERROR_SEND_TO_CLIENT, "\n");
-    closeConnection(fd);
   } else {
     ws::print(MESSAGE_SUCCESS, "\n");
-    //понять когда закрывать коннекшены корректно
-    closeConnection(fd);
   }
+  //понять когда закрывать коннекшены корректно
+  closeConnection(fd);
   return 0;
 }
 
