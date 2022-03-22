@@ -84,6 +84,12 @@ if (_header.Request_URI.at(_header.Request_URI.length() - 1) == '/' && p.second-
     return 0;
 }
 
+if (_header.Request_URI == "/cgi"){
+  _MakeCgiRequest();
+  std::cout << "CGI handled" << std::endl;
+  return 0;
+}
+
   std::string url = p.second->root + p.first;
   if (_header.Method == "GET") {
     std::ifstream tmp(url, std::ifstream::binary);
@@ -161,35 +167,38 @@ int Request::_MakeAutoIndex(std::string const& show_path,
 //https://datatracker.ietf.org/doc/html/rfc3875
 //https://firststeps.ru/cgi/cgi1.html
 int Request::_MakeCgiRequest(void){
-  std::map<std::string, std::string> env;
-  env.insert(std::make_pair("AUTH_TYPE", _header.Authorization));
-  env.insert(std::make_pair("CONTENT_LENGTH", ws::intToStr(_header.Content_Length)));
-  env.insert(std::make_pair("GATEWAY_INTERFACE", "CGI/1.1"));
+  // std::map<std::string, std::string> env;
+  // env.insert(std::make_pair("AUTH_TYPE", _header.Authorization));
+  // env.insert(std::make_pair("CONTENT_LENGTH", ws::intToStr(_header.Content_Length)));
+  // env.insert(std::make_pair("GATEWAY_INTERFACE", "CGI/1.1"));
 
-  std::string path_info =
-      ws::stringUrlDecode(ws::stringTail(_header.Request_URI, '/'));
-  if (path_info.length())
-    path_info = '/' + path_info;
-  else
-    path_info = "";
-  env.insert(std::make_pair("PATH_INFO", path_info));  //не точно
-  env.insert(std::make_pair("PATH_TRANSLATED", ""));
+  // std::string path_info =
+  //     ws::stringUrlDecode(ws::stringTail(_header.Request_URI, '/'));
+  // if (path_info.length())
+  //   path_info = '/' + path_info;
+  // else
+  //   path_info = "";
+  // env.insert(std::make_pair("PATH_INFO", path_info));  //не точно
+  // env.insert(std::make_pair("PATH_TRANSLATED", ""));
 
-  env.insert(std::make_pair("CONTENT_TYPE", "empty"));
-  env.insert(std::make_pair("QUERY_STRING", "empty"));
-  env.insert(std::make_pair("REMOTE_ADDR", "empty"));
-  env.insert(std::make_pair("REMOTE_HOST", "empty"));
-  env.insert(std::make_pair("REMOTE_IDENT", "empty"));
-  env.insert(std::make_pair("REMOTE_USER", "empty"));
-  env.insert(std::make_pair("REQUEST_METHOD", "empty"));
-  env.insert(std::make_pair("SCRIPT_NAME", "empty"));
-  env.insert(std::make_pair("SERVER_NAME", "empty"));
-  env.insert(std::make_pair("SERVER_PORT", "empty"));
-  env.insert(std::make_pair("SERVER_PROTOCOL", "empty"));
-  env.insert(std::make_pair("SERVER_SOFTWARE", "empty"));
-  //env.insert(std::make_pair("AUTH_TYPE", "empty"));
-  //env.insert(std::make_pair("AUTH_TYPE", "empty"));
-  
+  // env.insert(std::make_pair("CONTENT_TYPE", "empty"));
+  // env.insert(std::make_pair("QUERY_STRING", "empty"));
+  // env.insert(std::make_pair("REMOTE_ADDR", "empty"));
+  // env.insert(std::make_pair("REMOTE_HOST", "empty"));
+  // env.insert(std::make_pair("REMOTE_IDENT", "empty"));
+  // env.insert(std::make_pair("REMOTE_USER", "empty"));
+  // env.insert(std::make_pair("REQUEST_METHOD", "empty"));
+  // env.insert(std::make_pair("SCRIPT_NAME", "empty"));
+  // env.insert(std::make_pair("SERVER_NAME", "empty"));
+  // env.insert(std::make_pair("SERVER_PORT", "empty"));
+  // env.insert(std::make_pair("SERVER_PROTOCOL", "empty"));
+  // env.insert(std::make_pair("SERVER_SOFTWARE", "empty"));
+  // env.insert(std::make_pair("AUTH_TYPE", "empty"));
+  // env.insert(std::make_pair("AUTH_TYPE", "empty"));
+
+
+  fork();
+  return (0);
 }
 
 

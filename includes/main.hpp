@@ -42,7 +42,7 @@ void print(std::string const& msg, std::string const& divider);
 std::pair<bool, std::vector<std::string> > filesReadDirectory(std::string const& path);
 std::string intToStr(int i);
 std::string stringTail(std::string const& str, char c);
-std::string stringReverse(std::string const& str);
+std::string stringReverse(std::string& str);
 std::string stringUrlDecode(std::string const& str);
 }  // namespace ws
 

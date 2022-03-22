@@ -17,7 +17,7 @@ server test {
     index index.html
     upload /Downloads
   }
-  cgi .php /Some/way/to/php-cgi
+  cgi .php /Users/wgaunt/Desktop/ws/my-cgi
 }
 server test2 {
   127.0.0.1:8081
@@ -38,5 +38,5 @@ server test2 {
     index index.html
     upload /Downloads
   }
-  cgi .php /Some/way/to/php-cgi
+  cgi .php /Users/wgaunt/Desktop/ws/my-cgi
 }

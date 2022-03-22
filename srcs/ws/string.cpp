@@ -10,9 +10,10 @@ std::string ws::stringTail(std::string const& str, char c) {
   return ws::stringReverse(tmp);
 }
 
-std::string ws::stringReverse(std::string const& str) {
+std::string ws::stringReverse(std::string& str) {
   int n = str.length();
   for (int i = 0; i < n / 2; i++) std::swap(str[i], str[n - i - 1]);
+  return (str);
 }
 
 std::string ws::stringUrlDecode(std::string const& str) {
