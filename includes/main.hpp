@@ -22,6 +22,7 @@
 #include "default_settings.hpp"
 #include "errors.hpp"
 #include "messages.hpp"
+#include "z_array.hpp"
 #include "http_status_codes.hpp"
 #include "structs.hpp"
 #include "./classes/Config.hpp"
@@ -44,6 +45,7 @@ std::string intToStr(int i);
 std::string stringTail(std::string const& str, char c);
 std::string stringReverse(std::string const& str);
 std::string stringUrlDecode(std::string const& str);
+std::string socketGetIP(int const& fd);
 }  // namespace ws
 
 #endif

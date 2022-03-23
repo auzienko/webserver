@@ -6,7 +6,7 @@
 #    By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/03 17:56:13 by zcris             #+#    #+#              #
-#    Updated: 2022/03/18 16:48:14 by zcris            ###   ########.fr        #
+#    Updated: 2022/03/23 12:48:04 by zcris            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,13 +21,16 @@ ws/print.cpp \
 ws/files.cpp \
 ws/int.cpp \
 ws/string.cpp \
+ws/socket.cpp \
 classes/Config.cpp \
 classes/Webserver.cpp \
 classes/WebserverManager.cpp \
 classes/Request.cpp \
 classes/RequestManager.cpp \
 classes/MimeTypes.cpp \
-classes/ConfigUtils.cpp
+classes/ConfigUtils.cpp \
+z_array/z_array_utils.cpp \
+z_array/z_array.cpp
 
 HEADER_LIST = \
 main.hpp \
@@ -36,6 +39,7 @@ default_settings.hpp \
 structs.hpp \
 errors.hpp \
 messages.hpp \
+z_array.hpp \
 classes/Config.hpp \
 classes/Webserver.hpp \
 classes/WebserverManager.hpp \

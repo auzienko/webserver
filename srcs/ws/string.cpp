@@ -12,7 +12,9 @@ std::string ws::stringTail(std::string const& str, char c) {
 
 std::string ws::stringReverse(std::string const& str) {
   int n = str.length();
-  for (int i = 0; i < n / 2; i++) std::swap(str[i], str[n - i - 1]);
+  std::string tmp = str;
+  for (int i = 0; i < n / 2; i++) std::swap(tmp[i], tmp[n - i - 1]);
+  return tmp;
 }
 
 std::string ws::stringUrlDecode(std::string const& str) {

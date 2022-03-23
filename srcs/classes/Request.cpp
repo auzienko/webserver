@@ -67,6 +67,11 @@ int Request::_RequestHandler(t_server const& server_config) {
 int Request::_MakeResponseBody(t_server const& server_config) {
   _responseBody.clear();
 
+//cgi headers
+_MakeCgiRequest(server_config);
+
+
+
 //// заглушка на ГЕТ
   _header.Method = "GET";
 
@@ -157,36 +162,55 @@ int Request::_MakeAutoIndex(std::string const& show_path,
 
 //https://datatracker.ietf.org/doc/html/rfc3875
 //https://firststeps.ru/cgi/cgi1.html
-int Request::_MakeCgiRequest(void){
+int Request::_MakeCgiRequest(t_server const& server_config){
+
+//test data
+_header.Authorization = "BASIC";
+std::string path_info = "/?foo=2&bar=qwerty";
+std::string content_type = "application/x-www-form-urlencoded";
+std::string query_string = "foo=2&bar=qwerty";
+std::string remote_ident_pwd = "123456";
+std::string remote_username = "student21";
+_header.Method = "POST";
+std::string script_name = "/Some/way/to/php-cgi"; //из конфига получить
+_header.HTTP_Version = "HTTP/1.1";
+
+//headers
   std::map<std::string, std::string> env;
-  env.insert(std::make_pair("AUTH_TYPE", _header.Authorization));
-  env.insert(std::make_pair("CONTENT_LENGTH", ws::intToStr(_header.Content_Length)));
-  env.insert(std::make_pair("GATEWAY_INTERFACE", "CGI/1.1"));
+  env["AUTH_TYPE"] = _header.Authorization;
+  env["CONTENT_LENGTH"] = ws::intToStr(_header.Content_Length);
+  env["GATEWAY_INTERFACE"] = "CGI/1.1";
+  env["PATH_INFO"] = path_info;
+  env["PATH_TRANSLATED"] = path_info;
+  env["CONTENT_TYPE"] = content_type;
+  env["QUERY_STRING"] = query_string;
+  env["REMOTE_ADDR"] = ws::socketGetIP(_fd);
+  //env["REMOTE_HOST"] = "empty";
+  env["REMOTE_IDENT"] =  remote_ident_pwd;
+  env["REMOTE_USER"] = remote_username;
+  env["REQUEST_METHOD"] = _header.Method;
+  env["SCRIPT_NAME"] = script_name;
+  env["SERVER_NAME"] = server_config.listen;
+  env["SERVER_PORT"] = ws::intToStr(server_config.port);
+  env["SERVER_PROTOCOL"] = _header.HTTP_Version;
+  env["SERVER_SOFTWARE"] = PROGRAMM_NAME;
 
-  std::string path_info =
-      ws::stringUrlDecode(ws::stringTail(_header.Request_URI, '/'));
-  if (path_info.length())
-    path_info = '/' + path_info;
-  else
-    path_info = "";
-  env.insert(std::make_pair("PATH_INFO", path_info));  //не точно
-  env.insert(std::make_pair("PATH_TRANSLATED", ""));
+  //как будет готов парсер реквестов добавить еще все хедеры из запроса в формате HTTP_NAME
 
-  env.insert(std::make_pair("CONTENT_TYPE", "empty"));
-  env.insert(std::make_pair("QUERY_STRING", "empty"));
-  env.insert(std::make_pair("REMOTE_ADDR", "empty"));
-  env.insert(std::make_pair("REMOTE_HOST", "empty"));
-  env.insert(std::make_pair("REMOTE_IDENT", "empty"));
-  env.insert(std::make_pair("REMOTE_USER", "empty"));
-  env.insert(std::make_pair("REQUEST_METHOD", "empty"));
-  env.insert(std::make_pair("SCRIPT_NAME", "empty"));
-  env.insert(std::make_pair("SERVER_NAME", "empty"));
-  env.insert(std::make_pair("SERVER_PORT", "empty"));
-  env.insert(std::make_pair("SERVER_PROTOCOL", "empty"));
-  env.insert(std::make_pair("SERVER_SOFTWARE", "empty"));
-  //env.insert(std::make_pair("AUTH_TYPE", "empty"));
-  //env.insert(std::make_pair("AUTH_TYPE", "empty"));
-  
+  //make env char**
+  t_z_array zc_env;
+  z_array_init(&zc_env);
+  std::map<std::string, std::string>::iterator i = env.begin();
+  std::map<std::string, std::string>::iterator e = env.end();
+  while( i != e){
+    std::string tmp = (*i).first + '=' + (*i).second;
+    z_array_append(&zc_env, (char*)tmp.c_str());
+    ++i;
+  }
+  z_array_null_terminate(&zc_env);
+
+  z_array_free(&zc_env);
+  return 0;
 }
 
 
