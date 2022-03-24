@@ -166,22 +166,24 @@ int Request::_MakeCgiRequest(t_server const& server_config){
 
 //test data
 _header.Authorization = "BASIC";
-std::string path_info = "/?foo=2&bar=qwerty";
+std::string path_info = "/foo";
+std::string path_info_translated = "/Users/aleksandruzienko/Documents/21projects/webserver/cgi/cgi_tester";
 std::string content_type = "application/x-www-form-urlencoded";
 std::string query_string = "foo=2&bar=qwerty";
 std::string remote_ident_pwd = "123456";
 std::string remote_username = "student21";
 _header.Method = "POST";
-std::string script_name = "/Some/way/to/php-cgi"; //из конфига получить
+std::string script_name = "./cgi/cgi_tester"; //из конфига получить
 _header.HTTP_Version = "HTTP/1.1";
+//_body.push_back("licenseID=string&content=string&/paramsXML=string");
 
 //headers
   std::map<std::string, std::string> env;
   env["AUTH_TYPE"] = _header.Authorization;
+  env["PATH_INFO"] = path_info;
   env["CONTENT_LENGTH"] = ws::intToStr(_header.Content_Length);
   env["GATEWAY_INTERFACE"] = "CGI/1.1";
-  env["PATH_INFO"] = path_info;
-  env["PATH_TRANSLATED"] = path_info;
+  env["PATH_TRANSLATED"] = path_info_translated;
   env["CONTENT_TYPE"] = content_type;
   env["QUERY_STRING"] = query_string;
   env["REMOTE_ADDR"] = ws::socketGetIP(_fd);
@@ -202,14 +204,34 @@ _header.HTTP_Version = "HTTP/1.1";
   z_array_init(&zc_env);
   std::map<std::string, std::string>::iterator i = env.begin();
   std::map<std::string, std::string>::iterator e = env.end();
+  std::string tmp;
   while( i != e){
-    std::string tmp = (*i).first + '=' + (*i).second;
+    if ((*i).second.empty())
+      tmp = (*i).first;
+    else
+      tmp = (*i).first + '=' + (*i).second;
     z_array_append(&zc_env, (char*)tmp.c_str());
     ++i;
   }
   z_array_null_terminate(&zc_env);
 
+  for (size_t i = 0; i < zc_env.size; ++i){
+   printf("%s \n",zc_env.elem[i]);
+  }
+
+  t_z_array zc_cgi_path;
+  z_array_init(&zc_cgi_path);
+  z_array_append(&zc_cgi_path, (char*)env["SCRIPT_NAME"].c_str());
+  z_array_null_terminate(&zc_cgi_path);
+
+
+  //RUN cgi
+  std::cout << "CGI RUN:\n";
+  execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
+
+
   z_array_free(&zc_env);
+  z_array_free(&zc_cgi_path);
   return 0;
 }
 
