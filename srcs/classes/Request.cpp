@@ -224,17 +224,69 @@ _header.HTTP_Version = "HTTP/1.1";
   z_array_append(&zc_cgi_path, (char*)env["SCRIPT_NAME"].c_str());
   z_array_null_terminate(&zc_cgi_path);
 
-
-  //RUN cgi
+  // RUN cgi
   std::cout << "CGI RUN:\n";
-  execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
 
+  pid_t pid;
+  int status;
+  int fd_input[2];
+  int fd_output[2];
 
+  if (pipe(fd_input) < 0) {
+    ws::printE(ERROR_CGI_PIPE, "\n");
+    return -1;
+  }
+  if (pipe(fd_output) < 0) {
+    ws::printE(ERROR_CGI_PIPE, "\n");
+    close(fd_input[0]);
+    close(fd_input[1]);
+    return -1;
+  }
+  pid = fork();
+  if (pid < 0) {
+    ws::printE(ERROR_CGI_EXECVE_FORK, "\n");
+    return -1;
+  }
+  if (pid == 0) {
+    if (dup2(fd_input[0], STDIN_FILENO) < 0 ||
+        dup2(fd_output[1], STDOUT_FILENO) < 0) {
+      ws::printE(ERROR_CGI_DUP2, "\n");
+      exit(-1);
+    }
+    close(fd_input[0]);
+    close(fd_input[1]);
+    close(fd_output[0]);
+    close(fd_output[1]);
+    status = execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
+    ws::printE(ERROR_CGI_EXECVE, "\n");
+    exit(status);
+  }
+
+  // if (waitpid(pid, &status, WUNTRACED) < 0) {
+  // }
+  close(fd_input[0]);
+  close(fd_output[1]);
+
+  // if you need to write something to cgi - use fd_input[1]
+  // if you need to read something to cgi - use fd_output[0]
+
+  // test print for cgi response fd_output[0]
+  char buff[2000];
+  int r;
+  while (1) {
+    r = read(fd_output[0], buff, 2000);
+    if (r <= 0) break;
+    write(2, buff, r);
+  }
+  printf("\n");
+  ////////////////
+
+  close(fd_input[1]);
+  close(fd_output[0]);
   z_array_free(&zc_env);
   z_array_free(&zc_cgi_path);
   return 0;
 }
-
 
 int Request::sendResult(void) {
   setStatus(SENDING);
