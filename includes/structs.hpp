@@ -56,3 +56,11 @@ typedef struct tag_requestHeader {
     std::string Referer;
     std::string TE;
 } t_requestHeader;
+
+typedef struct s_uriInfo{
+    std::string uri;
+    bool        isCgi;
+    std::string args;
+    std::string pathInfo;
+    const t_location  *loc;
+}   t_uriInfo;

@@ -1,15 +1,3 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2021/12/03 17:56:13 by zcris             #+#    #+#              #
-#    Updated: 2022/03/18 16:48:14 by zcris            ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 NAME	= 	webserver
 
 SRC_FOLDER = ./srcs/
@@ -48,7 +36,7 @@ SRCS = $(addprefix $(SRC_FOLDER), $(SRC_LIST))
 HEADERS = $(addprefix $(HEADER_FOLDER), $(HEADER_LIST))
 
 OBJS	=	$(SRCS:.cpp=.o)
-CC		=	c++ -g
+CC		=	c++ -g -fsanitize=address
 CFLAGS	=	-Wall -Wextra -Werror -std=c++98 -pedantic-errors
 RM		=	rm -f
 ALL_HEADERS = $(addprefix -I$(HEADER_FOLDER), $(HEADER_LIST))

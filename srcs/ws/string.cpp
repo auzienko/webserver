@@ -19,10 +19,11 @@ std::string ws::stringReverse(std::string& str) {
 std::string ws::stringUrlDecode(std::string const& str) {
   std::string result;
   char ch;
-  int len = str.length();
+  size_t len = str.length();
   int ii;
+  size_t max = str.find('?');
 
-  for (int i = 0; i < len; ++i) {
+  for (size_t i = 0; i < len && (i < max || max == std::string::npos); ++i) {
     if (str[i] != '%') {
       if (str[i] == '+')
         result += ' ';

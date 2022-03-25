@@ -61,40 +61,85 @@ int Request::getRequest(t_server const& server_config) {
 }
 
 int Request::_RequestHandler(t_server const& server_config) {
-  _MakeResponseBody(server_config);
-  _MakeResponseHeaders();
+  t_uriInfo cur;
+
+  try
+  {
+    cur = ConfigUtils::parseURI(_header, server_config);
+  }
+  catch (std::exception &ex)
+  {
+    std::cerr << ex.what() << std::endl;
+  }
+  _MakeResponseBody(cur);
+  _MakeResponseHeaders(cur);
   _AssembleRespose();
   return 0;
 }
 
-int Request::_MakeResponseBody(t_server const& server_config) {
+// int Request::_MakeResponseBody(t_server const& server_config) {
+//   _responseBody.clear();
+
+// //// заглушка на ГЕТ
+//   _header.Method = "GET";
+
+//   std::pair<std::string, t_location const*> p =
+//       ConfigUtils::getLocationSettings(server_config, _header.Request_URI);
+//   if (p.second == nullptr) return -1;
+
+//   // autoindex - сейчас игнорим индекс настройку если есть автоиндекс
+// if (_header.Request_URI.at(_header.Request_URI.length() - 1) == '/' && p.second->autoindex){
+//     std::cout << "🖖 Autoindex hadler\n";
+//     _MakeAutoIndex(_header.Request_URI, p.second->root);
+//     return 0;
+// }
+
+// if (_header.Request_URI == "/cgi"){
+//   _MakeCgiRequest();
+//   std::cout << "CGI handled" << std::endl;
+//   return 0;
+// }
+
+//   std::string url = p.second->root + p.first;
+//   if (_header.Method == "GET") {
+//     std::ifstream tmp(url, std::ifstream::binary);
+//     if (!tmp.is_open()) {
+//       std::cout << "Can't GET file " << _header.Request_URI << std::endl;
+//       return 404;
+//     }
+//     _responseBody << tmp.rdbuf();
+//     tmp.close();
+//   } else if (_header.Method == "POST") {
+//   }
+//   return 0;
+// }
+
+int Request::_MakeResponseBody(t_uriInfo &cur) {
   _responseBody.clear();
 
 //// заглушка на ГЕТ
   _header.Method = "GET";
 
-  std::pair<std::string, t_location const*> p =
-      ConfigUtils::getLocationSettings(server_config, _header.Request_URI);
-  if (p.second == nullptr) return -1;
+  if (cur.isCgi)
+    _MakeCgiRequest();
+  else
+  {
+    if (!cur.loc)
+      throw std::logic_error("Cannt find location");
+    else if (cur.loc->autoindex)
+      _MakeAutoIndex(cur.uri, cur.loc->root);
+    else
+      _MakeStdRequest(cur.uri);
+  }
 
-  // autoindex - сейчас игнорим индекс настройку если есть автоиндекс
-if (_header.Request_URI.at(_header.Request_URI.length() - 1) == '/' && p.second->autoindex){
-    std::cout << "🖖 Autoindex hadler\n";
-    _MakeAutoIndex(_header.Request_URI, p.second->root);
-    return 0;
-}
-
-if (_header.Request_URI == "/cgi"){
-  _MakeCgiRequest();
-  std::cout << "CGI handled" << std::endl;
   return 0;
 }
 
-  std::string url = p.second->root + p.first;
+int Request::_MakeStdRequest(std::string uri) {       // Заглушка из прежней версии
   if (_header.Method == "GET") {
-    std::ifstream tmp(url, std::ifstream::binary);
+    std::ifstream tmp(uri, std::ifstream::binary);
     if (!tmp.is_open()) {
-      std::cout << "Can't GET file " << _header.Request_URI << std::endl;
+      std::cout << "Can't GET file " << uri << std::endl;
       return 404;
     }
     _responseBody << tmp.rdbuf();
@@ -104,11 +149,12 @@ if (_header.Request_URI == "/cgi"){
   return 0;
 }
 
-int Request::_MakeResponseHeaders(void) {
+int Request::_MakeResponseHeaders(t_uriInfo &cur) {
   _responseHeader.clear();
   _responseHeader << "HTTP/1.1 200 OK\r\n";
   _responseHeader << "Connection: keep-alive\r\n";
-  _responseHeader << "Content-type: " << MimeTypes::getMimeType(_header.Request_URI) << "\r\n";
+  _responseHeader << "Content-type: " << MimeTypes::getMimeType(cur.uri) << "\r\n";
+  std::cout << "DEBUG! Type: " << MimeTypes::getMimeType(cur.uri) << " for " << cur.uri << std::endl;
   return 0;
 }
 
@@ -167,37 +213,9 @@ int Request::_MakeAutoIndex(std::string const& show_path,
 //https://datatracker.ietf.org/doc/html/rfc3875
 //https://firststeps.ru/cgi/cgi1.html
 int Request::_MakeCgiRequest(void){
-  // std::map<std::string, std::string> env;
-  // env.insert(std::make_pair("AUTH_TYPE", _header.Authorization));
-  // env.insert(std::make_pair("CONTENT_LENGTH", ws::intToStr(_header.Content_Length)));
-  // env.insert(std::make_pair("GATEWAY_INTERFACE", "CGI/1.1"));
+  
+  std::cout << "Find CGI!" << std::endl;
 
-  // std::string path_info =
-  //     ws::stringUrlDecode(ws::stringTail(_header.Request_URI, '/'));
-  // if (path_info.length())
-  //   path_info = '/' + path_info;
-  // else
-  //   path_info = "";
-  // env.insert(std::make_pair("PATH_INFO", path_info));  //не точно
-  // env.insert(std::make_pair("PATH_TRANSLATED", ""));
-
-  // env.insert(std::make_pair("CONTENT_TYPE", "empty"));
-  // env.insert(std::make_pair("QUERY_STRING", "empty"));
-  // env.insert(std::make_pair("REMOTE_ADDR", "empty"));
-  // env.insert(std::make_pair("REMOTE_HOST", "empty"));
-  // env.insert(std::make_pair("REMOTE_IDENT", "empty"));
-  // env.insert(std::make_pair("REMOTE_USER", "empty"));
-  // env.insert(std::make_pair("REQUEST_METHOD", "empty"));
-  // env.insert(std::make_pair("SCRIPT_NAME", "empty"));
-  // env.insert(std::make_pair("SERVER_NAME", "empty"));
-  // env.insert(std::make_pair("SERVER_PORT", "empty"));
-  // env.insert(std::make_pair("SERVER_PROTOCOL", "empty"));
-  // env.insert(std::make_pair("SERVER_SOFTWARE", "empty"));
-  // env.insert(std::make_pair("AUTH_TYPE", "empty"));
-  // env.insert(std::make_pair("AUTH_TYPE", "empty"));
-
-
-  fork();
   return (0);
 }
 
