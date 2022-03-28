@@ -43,10 +43,12 @@ class Request {
   Request(Request const& src);
   Request& operator=(Request const& rhs);
   int _RequestHandler(t_server const& server_config);
-  int _MakeResponseBody(t_server const& server_config);
-  int _MakeResponseHeaders(void);
+  int _MakeResponseBody(t_uriInfo &cur);
+  int _MakeResponseHeaders(t_uriInfo &cur);
   int _AssembleRespose(void);
   int _MakeAutoIndex(std::string const& show_path, std::string const& real_path);
+  int _MakeCgiRequest(void);
+  int _MakeStdRequest(std::string uri);
 
 
   private:

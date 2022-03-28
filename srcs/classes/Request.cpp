@@ -16,43 +16,59 @@ int Request::getStatus(void) const { return _status; }
 void Request::setStatus(int status) { _status = status; }
 
 int Request::_RequestHandler(t_server const& server_config) {
-  _MakeResponseBody(server_config);
-  _MakeResponseHeaders();
+  t_uriInfo cur;
+
+  try
+  {
+    cur = ConfigUtils::parseURI(_request_uri, server_config);
+  }
+  catch (std::exception &ex)
+  {
+    std::cerr << ex.what() << std::endl;
+  }
+  _MakeResponseBody(cur);
+  _MakeResponseHeaders(cur);
   _AssembleRespose();
   return 0;
 }
 
-int Request::_MakeResponseBody(t_server const& server_config) {
+int Request::_MakeResponseBody(t_uriInfo &cur) {
   _responseBody.clear();
-  std::pair<std::string, t_location const*> p =
-      ConfigUtils::getLocationSettings(server_config, _request_uri);
-  if (p.second == nullptr) return -1;
 
-  // autoindex - сейчас игнорим индекс настройку если есть автоиндекс
-if (_request_uri.at(_request_uri.length() - 1) == '/' && p.second->autoindex){
-    std::cout << "🖖 Autoindex hadler\n";
-    _MakeAutoIndex(_request_uri, p.second->root);
-    return 0;
+  if (cur.isCgi)
+    _MakeCgiRequest();
+  else
+  {
+    if (!cur.loc)
+      throw std::logic_error("Cannt find location");
+    else if (cur.loc->autoindex)
+      _MakeAutoIndex(cur.uri, cur.loc->root);
+    else
+      _MakeStdRequest(cur.uri);
+  }
+
+  return 0;
 }
 
-  std::string url = p.second->root + p.first;
+int Request::_MakeStdRequest(std::string uri) {       // Заглушка из прежней версии
   if (_method == "GET") {
-    std::ifstream tmp(url, std::ifstream::binary);
+    std::ifstream tmp(uri, std::ifstream::binary);
     if (!tmp.is_open()) {
-      std::cout << "Can't GET file " << _request_uri << std::endl;
+      std::cout << "Can't GET file " << uri << std::endl;
       return 404;
     }
     _responseBody << tmp.rdbuf();
     tmp.close();
+  } else if (_method== "POST") {
   }
   return 0;
 }
 
-int Request::_MakeResponseHeaders(void) {
+int Request::_MakeResponseHeaders(t_uriInfo &cur) {
   _responseHeader.clear();
   _responseHeader << "HTTP/1.1 200 OK\r\n";
   _responseHeader << "Connection: keep-alive\r\n";
-  _responseHeader << "Content-type: " << MimeTypes::getMimeType(_request_uri) << "\r\n";
+  _responseHeader << "Content-type: " << MimeTypes::getMimeType(cur.uri) << "\r\n";
   return 0;
 }
 
@@ -106,6 +122,17 @@ int Request::_MakeAutoIndex(std::string const& show_path,
   }
   return 0;
 }
+
+
+//https://datatracker.ietf.org/doc/html/rfc3875
+//https://firststeps.ru/cgi/cgi1.html
+int Request::_MakeCgiRequest(void){
+  
+  std::cout << "Find CGI!" << std::endl;
+
+  return (0);
+}
+
 
 int Request::sendResult(void) {
   setStatus(SENDING);

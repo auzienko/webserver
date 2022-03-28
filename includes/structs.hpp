@@ -24,3 +24,11 @@ typedef struct tag_server {
   std::map<std::string, std::string>
       cgi;  //расширение - ключ, значение - путь к cgi-файлу
 } t_server;
+
+typedef struct s_uriInfo{
+    std::string uri;
+    bool        isCgi;
+    std::string args;
+    std::string pathInfo;
+    const t_location  *loc;
+}   t_uriInfo;
