@@ -1,12 +1,13 @@
 #include "../../includes/classes/Request.hpp"
 
+using namespace std;
 
-Request::Request(void) : _fd(-1), _status(NEW) {
+Request::Request(void) : _fd(-1), _status(NEW) {  reset();
 }
 
 Request::~Request(void) {}
 
-Request::Request(int const& fd) : _fd(fd), _status(NEW) {}
+Request::Request(int const& fd) : _fd(fd), _status(NEW) {  reset(); }
 
 int Request::getFd(void) const { return _fd; }
 
@@ -14,58 +15,12 @@ int Request::getStatus(void) const { return _status; }
 
 void Request::setStatus(int status) { _status = status; }
 
-int Request::getRequest(t_server const& server_config) {
-  if (getStatus() >= READY_TO_HANDLE) return 0;
-
-  int nbytes;
-  char buf[DEFAULT_BUFLEN];
-  int fd = _fd;
-  nbytes = recv(fd, buf, DEFAULT_BUFLEN, 0);
-  std::cout << "\n\n🤓 Reading " << nbytes << " bytes from socket " << fd << "...\n";
-  if (nbytes < 0) {
-    //ошибка чтения
-    ws::printE("~~ 😞 Server: read failture", "\n");
-    return -1;
-  } else if (nbytes == 0) {
-    ws::print("reading no data", "\n");
-    return 0;
-  } else {
-    int cnt = 0;
-    std::cout << "~~ ✔️Server gets " << nbytes << " bytes\nHEADERS:\n";
-
-//header print
-    for (int i = 0; i < nbytes && cnt < 2; ++i) {
-      write(1, &buf[i], 1);
-    }
-    write(1, "\n\n", 2);
-//end header print
-
-//костыль получения урла
-    int j = 0;
-    while (buf[j++] != ' ');
-    while (buf[j] != ' ') {
-      _header.Request_URI += buf[j];
-       ++j;
-    }
-    for (int i = 0; i < nbytes && cnt < 2; ++i) {
-      write(1, &buf[i], 1);
-    }
-//end костыль получения урла
-
-    setStatus(READY_TO_HANDLE);
-
-    if (getStatus() == READY_TO_HANDLE) _RequestHandler(server_config);
-
-    return 0;
-  }
-}
-
 int Request::_RequestHandler(t_server const& server_config) {
   t_uriInfo cur;
 
   try
   {
-    cur = ConfigUtils::parseURI(_header, server_config);
+    cur = ConfigUtils::parseURI(_request_uri, server_config);
   }
   catch (std::exception &ex)
   {
@@ -79,9 +34,6 @@ int Request::_RequestHandler(t_server const& server_config) {
 
 int Request::_MakeResponseBody(t_uriInfo &cur) {
   _responseBody.clear();
-
-//// заглушка на ГЕТ
-  _header.Method = "GET";
 
   if (cur.isCgi)
     _MakeCgiRequest();
@@ -99,7 +51,7 @@ int Request::_MakeResponseBody(t_uriInfo &cur) {
 }
 
 int Request::_MakeStdRequest(std::string uri) {       // Заглушка из прежней версии
-  if (_header.Method == "GET") {
+  if (_method == "GET") {
     std::ifstream tmp(uri, std::ifstream::binary);
     if (!tmp.is_open()) {
       std::cout << "Can't GET file " << uri << std::endl;
@@ -107,7 +59,7 @@ int Request::_MakeStdRequest(std::string uri) {       // Заглушка из �
     }
     _responseBody << tmp.rdbuf();
     tmp.close();
-  } else if (_header.Method == "POST") {
+  } else if (_method== "POST") {
   }
   return 0;
 }
@@ -117,7 +69,6 @@ int Request::_MakeResponseHeaders(t_uriInfo &cur) {
   _responseHeader << "HTTP/1.1 200 OK\r\n";
   _responseHeader << "Connection: keep-alive\r\n";
   _responseHeader << "Content-type: " << MimeTypes::getMimeType(cur.uri) << "\r\n";
-  std::cout << "DEBUG! Type: " << MimeTypes::getMimeType(cur.uri) << " for " << cur.uri << std::endl;
   return 0;
 }
 
@@ -233,3 +184,154 @@ int Request::sendResult(void) {
   // пустая строка
   // <?xml version="1.0" encoding="utf-8"?>
   // <string xmlns="http://clearforest.com/">string</string>
+
+// void Request::getSimple(string& body){
+//     if (_content_len > _client_max_body_size || _body.size() + body.size() > _client_max_body_size)
+//         throw WebException(CODE_413);
+//     _body.append(body);
+//     if (_body.length() == _content_len)
+//         _status = END;
+// }
+
+// void Request::getChunked(string& body){
+//     int chunkSize;
+    
+//     if (!body.size())
+//         _status = END;
+//     size_t i = body.find(CRLF);
+//     if (i == strnpos)
+//         throw WebException(CODE_400); //?
+//     if (i != strnpos){
+//         stringstream ss;
+//         ss << std::hex << body.substr(0, i);
+//         ss >> chunkSize;
+//         if (!chunkSize)
+//             _status = END;
+//     }
+// }
+
+// void Request::parseBody(std::string& body){
+//     if (!_chunked){
+//         if (_content_len > _client_max_body_size || _body.size() + body.size() > _client_max_body_size)
+//             throw WebException(CODE_413);
+//         _body.append(body);
+//         return ;
+//     }
+// }
+
+
+
+ void Request::parseFirstLine(string& firstLine){
+     size_t j = firstLine.find(CRLF);
+     if (j == strnpos)
+        throw logic_error(CODE_400);
+     if (firstLine.size() < 1)
+         throw logic_error(CODE_400);
+     size_t i = firstLine.find_first_of(" ");
+     if (i == strnpos)
+         throw logic_error(CODE_400);
+     _method = firstLine.substr(0, i);
+     firstLine.erase(0, i + 1);
+     j = j - i - 1;
+     i = firstLine.find(" ");
+     if (i == strnpos)
+         throw logic_error(CODE_400);
+     _request_uri = firstLine.substr(0, i);
+     _http_version = firstLine.substr(i + 1, j - i - 1);
+     if (_method != GET && _method != POST && _method != DELETE)
+         throw logic_error(CODE_501);
+     if (_http_version != "HTTP/1.1")
+         throw logic_error(CODE_505);
+     firstLine.erase(0, j + 2);
+     if (firstLine[0] == '\r' && firstLine[1] == '\n' && firstLine[2] == '\0')
+      status = END;
+     else 
+      status = HEADERS;
+ }
+
+void Request::parseHeaders(string head){
+    string key;
+    string value;
+
+    if (head.empty()){
+        if (_chunked || _content_len)
+            status = BODY;
+        else 
+            status = END;
+        return ;
+    }
+    size_t i = head.find(":");
+    if (i == strnpos)
+        throw logic_error(CODE_400);
+    key = head.substr(0, i);
+    value = head.substr(i + 1);
+    _headers.insert(make_pair(key, value));
+    if (key == "Content-lenght")
+        _content_len = stoi(value);
+    if (key == "Transfer-Encoding" && value == " chunked")
+        _chunked = true;
+}
+
+void Request::reset(){
+  _method.clear();
+  _request_uri.clear();
+  _http_version.clear();
+  _headers.clear();
+  _content_len = 0;
+  _client_max_body_size = 0;
+  _chunked = false;
+  _body.clear();
+  status = START;
+  _code_status = 0;
+}
+
+void Request::parse(char *buf, int nbytes, size_t i){
+  std::string tmp;
+  buf[nbytes] = 0;
+  _client_max_body_size = i;
+  tmp.append(buf, nbytes);
+  if (status == START)
+    parseFirstLine(tmp);
+  if (status == HEADERS)
+  {
+     size_t i = tmp.find(CRLF);
+     while (status == HEADERS && i != strnpos){
+         parseHeaders(tmp.substr(0, i));
+         tmp.erase(0, i + 2);
+         i = tmp.find(CRLF);
+     }
+  }
+}
+
+void Request::print(){
+    cout << "HTTP REQUEST\n" << _method << " " << _request_uri << " " << _http_version << endl;
+    for (map<string, string>::iterator it = _headers.begin(); it != _headers.end(); ++it){
+      cout << (*it).first << ":" << (*it).second << endl;
+    }
+}
+
+
+int Request::getRequest(t_server const& server_config) {
+  size_t i = server_config.client_max_body_size;
+  int nbytes;
+  char buf[DEFAULT_BUFLEN];
+  int fd = _fd;
+  while (1){
+    nbytes = recv(fd, &buf, DEFAULT_BUFLEN, 0);
+    if (nbytes == -1 && errno == 35)
+      break;
+    if (nbytes < 0) {
+     ws::printE("~~ 😞 Server: read failture", "\n");
+     return -1;
+    } else if (nbytes == 0) {
+      ws::print("reading no data", "\n");
+      return 0;
+    }
+    else
+     parse(buf, nbytes, i);
+  }
+  print();
+  setStatus(READY_TO_HANDLE);
+  if (getStatus() == READY_TO_HANDLE) _RequestHandler(server_config);
+  return 0;
+  }

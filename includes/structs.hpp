@@ -25,38 +25,6 @@ typedef struct tag_server {
       cgi;  //расширение - ключ, значение - путь к cgi-файлу
 } t_server;
 
-typedef struct tag_requestHeader {
-    std::string Method;
-    std::string Request_URI;
-    std::string HTTP_Version;
-    std::string Host;
-    
-    std::string Connection;
-    int Content_Length;
-
-    std::string Cache_Control;
-    std::string Accept_Encoding;
-    std::string Accept_Language;
-    std::string User_Agent;
-    int Upgrade_Insecure_Requests;
-    
-    std::string Accept;
-    std::string Accept_Charset;
-    std::string Authorization;
-    std::string Expect;
-    std::string From;
-    std::string If_Match;
-    std::string If_Modified_Since;
-    std::string If_None_Match;
-    std::string If_Range;
-    std::string If_Unmodified_Since;
-    std::string Max_Forwards;
-    std::string Proxy_Authorization;
-    std::string Range;
-    std::string Referer;
-    std::string TE;
-} t_requestHeader;
-
 typedef struct s_uriInfo{
     std::string uri;
     bool        isCgi;

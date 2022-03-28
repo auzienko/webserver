@@ -10,6 +10,7 @@ class WebserverManager {
  private:
   Config* _config;
   std::vector<Webserver*> _webservers;
+  int _maxFd;
 
  public:
   WebserverManager(std::string const& config_path);
@@ -22,6 +23,9 @@ class WebserverManager {
   WebserverManager& operator=(WebserverManager const& rhs);
   int _Create_webserver(t_server &newServerConfig);
   void _Banner(void) const;
+  fd_set _GetAllSocketsFds(void);
+  void _ReadHandler(int fd);
+  void _WriteHandler(int fd);
 };
 
 #endif

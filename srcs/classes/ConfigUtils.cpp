@@ -128,10 +128,11 @@ static void fillUri(std::string const &line, t_server const& server_config, t_ur
   }
 }
 
-t_uriInfo ConfigUtils::parseURI(t_requestHeader &_header, t_server const& server_config){
+t_uriInfo ConfigUtils::parseURI(std::string &uri, t_server const& server_config){
   t_uriInfo res;
 
-  std::string url = (_header.Request_URI.find('%') != std::string::npos ? ws::stringUrlDecode(_header.Request_URI) : _header.Request_URI);
+  res.isCgi = false;
+  std::string url = (uri.find('%') != std::string::npos ? ws::stringUrlDecode(uri) : uri);
   size_t  delim = url.find('?');
 
   if (delim == std::string::npos)

@@ -12,8 +12,7 @@ class Webserver {
   int _connectionCount;
   int _maxConnection;
   int _listenSocket;
-  int _maxFd;
-  fd_set _connections;
+  std::set<int> _connections;
   RequestManager* _rm;
   t_server _serverConfig;
 
@@ -27,12 +26,13 @@ class Webserver {
   void minusConnection(void);
   void addConnection(int fd);
   void closeConnection(int index);
+  void appendSocketsToFdsSet(fd_set* fds, int* max_fd) const;
+  int readHandler(int fd);
+  int writeHandler(int fd);
 
  private:
   Webserver(Webserver const& src);
   Webserver& operator=(Webserver const& rhs);
-  void _ReadHandler(int fd);
-  void _WriteHandler(int fd);
 };
 
 #endif

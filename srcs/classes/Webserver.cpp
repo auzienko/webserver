@@ -1,8 +1,7 @@
 #include "../../includes/classes/Webserver.hpp"
 
 Webserver::Webserver(t_server &src, int maxConnection)
-    : _connectionCount(0), _maxConnection(maxConnection), _maxFd(-1), _serverConfig(src) {
-  FD_ZERO(&_connections);
+    : _connectionCount(0), _maxConnection(maxConnection), _serverConfig(src) {
   _rm = new RequestManager();
 }
 
@@ -19,21 +18,18 @@ void Webserver::minusConnection(void) {
 }
 
 void Webserver::addConnection(int fd) {
-  FD_SET(fd, &_connections);
+  _connections.insert(fd);
   plusConnection();
-  if (fd > _maxFd) _maxFd = fd;
   _rm->add(fd);
   std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> NEW CONNECTION : " << fd << std::endl;
 }
 
 void Webserver::closeConnection(int fd) {
-  if (FD_ISSET(fd, &_connections)) {
+  std::set<int>::iterator i = _connections.find(fd);
+  if (i != _connections.end()) {
     close(fd);
-    FD_CLR(fd, &_connections);
+    _connections.erase(i);
     minusConnection();
-    if (fd == _maxFd) {
-      while (FD_ISSET(_maxFd, &_connections) == false) _maxFd -= 1;
-    }
   }
   _rm->remove(fd);
   std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> CLOSE CONNECTION : " << fd << std::endl;
@@ -57,14 +53,15 @@ int Webserver::createServerListenSocket(void) {
     close(_listenSocket);
     return -1;
   }
-  
+
   addr.sin_family = AF_INET;
-  if (inet_pton(addr.sin_family, _serverConfig.listen.c_str(), &(addr.sin_addr)) < 0){
+  addr.sin_port = htons(_serverConfig.port);
+  if (inet_pton(addr.sin_family, _serverConfig.listen.c_str(),
+                &(addr.sin_addr)) < 0) {
     ws::printE(ERROR_CREATE_IP, "\n");
     close(_listenSocket);
     return -1;
   }
-  addr.sin_port = htons(_serverConfig.port);
   err = bind(_listenSocket, (struct sockaddr*)&addr, sizeof(addr));
   if (err < 0) {
     ws::printE(ERROR_BIND_SOCKET, "\n");
@@ -78,14 +75,20 @@ int Webserver::createServerListenSocket(void) {
     close(_listenSocket);
     return -1;
   }
-
   addConnection(_listenSocket);
-  _maxFd = _listenSocket;
+
+  char str[sizeof(addr)];
+  inet_ntop(AF_INET, &(addr.sin_addr), str, sizeof(addr));
+  std::cout << "webserver: " << str << ":" << ntohs(addr.sin_port) << " ";
+
   return 0;
 }
 
-void Webserver::_ReadHandler(int fd) {
+int Webserver::readHandler(int fd) {
+  if (fd != _listenSocket && _connections.find(fd) == _connections.end())
+    return -1;
   if (fd == _listenSocket) {
+  
     struct sockaddr_in client;
     socklen_t size = sizeof(client);
     int new_sock = accept(_listenSocket, (struct sockaddr*)&client, &size);
@@ -107,30 +110,27 @@ void Webserver::_ReadHandler(int fd) {
       closeConnection(fd);
     }
   }
+  return 0;
 }
 
-void Webserver::_WriteHandler(int fd) {
-  if (fd == _listenSocket) return;
-  if (_rm->at(fd) == nullptr || _rm->at(fd)->getStatus() != READY_TO_SEND) return;
+int Webserver::writeHandler(int fd) {
+  if (fd == _listenSocket) return 0;
+  if (_connections.find(fd) == _connections.end()) return -1;
+  if (_rm->at(fd) == nullptr || _rm->at(fd)->getStatus() != READY_TO_SEND)
+    return 0;
   ws::print(MESSAGE_TRY_SEND_DATA, " ");
   if (_rm->sendResult(fd) < 0) {
     ws::print(MESSAGE_FAIL, "\n");
     ws::printE(ERROR_SEND_TO_CLIENT, "\n");
-    closeConnection(fd);
   } else {
     ws::print(MESSAGE_SUCCESS, "\n");
-    //понять когда закрывать коннекшены корректно
-     closeConnection(fd);
   }
+  //понять когда закрывать коннекшены корректно
+  closeConnection(fd);
+  return 0;
 }
 
 int Webserver::run(void) {
-  fd_set read_fds;
-  fd_set write_fds;
-
-  FD_ZERO(&read_fds);
-  FD_ZERO(&write_fds);
-
   ws::print(MESSAGE_TRY_START_SERV, "\n");
   ws::print(MESSAGE_CREATE_LISTEN_SOCKET, " ");
   if (createServerListenSocket() != 0) {
@@ -139,25 +139,17 @@ int Webserver::run(void) {
   }
   ws::print(MESSAGE_SUCCESS, "\n");
   ws::print(MESSAGE_SERVER_STARTED, "\n");
-
-  // timeout брать из конфига наверно, но это не точно...
-  struct timeval tv;
-  tv.tv_sec = 2;
-  tv.tv_usec = 0;
-
-  while (1) {
-    read_fds = _connections;
-    write_fds = _connections;
-    if (select(_maxFd + 1, &read_fds, &write_fds, 0, &tv) < 0) {
-      ws::printE(ERROR_SELECT, "\n");
-      //добавить обработчик
-      exit(EXIT_FAILURE);
-    }
-    int max_fd = _maxFd;
-    for (int i = 0; i <= max_fd; ++i) {
-      if (FD_ISSET(i, &read_fds)) _ReadHandler(i);
-      if (FD_ISSET(i, &write_fds)) _WriteHandler(i);
-    }
-  }
   return 0;
+}
+
+void Webserver::appendSocketsToFdsSet(fd_set* fds, int* max_fd) const {
+  FD_SET(_listenSocket, fds);
+  *max_fd = _listenSocket > *max_fd ? _listenSocket : *max_fd;
+  std::set<int>::const_iterator i = _connections.begin();
+  std::set<int>::const_iterator e = _connections.end();
+  while (i != e) {
+    FD_SET(*i, fds);
+    *max_fd = *i > *max_fd ? *i : *max_fd;
+    ++i;
+  }
 }
