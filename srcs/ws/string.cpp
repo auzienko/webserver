@@ -4,7 +4,7 @@ std::string ws::stringTail(std::string const& str, char c) {
   size_t len = str.length() - 1;
   std::string tmp;
   while (len && str[len] != c) {
-    tmp += c;
+    tmp += str[len];
     --len;
   }
   return ws::stringReverse(tmp);
@@ -37,4 +37,12 @@ std::string ws::stringUrlDecode(std::string const& str) {
     }
   }
   return result;
+}
+
+std::string ws::stringFromMap(std::map<std::string, std::string>::const_iterator it,
+    std::map<std::string, std::string>::const_iterator end)
+{
+  if (end == it)
+    return ("");
+  return (it->second);
 }

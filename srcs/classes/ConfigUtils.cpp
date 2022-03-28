@@ -60,7 +60,7 @@ static bool isCGI(std::vector<std::string> dirs, std::map<std::string, std::stri
   std::map<std::string, std::string>::const_iterator  it;
   std::map<std::string, std::string>::const_iterator  end = cgi.cend();
   bool isMiss = false, isPass = false;
-  std::string path("/");
+  std::string path(".");
 
   for (size_t i = 0; !isMiss && !isPass; ++i)
   {
@@ -74,8 +74,8 @@ static bool isCGI(std::vector<std::string> dirs, std::map<std::string, std::stri
     }
     if (dirs.empty() || isPass)
       break;
-    if (path == "/")
-      path.insert(1, dirs.front());
+    if (path == ".")
+      path = dirs.front();
     else
       path = path + "/" + dirs.front();
     dirs.erase(dirs.begin());

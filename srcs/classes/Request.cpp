@@ -26,26 +26,37 @@ int Request::_RequestHandler(t_server const& server_config) {
   {
     std::cerr << ex.what() << std::endl;
   }
-  _MakeResponseBody(cur);
+  _MakeResponseBody(server_config, cur);
   _MakeResponseHeaders(cur);
   _AssembleRespose();
   return 0;
 }
 
-int Request::_MakeResponseBody(t_uriInfo &cur) {
+int Request::_MakeResponseBody(t_server const& server_config, t_uriInfo &cur) {
   _responseBody.clear();
 
   if (cur.isCgi)
-    _MakeCgiRequest();
+    _MakeCgiRequest(server_config, cur);
   else
   {
     if (!cur.loc)
       throw std::logic_error("Cannt find location");
     else if (cur.loc->autoindex)
-      _MakeAutoIndex(cur.uri, cur.loc->root);
+      _MakeAutoIndex(cur.loc->path, cur.loc->root);
     else
       _MakeStdRequest(cur.uri);
   }
+//cgi headers
+// _MakeCgiRequest(server_config);
+
+
+
+// //// заглушка на ГЕТ
+//   _header.Method = "GET";
+
+//   std::pair<std::string, t_location const*> p =
+//       ConfigUtils::getLocationSettings(server_config, _header.Request_URI);
+//   if (p.second == nullptr) return -1;
 
   return 0;
 }
@@ -123,16 +134,134 @@ int Request::_MakeAutoIndex(std::string const& show_path,
   return 0;
 }
 
-
 //https://datatracker.ietf.org/doc/html/rfc3875
 //https://firststeps.ru/cgi/cgi1.html
-int Request::_MakeCgiRequest(void){
-  
-  std::cout << "Find CGI!" << std::endl;
+int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks){
 
-  return (0);
+//test data
+// _header.Authorization = "BASIC";
+// std::string path_info = "/foo";
+// std::string path_info_translated = "/Users/aleksandruzienko/Documents/21projects/webserver/cgi/cgi_tester";
+// std::string content_type = "application/x-www-form-urlencoded";
+// std::string query_string = "foo=2&bar=qwerty";
+// std::string remote_ident_pwd = "123456";
+// std::string remote_username = "student21";
+// _header.Method = "POST";
+// std::string script_name = "./cgi/cgi_tester"; //из конфига получить
+// _header.HTTP_Version = "HTTP/1.1";
+//_body.push_back("licenseID=string&content=string&/paramsXML=string");
+
+//headers
+  std::map<std::string, std::string> env;
+  env["PATH_INFO"] = uriBlocks.pathInfo;
+  env["SERVER_NAME"] = server_config.listen;
+
+  env["AUTH_TYPE"] = ws::stringFromMap(_headers.find("Authorization"), _headers.end());
+  env["CONTENT_LENGTH"] = ws::intToStr(_content_len);
+  env["GATEWAY_INTERFACE"] = "CGI/1.1";
+  env["PATH_TRANSLATED"] = uriBlocks.uri;
+  env["CONTENT_TYPE"] =  ws::stringFromMap(_headers.find("Content-Type"), _headers.end());
+  env["QUERY_STRING"] = _query;
+  env["REMOTE_ADDR"] = ws::socketGetIP(_fd);
+  //env["REMOTE_HOST"] = "empty";
+  // env["REMOTE_IDENT"] =  remote_ident_pwd;
+  // env["REMOTE_USER"] = remote_username;
+  env["REQUEST_METHOD"] = _method;
+  env["SCRIPT_NAME"] = ws::stringFromMap(server_config.cgi.find("." + ws::stringTail(uriBlocks.uri, '.')), _headers.end());
+  env["SERVER_PORT"] = ws::intToStr(server_config.port);
+  env["SERVER_PROTOCOL"] = _http_version;
+  env["SERVER_SOFTWARE"] = PROGRAMM_NAME;
+
+  //как будет готов парсер реквестов добавить еще все хедеры из запроса в формате HTTP_NAME
+
+  //make env char**
+  t_z_array zc_env;
+  z_array_init(&zc_env);
+  std::map<std::string, std::string>::iterator i = env.begin();
+  std::map<std::string, std::string>::iterator e = env.end();
+  std::string tmp;
+  while( i != e){
+    if ((*i).second.empty())
+      tmp = (*i).first;
+    else
+      tmp = (*i).first + '=' + (*i).second;
+    z_array_append(&zc_env, (char*)tmp.c_str());
+    ++i;
+  }
+  z_array_null_terminate(&zc_env);
+
+  for (size_t i = 0; i < zc_env.size; ++i){
+   printf("%s \n",zc_env.elem[i]);
+  }
+
+  t_z_array zc_cgi_path;
+  z_array_init(&zc_cgi_path);
+  z_array_append(&zc_cgi_path, (char*)env["SCRIPT_NAME"].c_str());
+  z_array_null_terminate(&zc_cgi_path);
+
+  // RUN cgi
+  std::cout << "CGI RUN:\n";
+
+  pid_t pid;
+  int status;
+  int fd_input[2];
+  int fd_output[2];
+
+  if (pipe(fd_input) < 0) {
+    ws::printE(ERROR_CGI_PIPE, "\n");
+    return -1;
+  }
+  if (pipe(fd_output) < 0) {
+    ws::printE(ERROR_CGI_PIPE, "\n");
+    close(fd_input[0]);
+    close(fd_input[1]);
+    return -1;
+  }
+  pid = fork();
+  if (pid < 0) {
+    ws::printE(ERROR_CGI_EXECVE_FORK, "\n");
+    return -1;
+  }
+  if (pid == 0) {
+    if (dup2(fd_input[0], STDIN_FILENO) < 0 ||
+        dup2(fd_output[1], STDOUT_FILENO) < 0) {
+      ws::printE(ERROR_CGI_DUP2, "\n");
+      exit(-1);
+    }
+    close(fd_input[0]);
+    close(fd_input[1]);
+    close(fd_output[0]);
+    close(fd_output[1]);
+    status = execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
+    ws::printE(ERROR_CGI_EXECVE, "\n");
+    exit(status);
+  }
+
+  // if (waitpid(pid, &status, WUNTRACED) < 0) {
+  // }
+  close(fd_input[0]);
+  close(fd_output[1]);
+
+  // if you need to write something to cgi - use fd_input[1]
+  // if you need to read something to cgi - use fd_output[0]
+
+  // test print for cgi response fd_output[0]
+  char buff[2000];
+  int r;
+  while (1) {
+    r = read(fd_output[0], buff, 2000);
+    if (r <= 0) break;
+    write(2, buff, r);
+  }
+  printf("\n");
+  ////////////////
+
+  close(fd_input[1]);
+  close(fd_output[0]);
+  z_array_free(&zc_env);
+  z_array_free(&zc_cgi_path);
+  return 0;
 }
-
 
 int Request::sendResult(void) {
   setStatus(SENDING);
@@ -318,7 +447,7 @@ int Request::getRequest(t_server const& server_config) {
   int fd = _fd;
   while (1){
     nbytes = recv(fd, &buf, DEFAULT_BUFLEN, 0);
-    if (nbytes == -1 && errno == 35)
+    if (nbytes == -1)
       break;
     if (nbytes < 0) {
      ws::printE("~~ 😞 Server: read failture", "\n");
