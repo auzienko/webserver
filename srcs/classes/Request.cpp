@@ -77,43 +77,6 @@ int Request::_RequestHandler(t_server const& server_config) {
   return 0;
 }
 
-// int Request::_MakeResponseBody(t_server const& server_config) {
-//   _responseBody.clear();
-
-// //// заглушка на ГЕТ
-//   _header.Method = "GET";
-
-//   std::pair<std::string, t_location const*> p =
-//       ConfigUtils::getLocationSettings(server_config, _header.Request_URI);
-//   if (p.second == nullptr) return -1;
-
-//   // autoindex - сейчас игнорим индекс настройку если есть автоиндекс
-// if (_header.Request_URI.at(_header.Request_URI.length() - 1) == '/' && p.second->autoindex){
-//     std::cout << "🖖 Autoindex hadler\n";
-//     _MakeAutoIndex(_header.Request_URI, p.second->root);
-//     return 0;
-// }
-
-// if (_header.Request_URI == "/cgi"){
-//   _MakeCgiRequest();
-//   std::cout << "CGI handled" << std::endl;
-//   return 0;
-// }
-
-//   std::string url = p.second->root + p.first;
-//   if (_header.Method == "GET") {
-//     std::ifstream tmp(url, std::ifstream::binary);
-//     if (!tmp.is_open()) {
-//       std::cout << "Can't GET file " << _header.Request_URI << std::endl;
-//       return 404;
-//     }
-//     _responseBody << tmp.rdbuf();
-//     tmp.close();
-//   } else if (_header.Method == "POST") {
-//   }
-//   return 0;
-// }
-
 int Request::_MakeResponseBody(t_uriInfo &cur) {
   _responseBody.clear();
 

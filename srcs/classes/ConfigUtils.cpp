@@ -67,7 +67,6 @@ static bool isCGI(std::vector<std::string> dirs, std::map<std::string, std::stri
     isMiss = true;
     for (it = cgi.cbegin(); !isPass && it != end; ++it)
     {
-      std::string tets = it->first;
       if (it->first == path)
         isPass = true;
       else if (it->first.find(path) != std::string::npos)
