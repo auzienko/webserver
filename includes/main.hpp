@@ -48,6 +48,7 @@ std::string stringUrlDecode(std::string const& str);
 std::string socketGetIP(int const& fd);
 std::string stringFromMap(std::map<std::string, std::string>::const_iterator it,
     std::map<std::string, std::string>::const_iterator end);
+std::string stringToCGIFormat(std::string const& str);
 }  // namespace ws
 
 #endif

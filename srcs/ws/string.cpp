@@ -46,3 +46,10 @@ std::string ws::stringFromMap(std::map<std::string, std::string>::const_iterator
     return ("");
   return (it->second);
 }
+
+std::string ws::stringToCGIFormat(std::string const& str){
+    std::string result = str;
+    std::replace(result.begin(), result.end(), '-', '_');
+    std::transform(result.begin(), result.end(), result.begin(), ::toupper);
+    return result;
+}
