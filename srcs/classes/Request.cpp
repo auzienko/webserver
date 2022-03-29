@@ -137,25 +137,9 @@ int Request::_MakeAutoIndex(std::string const& show_path,
 //https://datatracker.ietf.org/doc/html/rfc3875
 //https://firststeps.ru/cgi/cgi1.html
 int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks){
-
-//test data
-// _header.Authorization = "BASIC";
-// std::string path_info = "/foo";
-// std::string path_info_translated = "/Users/aleksandruzienko/Documents/21projects/webserver/cgi/cgi_tester";
-// std::string content_type = "application/x-www-form-urlencoded";
-// std::string query_string = "foo=2&bar=qwerty";
-// std::string remote_ident_pwd = "123456";
-// std::string remote_username = "student21";
-// _header.Method = "POST";
-// std::string script_name = "./cgi/cgi_tester"; //из конфига получить
-// _header.HTTP_Version = "HTTP/1.1";
-//_body.push_back("licenseID=string&content=string&/paramsXML=string");
-
-//headers
   std::map<std::string, std::string> env;
   env["PATH_INFO"] = uriBlocks.pathInfo;
   env["SERVER_NAME"] = server_config.listen;
-
   env["AUTH_TYPE"] = ws::stringFromMap(_headers.find("Authorization"), _headers.end());
   env["CONTENT_LENGTH"] = ws::intToStr(_content_len);
   env["GATEWAY_INTERFACE"] = "CGI/1.1";
@@ -172,7 +156,12 @@ int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks)
   env["SERVER_PROTOCOL"] = _http_version;
   env["SERVER_SOFTWARE"] = PROGRAMM_NAME;
 
-  //как будет готов парсер реквестов добавить еще все хедеры из запроса в формате HTTP_NAME
+  std::map<std::string, std::string>::iterator it = _headers.begin();
+  std::map<std::string, std::string>::iterator en = _headers.end();
+  while (it != en) {
+    env["HTTP_" + ws::stringToCGIFormat(it->first)] = it->second;
+    ++it;
+  }
 
   //make env char**
   t_z_array zc_env;
