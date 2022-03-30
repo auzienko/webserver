@@ -20,7 +20,8 @@ class RequestManager {
   Request* at(int fd) const;
   int getRequest(int fd, t_server const& server_config);
   int sendResult(int fd);
-  std::vector<int> getAllRequestsFds(void) const; 
+  std::vector<int> getAllRequestsFds(void) const;
+  int getConnectionCount(void) const;
 };
 
 #endif

@@ -9,11 +9,13 @@ RequestManager::~RequestManager() {
 void RequestManager::add(int fd) {
   Request* tmp = new Request(this, fd);
   _list.insert(std::pair<int, Request*>(fd, tmp));
+  std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🟢 NEW FD : " << fd << std::endl;
 }
 
 void RequestManager::add(int fd, int parentFd) {
   Request* tmp = new Request(this, fd, parentFd);
   _list.insert(std::pair<int, Request*>(fd, tmp));
+  std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🟢 NEW FD : " << fd << std::endl;
 }
 
 void RequestManager::remove(int fd) {
@@ -22,6 +24,10 @@ void RequestManager::remove(int fd) {
   if (it != _list.end()) {
     delete (*it).second;
     _list.erase(it);
+    close(fd);
+    std::cout
+        << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🔴 CLOSE FD : "
+        << fd << std::endl;
   }
 }
 
@@ -61,3 +67,5 @@ std::vector<int> RequestManager::getAllRequestsFds(void) const {
   }
   return result;
 }
+
+int RequestManager::getConnectionCount(void) const { return _list.size(); }

@@ -1,36 +1,21 @@
 #include "../../includes/classes/Webserver.hpp"
 
 Webserver::Webserver(t_server &src, int maxConnection)
-    : _connectionCount(0), _maxConnection(maxConnection), _serverConfig(src) {
+    : _maxConnection(maxConnection), _serverConfig(src) {
   _rm = new RequestManager();
 }
 
 Webserver::~Webserver() { delete _rm; }
 
-int const& Webserver::getClientsCount(void) const { return _connectionCount; }
-
-void Webserver::plusConnection(void) {
-  if (_connectionCount < _maxConnection) ++_connectionCount;
-}
-
-void Webserver::minusConnection(void) {
-  if (_connectionCount != 0) --_connectionCount;
-}
+int Webserver::getClientsCount(void) const { return _rm->getConnectionCount(); }
 
 void Webserver::addConnection(int fd) {
-  plusConnection();
   _rm->add(fd);
-  std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> NEW CONNECTION : " << fd << std::endl;
 }
 
 void Webserver::closeConnection(int fd) {
   if (_rm->isExist(fd)) {
-    close(fd);
-    minusConnection();
     _rm->remove(fd);
-    std::cout
-        << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> CLOSE CONNECTION : "
-        << fd << std::endl;
   }
 }
 
@@ -96,7 +81,7 @@ int Webserver::readHandler(int fd) {
       //добавить обработчик
       exit(EXIT_FAILURE);
     }
-    if (_connectionCount < _maxConnection) {
+    if (_rm->getConnectionCount() < _maxConnection) {
       fcntl(new_sock, F_SETFL, O_NONBLOCK);
       addConnection(new_sock);
     } else {

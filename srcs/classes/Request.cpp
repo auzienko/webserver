@@ -34,19 +34,19 @@ int Request::_RequestHandler(t_server const& server_config) {
   {
     std::cerr << ex.what() << std::endl;
   }
-  _MakeResponseBody(server_config, cur);
-  _MakeResponseHeaders(cur);
-  _AssembleRespose();
+  if (_MakeResponseBody(server_config, cur) == 0 &&
+      _MakeResponseHeaders(cur) == 0)
+    _AssembleRespose();
   return 0;
 }
 
 int Request::_MakeResponseBody(t_server const& server_config, t_uriInfo &cur) {
   _responseBody.clear();
 
-  if (cur.isCgi)
+  if (cur.isCgi) {
     _MakeCgiRequest(server_config, cur);
-  else
-  {
+    return 1;
+  } else {
     if (!cur.loc)
       throw std::logic_error("Cannt find location");
     else if (cur.loc->autoindex)
@@ -197,7 +197,7 @@ int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks)
   z_array_null_terminate(&zc_cgi_path);
 
   // RUN cgi
-  std::cout << "CGI RUN:\n";
+  std::cout << "~~~ CGI REQUEST\n";
 
   pid_t pid;
   int status;
@@ -239,46 +239,49 @@ int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks)
   z_array_free(&zc_env);
   z_array_free(&zc_cgi_path);
 
-  waitpid(pid, &status, 0);
-  if (WIFEXITED(status)) {
-    close(fd_input[1]);
-    close(fd_output[0]);
-    return -1;
-  }
-
   // if you need to write something to cgi - use fd_input[1]
-  // if you need to read something to cgi - use fd_output[0]
+  // if you need to read something from cgi - use fd_output[0]
 
-  // test print for cgi response fd_output[0]
-  char buff[2000];
-  int r;
-  while (1) {
-    r = read(fd_output[0], buff, 2000);
-    if (r <= 0) break;
-    write(2, buff, r);
-  }
-  printf("\n");
-  ////////////////
-
+  //удалить это тестовое боди по готовности парсера
+  _body = "foo=bar";
+  ///
+  _rm->add(fd_output[0], _fd);
   _rm->add(fd_input[1]);
+  if (!_body.empty())
+    _rm->at(fd_input[1])->makeResponseFromString(_body);
+  else
+    _rm->at(fd_input[1])->makeResponseFromString("");
   _rm->at(fd_input[1])->setStatus(READY_TO_SEND);
-  if (!_body.empty()) _rm->at(fd_input[1])->makeResponseFromString(_body);
-  _rm->add(fd_output[0]);
 
-  // close(fd_input[1]);
-  // close(fd_output[0]);
+
+   // test print for cgi response fd_output[0]
+  // std::cout << "cgi re";
+  // char buff[2000];
+  // int r;
+  // while (1) {
+  //   r = read(fd_output[0], buff, 2000);
+  //   if (r <= 0) break;
+  //   write(2, buff, r);
+  // }
+  // printf("\n");
+  ////////////////
 
   return 0;
 }
 
 int Request::sendResult(void) {
+  if (getStatus() != READY_TO_SEND) return -1;
   setStatus(SENDING);
 
-  int nbytes, ret;
+  int nbytes, ret, sendfd;
   ret = 0;
-  nbytes = send(_fd, _response.str().c_str(), _response.str().length(), 0);
+
+  sendfd = _parentFd == -1 ? _fd : _parentFd;
+  std::cout <<  _response.str().c_str() << std::endl;
+  //nbytes = send(sendfd, _response.str().c_str(), _response.str().length(), 0);
+  nbytes = write(sendfd, _response.str().c_str(), _response.str().length());
   if (nbytes < 0) ret = -1;
-  printf("Server: write return %d ", ret);
+  printf("Server: write return %d, connection %d ", ret, sendfd);
   setStatus(DONE);
   return ret;
 }
@@ -420,8 +423,6 @@ void Request::reset(){
   _body.clear();
   status = START;
   _code_status = 0;
-  _parentFd = -1;
-  _rm = nullptr;
 }
 
 void Request::parse(char *buf, int nbytes, size_t i){
@@ -443,35 +444,55 @@ void Request::parse(char *buf, int nbytes, size_t i){
 }
 
 void Request::print(){
-    cout << "HTTP REQUEST\n" << _method << " " << _request_uri << " " << _http_version << endl;
-    for (map<string, string>::iterator it = _headers.begin(); it != _headers.end(); ++it){
+  if (_parentFd == -1) {
+    cout << "HTTP REQUEST (fd: " << _fd << ")\n"
+         << _method << " " << _request_uri << " " << _http_version << endl;
+    for (map<string, string>::iterator it = _headers.begin();
+         it != _headers.end(); ++it) {
       cout << (*it).first << ":" << (*it).second << endl;
     }
+  } else {
+    cout << "HTTP REQUEST CGI\n";
+  }
 }
 
-
 int Request::getRequest(t_server const& server_config) {
+  if (getStatus() < READY_TO_HANDLE)
+    setStatus(READING);
+  else
+    return 0;
   size_t i = server_config.client_max_body_size;
   int nbytes;
   char buf[DEFAULT_BUFLEN];
   int fd = _fd;
   while (1){
-    nbytes = recv(fd, &buf, DEFAULT_BUFLEN, 0);
+    nbytes = read(fd, &buf, DEFAULT_BUFLEN);
     if (nbytes == -1)
       break;
     if (nbytes < 0) {
      ws::printE("~~ 😞 Server: read failture", "\n");
      return -1;
     } else if (nbytes == 0) {
-      ws::print("reading no data", "\n");
+      std::cout << "fd: " << _fd << " reading no data\n";
       return 0;
+    } else {
+      if (_parentFd != -1) {
+        //тестовый вывод cgi
+        printf("cgi request body");
+        write(2, buf, nbytes);
+        _rm->remove(fd);
+        return 0;
+      } else {
+        //тут надо подумать, почему только buf берется? (Рита, надо подумать
+        //тут)
+        parse(buf, nbytes, i);
+        print();
+        //проставить этот статус после успешного парсинга
+        setStatus(READY_TO_HANDLE);
+        _RequestHandler(server_config);
+      }
     }
-    else
-     parse(buf, nbytes, i);
   }
-  print();
-  setStatus(READY_TO_HANDLE);
-  if (getStatus() == READY_TO_HANDLE) _RequestHandler(server_config);
   return 0;
   }
 

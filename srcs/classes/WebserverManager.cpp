@@ -46,7 +46,7 @@ int WebserverManager::start(void) {
     read_fds = all_fds;
     write_fds = all_fds;
    // std::cout << "\n😴 Waiting on select()...\n";
-    select_result = select(_maxFd + 1, &read_fds, &write_fds, 0, NULL);
+    select_result = select(_maxFd + 1, &read_fds, &write_fds, 0, 0);
     if (select_result < 0) {
       ws::printE(ERROR_SELECT, "\n");
       //добавить обработчик для < 0 + if select == 0 -> timeout;

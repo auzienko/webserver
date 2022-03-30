@@ -30,5 +30,5 @@ server test2 {
     index index.html
     upload /Downloads
   }
-  cgi .test /Users/wgaunt/Desktop/ws/my-cgi.test
+  cgi .test /Users/aleksandruzienko/Documents/21projects/webserver/cgi/my_cgi.test
 }

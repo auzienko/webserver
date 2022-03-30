@@ -9,7 +9,6 @@ class RequestManager;
 
 class Webserver {
  private:
-  int _connectionCount;
   int _maxConnection;
   int _listenSocket;
   RequestManager* _rm;
@@ -19,10 +18,8 @@ class Webserver {
   Webserver(t_server &src, int maxConnection = MAX_CLIENTS);
   ~Webserver(void);
   int run(void);
-  int const& getClientsCount(void) const;
+  int getClientsCount(void) const;
   int createServerListenSocket(void);
-  void plusConnection(void);
-  void minusConnection(void);
   void addConnection(int fd);
   void closeConnection(int index);
   void makeActiveFdsSet(fd_set* fds, int* max_fd) const;
