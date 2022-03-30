@@ -2,12 +2,20 @@
 
 using namespace std;
 
-Request::Request(void) : _fd(-1), _status(NEW) {  reset();
+Request::Request(void) : _fd(-1), _parentFd(-1), _status(NEW), _rm(nullptr) {
+  reset();
 }
 
 Request::~Request(void) {}
 
-Request::Request(int const& fd) : _fd(fd), _status(NEW) {  reset(); }
+Request::Request(RequestManager* rm, int const& fd)
+    : _fd(fd), _parentFd(-1), _status(NEW), _rm(rm) {
+  reset();
+}
+Request::Request(RequestManager* rm, int const& fd, int const& parentFd)
+    : _fd(fd), _parentFd(parentFd), _status(NEW), _rm(rm) {
+  reset();
+}
 
 int Request::getFd(void) const { return _fd; }
 
@@ -179,9 +187,9 @@ int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks)
   }
   z_array_null_terminate(&zc_env);
 
-  for (size_t i = 0; i < zc_env.size; ++i){
-   printf("%s \n",zc_env.elem[i]);
-  }
+  // for (size_t i = 0; i < zc_env.size; ++i){
+  //  printf("%s \n",zc_env.elem[i]);
+  // }
 
   t_z_array zc_cgi_path;
   z_array_init(&zc_cgi_path);
@@ -226,10 +234,17 @@ int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks)
     exit(status);
   }
 
-  // if (waitpid(pid, &status, WUNTRACED) < 0) {
-  // }
   close(fd_input[0]);
   close(fd_output[1]);
+  z_array_free(&zc_env);
+  z_array_free(&zc_cgi_path);
+
+  waitpid(pid, &status, 0);
+  if (WIFEXITED(status)) {
+    close(fd_input[1]);
+    close(fd_output[0]);
+    return -1;
+  }
 
   // if you need to write something to cgi - use fd_input[1]
   // if you need to read something to cgi - use fd_output[0]
@@ -245,10 +260,14 @@ int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks)
   printf("\n");
   ////////////////
 
-  close(fd_input[1]);
-  close(fd_output[0]);
-  z_array_free(&zc_env);
-  z_array_free(&zc_cgi_path);
+  _rm->add(fd_input[1]);
+  _rm->at(fd_input[1])->setStatus(READY_TO_SEND);
+  if (!_body.empty()) _rm->at(fd_input[1])->makeResponseFromString(_body);
+  _rm->add(fd_output[0]);
+
+  // close(fd_input[1]);
+  // close(fd_output[0]);
+
   return 0;
 }
 
@@ -401,6 +420,8 @@ void Request::reset(){
   _body.clear();
   status = START;
   _code_status = 0;
+  _parentFd = -1;
+  _rm = nullptr;
 }
 
 void Request::parse(char *buf, int nbytes, size_t i){
@@ -452,4 +473,9 @@ int Request::getRequest(t_server const& server_config) {
   setStatus(READY_TO_HANDLE);
   if (getStatus() == READY_TO_HANDLE) _RequestHandler(server_config);
   return 0;
+  }
+
+  int Request::makeResponseFromString(std::string str) {
+    _response << str;
+    return 0;
   }

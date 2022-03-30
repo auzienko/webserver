@@ -96,7 +96,7 @@ fd_set WebserverManager::_GetAllSocketsFds(void) {
   std::vector<Webserver *>::iterator i = _webservers.begin();
   std::vector<Webserver *>::iterator e = _webservers.end();
   while (i != e) {
-    (*i)->appendSocketsToFdsSet(&result, &_maxFd);
+    (*i)->makeActiveFdsSet(&result, &_maxFd);
     ++i;
   }
   return result;
