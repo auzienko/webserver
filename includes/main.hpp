@@ -1,6 +1,7 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -21,6 +22,7 @@
 #include "default_settings.hpp"
 #include "errors.hpp"
 #include "messages.hpp"
+#include "z_array.hpp"
 #include "http_status_codes.hpp"
 #include "structs.hpp"
 #include "./classes/Config.hpp"
@@ -39,6 +41,14 @@ namespace ws {
 void printE(std::string const& msg, std::string const& divider);
 void print(std::string const& msg, std::string const& divider);
 std::pair<bool, std::vector<std::string> > filesReadDirectory(std::string const& path);
+std::string intToStr(int i);
+std::string stringTail(std::string const& str, char c);
+std::string stringReverse(std::string& str);
+std::string stringUrlDecode(std::string const& str);
+std::string socketGetIP(int const& fd);
+std::string stringFromMap(std::map<std::string, std::string>::const_iterator it,
+    std::map<std::string, std::string>::const_iterator end);
+std::string stringToCGIFormat(std::string const& str);
 }  // namespace ws
 
 #endif

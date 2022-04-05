@@ -2,12 +2,20 @@
 
 using namespace std;
 
-Request::Request(void) : _fd(-1), _status(NEW) {  reset();
+Request::Request(void) : _fd(-1), _parentFd(-1), _status(NEW), _rm(nullptr) {
+  reset();
 }
 
 Request::~Request(void) {}
 
-Request::Request(int const& fd) : _fd(fd), _status(NEW) {  reset(); }
+Request::Request(RequestManager* rm, int const& fd)
+    : _fd(fd), _parentFd(-1), _status(NEW), _rm(rm) {
+  reset();
+}
+Request::Request(RequestManager* rm, int const& fd, int const& parentFd)
+    : _fd(fd), _parentFd(parentFd), _status(NEW), _rm(rm) {
+  reset();
+}
 
 int Request::getFd(void) const { return _fd; }
 
@@ -16,43 +24,70 @@ int Request::getStatus(void) const { return _status; }
 void Request::setStatus(int status) { _status = status; }
 
 int Request::_RequestHandler(t_server const& server_config) {
-  _MakeResponseBody(server_config);
-  _MakeResponseHeaders();
-  _AssembleRespose();
+  t_uriInfo cur;
+
+  try
+  {
+    cur = ConfigUtils::parseURI(_request_uri, server_config);
+  }
+  catch (std::exception &ex)
+  {
+    std::cerr << ex.what() << std::endl;
+  }
+  if (_MakeResponseBody(server_config, cur) == 0 &&
+      _MakeResponseHeaders(cur) == 0)
+    _AssembleRespose();
   return 0;
 }
 
-int Request::_MakeResponseBody(t_server const& server_config) {
+int Request::_MakeResponseBody(t_server const& server_config, t_uriInfo &cur) {
   _responseBody.clear();
-  std::pair<std::string, t_location const*> p =
-      ConfigUtils::getLocationSettings(server_config, _request_uri);
-  if (p.second == nullptr) return -1;
 
-  // autoindex - сейчас игнорим индекс настройку если есть автоиндекс
-if (_request_uri.at(_request_uri.length() - 1) == '/' && p.second->autoindex){
-    std::cout << "🖖 Autoindex hadler\n";
-    _MakeAutoIndex(_request_uri, p.second->root);
-    return 0;
+  if (cur.isCgi) {
+    _MakeCgiRequest(server_config, cur);
+    return 1;
+  } else {
+    if (!cur.loc)
+      throw std::logic_error("Cannt find location");
+    else if (cur.loc->autoindex)
+      _MakeAutoIndex(cur.loc->path, cur.loc->root);
+    else
+      _MakeStdRequest(cur.uri);
+  }
+//cgi headers
+// _MakeCgiRequest(server_config);
+
+
+
+// //// заглушка на ГЕТ
+//   _header.Method = "GET";
+
+//   std::pair<std::string, t_location const*> p =
+//       ConfigUtils::getLocationSettings(server_config, _header.Request_URI);
+//   if (p.second == nullptr) return -1;
+
+  return 0;
 }
 
-  std::string url = p.second->root + p.first;
+int Request::_MakeStdRequest(std::string uri) {       // Заглушка из прежней версии
   if (_method == "GET") {
-    std::ifstream tmp(url, std::ifstream::binary);
+    std::ifstream tmp(uri, std::ifstream::binary);
     if (!tmp.is_open()) {
-      std::cout << "Can't GET file " << _request_uri << std::endl;
+      std::cout << "Can't GET file " << uri << std::endl;
       return 404;
     }
     _responseBody << tmp.rdbuf();
     tmp.close();
+  } else if (_method== "POST") {
   }
   return 0;
 }
 
-int Request::_MakeResponseHeaders(void) {
+int Request::_MakeResponseHeaders(t_uriInfo &cur) {
   _responseHeader.clear();
   _responseHeader << "HTTP/1.1 200 OK\r\n";
   _responseHeader << "Connection: keep-alive\r\n";
-  _responseHeader << "Content-type: " << MimeTypes::getMimeType(_request_uri) << "\r\n";
+  _responseHeader << "Content-type: " << MimeTypes::getMimeType(cur.uri) << "\r\n";
   return 0;
 }
 
@@ -107,14 +142,146 @@ int Request::_MakeAutoIndex(std::string const& show_path,
   return 0;
 }
 
+//https://datatracker.ietf.org/doc/html/rfc3875
+//https://firststeps.ru/cgi/cgi1.html
+int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks){
+  std::map<std::string, std::string> env;
+  env["PATH_INFO"] = uriBlocks.pathInfo;
+  env["SERVER_NAME"] = server_config.listen;
+  env["AUTH_TYPE"] = ws::stringFromMap(_headers.find("Authorization"), _headers.end());
+  env["CONTENT_LENGTH"] = ws::intToStr(_content_len);
+  env["GATEWAY_INTERFACE"] = "CGI/1.1";
+  env["PATH_TRANSLATED"] = uriBlocks.uri;
+  env["CONTENT_TYPE"] =  ws::stringFromMap(_headers.find("Content-Type"), _headers.end());
+  env["QUERY_STRING"] = _query;
+  env["REMOTE_ADDR"] = ws::socketGetIP(_fd);
+  //env["REMOTE_HOST"] = "empty";
+  // env["REMOTE_IDENT"] =  remote_ident_pwd;
+  // env["REMOTE_USER"] = remote_username;
+  env["REQUEST_METHOD"] = _method;
+  env["SCRIPT_NAME"] = ws::stringFromMap(server_config.cgi.find("." + ws::stringTail(uriBlocks.uri, '.')), _headers.end());
+  env["SERVER_PORT"] = ws::intToStr(server_config.port);
+  env["SERVER_PROTOCOL"] = _http_version;
+  env["SERVER_SOFTWARE"] = PROGRAMM_NAME;
+
+  std::map<std::string, std::string>::iterator it = _headers.begin();
+  std::map<std::string, std::string>::iterator en = _headers.end();
+  while (it != en) {
+    env["HTTP_" + ws::stringToCGIFormat(it->first)] = it->second;
+    ++it;
+  }
+
+  //make env char**
+  t_z_array zc_env;
+  z_array_init(&zc_env);
+  std::map<std::string, std::string>::iterator i = env.begin();
+  std::map<std::string, std::string>::iterator e = env.end();
+  std::string tmp;
+  while( i != e){
+    if ((*i).second.empty())
+      tmp = (*i).first;
+    else
+      tmp = (*i).first + '=' + (*i).second;
+    z_array_append(&zc_env, (char*)tmp.c_str());
+    ++i;
+  }
+  z_array_null_terminate(&zc_env);
+
+  // for (size_t i = 0; i < zc_env.size; ++i){
+  //  printf("%s \n",zc_env.elem[i]);
+  // }
+
+  t_z_array zc_cgi_path;
+  z_array_init(&zc_cgi_path);
+  z_array_append(&zc_cgi_path, (char*)env["SCRIPT_NAME"].c_str());
+  z_array_null_terminate(&zc_cgi_path);
+
+  // RUN cgi
+  std::cout << "~~~ CGI REQUEST\n";
+
+  pid_t pid;
+  int status;
+  int fd_input[2];
+  int fd_output[2];
+
+  if (pipe(fd_input) < 0) {
+    ws::printE(ERROR_CGI_PIPE, "\n");
+    return -1;
+  }
+  if (pipe(fd_output) < 0) {
+    ws::printE(ERROR_CGI_PIPE, "\n");
+    close(fd_input[0]);
+    close(fd_input[1]);
+    return -1;
+  }
+  pid = fork();
+  if (pid < 0) {
+    ws::printE(ERROR_CGI_EXECVE_FORK, "\n");
+    return -1;
+  }
+  if (pid == 0) {
+    if (dup2(fd_input[0], STDIN_FILENO) < 0 ||
+        dup2(fd_output[1], STDOUT_FILENO) < 0) {
+      ws::printE(ERROR_CGI_DUP2, "\n");
+      exit(-1);
+    }
+    close(fd_input[0]);
+    close(fd_input[1]);
+    close(fd_output[0]);
+    close(fd_output[1]);
+    status = execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
+    ws::printE(ERROR_CGI_EXECVE, "\n");
+    exit(status);
+  }
+
+  close(fd_input[0]);
+  close(fd_output[1]);
+  z_array_free(&zc_env);
+  z_array_free(&zc_cgi_path);
+
+  // if you need to write something to cgi - use fd_input[1]
+  // if you need to read something from cgi - use fd_output[0]
+
+  //удалить это тестовое боди по готовности парсера
+  _body = "foo=bar";
+  ///
+  _rm->add(fd_output[0], _fd);
+  _rm->add(fd_input[1]);
+  if (!_body.empty())
+    _rm->at(fd_input[1])->makeResponseFromString(_body);
+  else
+    _rm->at(fd_input[1])->makeResponseFromString("");
+  _rm->at(fd_input[1])->setStatus(READY_TO_SEND);
+
+
+   // test print for cgi response fd_output[0]
+  // std::cout << "cgi re";
+  // char buff[2000];
+  // int r;
+  // while (1) {
+  //   r = read(fd_output[0], buff, 2000);
+  //   if (r <= 0) break;
+  //   write(2, buff, r);
+  // }
+  // printf("\n");
+  ////////////////
+
+  return 0;
+}
+
 int Request::sendResult(void) {
+  if (getStatus() != READY_TO_SEND) return -1;
   setStatus(SENDING);
 
-  int nbytes, ret;
+  int nbytes, ret, sendfd;
   ret = 0;
-  nbytes = send(_fd, _response.str().c_str(), _response.str().length(), 0);
+
+  sendfd = _parentFd == -1 ? _fd : _parentFd;
+  std::cout <<  _response.str().c_str() << std::endl;
+  //nbytes = send(sendfd, _response.str().c_str(), _response.str().length(), 0);
+  nbytes = write(sendfd, _response.str().c_str(), _response.str().length());
   if (nbytes < 0) ret = -1;
-  printf("Server: write return %d ", ret);
+  printf("Server: write return %d, connection %d ", ret, sendfd);
   setStatus(DONE);
   return ret;
 }
@@ -283,34 +450,58 @@ void Request::parse(char *buf, int nbytes, size_t i){
 }
 
 void Request::print(){
-    cout << "HTTP REQUEST\n" << _method << " " << _request_uri << " " << _http_version << endl;
-    for (map<string, string>::iterator it = _headers.begin(); it != _headers.end(); ++it){
+  if (_parentFd == -1) {
+    cout << "HTTP REQUEST (fd: " << _fd << ")\n"
+         << _method << " " << _request_uri << " " << _http_version << endl;
+    for (map<string, string>::iterator it = _headers.begin();
+         it != _headers.end(); ++it) {
       cout << (*it).first << ":" << (*it).second << endl;
     }
     cout << _body << endl;
+  }
 }
 
 int Request::getRequest(t_server const& server_config) {
+  if (getStatus() < READY_TO_HANDLE)
+    setStatus(READING);
+  else
+    return 0;
   size_t i = server_config.client_max_body_size;
   int nbytes;
   char buf[DEFAULT_BUFLEN];
   int fd = _fd;
   while (1){
-    nbytes = recv(fd, &buf, DEFAULT_BUFLEN, 0);
-    if (nbytes == -1 && errno == 35)
+    nbytes = read(fd, &buf, DEFAULT_BUFLEN);
+    if (nbytes == -1)
       break;
     if (nbytes < 0) {
      ws::printE("~~ 😞 Server: read failture", "\n");
      return -1;
     } else if (nbytes == 0) {
-      ws::print("reading no data", "\n");
+      std::cout << "fd: " << _fd << " reading no data\n";
       return 0;
+    } else {
+      if (_parentFd != -1) {
+        //тестовый вывод cgi
+        printf("cgi request body");
+        write(2, buf, nbytes);
+        _rm->remove(fd);
+        return 0;
+      } else {
+        //тут надо подумать, почему только buf берется? (Рита, надо подумать
+        //тут)
+        parse(buf, nbytes, i);
+        print();
+        //проставить этот статус после успешного парсинга
+        setStatus(READY_TO_HANDLE);
+        _RequestHandler(server_config);
+      }
     }
-    else
-     parse(buf, nbytes, i);
   }
-  print();
-  setStatus(READY_TO_HANDLE);
-  if (getStatus() == READY_TO_HANDLE) _RequestHandler(server_config);
   return 0;
+  }
+
+  int Request::makeResponseFromString(std::string str) {
+    _response << str;
+    return 0;
   }

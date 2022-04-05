@@ -25,6 +25,7 @@ class Config {
   Config(std::string const& file_name);
   ~Config(void);
 
+  void      close(void);
   int       checkAndParse(void);
   t_server  &get_server(void);
 };

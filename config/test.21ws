@@ -1,14 +1,20 @@
+#fd, return, cgi, index, autoindex
 server test {
   127.0.0.1:8081
   error_page 404 ../../some.html
   limit_size 1000
   location / {
-    methods GET POST LOL
     root ./www-static-site/
-    autoindex off
-    index index.html
-    upload /Downloads
   }
+  location /index.html {
+    root ./www-static-site/index.html
+  }
+  cgi .test /Users/wgaunt/Desktop/webserver/cgi/my_cgi.test
+}
+server test2 {
+  127.0.0.1:4242
+  error_page 404 ../../some.html
+  limit_size 1000
   location /usr/ {
     methods GET POST LOL
     root /Users/zcris/Downloads/
@@ -17,12 +23,6 @@ server test {
     index index.html
     upload /Downloads
   }
-  cgi .php /Some/way/to/php-cgi
-}
-server test2 {
-  127.0.0.1:4242
-  error_page 404 ../../some.html
-  limit_size 1000
   location / {
     methods GET POST LOL
     root ./www-static-site/
@@ -30,13 +30,5 @@ server test2 {
     index index.html
     upload /Downloads
   }
-  location /usr/ {
-    methods GET POST LOL
-    root /Users/zcris/Downloads/
-    autoindex on
-    limit_size 1000
-    index index.html
-    upload /Downloads
-  }
-  cgi .php /Some/way/to/php-cgi
+  cgi .test /Users/aleksandruzienko/Documents/21projects/webserver/cgi/my_cgi.test
 }
