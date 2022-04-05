@@ -18,4 +18,5 @@
 #define ERROR_CGI_EXECVE "Can't execute CGI"
 #define ERROR_CGI_PIPE "Can't create PIPE"
 #define ERROR_CGI_DUP2 "Can't clone descriptor (dup2)"
+#define ERROR_CGI_WAITPID "Can't execute CGI (waitpid)"
 #endif

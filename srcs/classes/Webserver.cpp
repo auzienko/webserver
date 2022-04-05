@@ -1,38 +1,22 @@
 #include "../../includes/classes/Webserver.hpp"
 
 Webserver::Webserver(t_server &src, int maxConnection)
-    : _connectionCount(0), _maxConnection(maxConnection), _serverConfig(src) {
+    : _maxConnection(maxConnection), _serverConfig(src) {
   _rm = new RequestManager();
 }
 
 Webserver::~Webserver() { delete _rm; }
 
-int const& Webserver::getClientsCount(void) const { return _connectionCount; }
-
-void Webserver::plusConnection(void) {
-  if (_connectionCount < _maxConnection) ++_connectionCount;
-}
-
-void Webserver::minusConnection(void) {
-  if (_connectionCount != 0) --_connectionCount;
-}
+int Webserver::getClientsCount(void) const { return _rm->getConnectionCount(); }
 
 void Webserver::addConnection(int fd) {
-  _connections.insert(fd);
-  plusConnection();
   _rm->add(fd);
-  std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> NEW CONNECTION : " << fd << std::endl;
 }
 
 void Webserver::closeConnection(int fd) {
-  std::set<int>::iterator i = _connections.find(fd);
-  if (i != _connections.end()) {
-    close(fd);
-    _connections.erase(i);
-    minusConnection();
+  if (_rm->isExist(fd)) {
+    _rm->remove(fd);
   }
-  _rm->remove(fd);
-  std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> CLOSE CONNECTION : " << fd << std::endl;
 }
 
 int Webserver::createServerListenSocket(void) {
@@ -85,7 +69,7 @@ int Webserver::createServerListenSocket(void) {
 }
 
 int Webserver::readHandler(int fd) {
-  if (fd != _listenSocket && _connections.find(fd) == _connections.end())
+  if (fd != _listenSocket && _rm->isExist(fd) == 0)
     return -1;
   if (fd == _listenSocket) {
   
@@ -97,7 +81,7 @@ int Webserver::readHandler(int fd) {
       //добавить обработчик
       exit(EXIT_FAILURE);
     }
-    if (_connectionCount < _maxConnection) {
+    if (_rm->getConnectionCount() < _maxConnection) {
       fcntl(new_sock, F_SETFL, O_NONBLOCK);
       addConnection(new_sock);
     } else {
@@ -115,7 +99,7 @@ int Webserver::readHandler(int fd) {
 
 int Webserver::writeHandler(int fd) {
   if (fd == _listenSocket) return 0;
-  if (_connections.find(fd) == _connections.end()) return -1;
+  if (_rm->isExist(fd) == 0) return -1;
   if (_rm->at(fd) == nullptr || _rm->at(fd)->getStatus() != READY_TO_SEND)
     return 0;
   ws::print(MESSAGE_TRY_SEND_DATA, " ");
@@ -142,11 +126,12 @@ int Webserver::run(void) {
   return 0;
 }
 
-void Webserver::appendSocketsToFdsSet(fd_set* fds, int* max_fd) const {
+void Webserver::makeActiveFdsSet(fd_set* fds, int* max_fd) const {
   FD_SET(_listenSocket, fds);
   *max_fd = _listenSocket > *max_fd ? _listenSocket : *max_fd;
-  std::set<int>::const_iterator i = _connections.begin();
-  std::set<int>::const_iterator e = _connections.end();
+  std::vector<int> tmp = _rm->getAllRequestsFds();
+  std::vector<int>::const_iterator i = tmp.begin();
+  std::vector<int>::const_iterator e = tmp.end();
   while (i != e) {
     FD_SET(*i, fds);
     *max_fd = *i > *max_fd ? *i : *max_fd;
