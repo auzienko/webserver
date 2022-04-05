@@ -55,8 +55,8 @@ class Request {
     string  _http_version;
     string  _query; 
     map<string, string> _headers;
-    int     _content_len;
-    int     _client_max_body_size; //from config
+    unsigned int     _content_len;
+    unsigned int     _client_max_body_size; //from config
     bool    _chunked;
     string  _body;
     int     status;
@@ -68,8 +68,8 @@ public:
     void parseHeaders(string headers);
     // void parseRequest(string& buf);
     void parseFirstLine(string& firstLine);
-    // void getChunked(string& str);
-    // void getSimple(string& str);
+    void getChunked(string& str);
+    void getSimple(string& str);
     void print();
     void reset(); 
     void parse(char *buf, int nbytes, size_t i);

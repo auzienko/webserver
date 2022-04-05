@@ -158,41 +158,40 @@ int Request::sendResult(void) {
   // <?xml version="1.0" encoding="utf-8"?>
   // <string xmlns="http://clearforest.com/">string</string>
 
-// void Request::getSimple(string& body){
-//     if (_content_len > _client_max_body_size || _body.size() + body.size() > _client_max_body_size)
-//         throw WebException(CODE_413);
-//     _body.append(body);
-//     if (_body.length() == _content_len)
-//         _status = END;
-// }
+void Request::getSimple(string& body){
+    if (_content_len > _client_max_body_size || _body.size() + body.size() > _client_max_body_size)
+        throw logic_error(CODE_413);
+    _body.append(body);
+    body.clear();
+    if (_body.length() == _content_len)
+        status = END;
+}
 
-// void Request::getChunked(string& body){
-//     int chunkSize;
+void Request::getChunked(string& body){
+    if (!body.size())
+        status = END;
     
-//     if (!body.size())
-//         _status = END;
-//     size_t i = body.find(CRLF);
-//     if (i == strnpos)
-//         throw WebException(CODE_400); //?
-//     if (i != strnpos){
-//         stringstream ss;
-//         ss << std::hex << body.substr(0, i);
-//         ss >> chunkSize;
-//         if (!chunkSize)
-//             _status = END;
-//     }
-// }
-
-// void Request::parseBody(std::string& body){
-//     if (!_chunked){
-//         if (_content_len > _client_max_body_size || _body.size() + body.size() > _client_max_body_size)
-//             throw WebException(CODE_413);
-//         _body.append(body);
-//         return ;
-//     }
-// }
-
-
+    while (status != END){
+        int chunkSize;
+        size_t i = body.find(CRLF);
+        if (i != strnpos){
+            stringstream ss;
+            ss << std::hex << body.substr(0, i);
+            ss >> chunkSize;
+            body.erase(0, i + 2);
+            if (!chunkSize){
+                status = END;
+                return ;
+            }
+            for (int j = 0; j < chunkSize; j++){
+                    _body.push_back(body[j]);
+            }
+            body.erase(0, chunkSize + 2);
+            i = body.find(CRLF);
+        }
+    }
+    //status = END;
+}
 
  void Request::parseFirstLine(string& firstLine){
      size_t j = firstLine.find(CRLF);
@@ -239,7 +238,7 @@ void Request::parseHeaders(string head){
     key = head.substr(0, i);
     value = head.substr(i + 1);
     _headers.insert(make_pair(key, value));
-    if (key == "Content-lenght")
+    if (key == "Content-Length")
         _content_len = stoi(value);
     if (key == "Transfer-Encoding" && value == " chunked")
         _chunked = true;
@@ -274,6 +273,13 @@ void Request::parse(char *buf, int nbytes, size_t i){
          i = tmp.find(CRLF);
      }
   }
+  if (status == BODY)
+  {
+    if (_chunked)
+        getChunked(tmp);
+    if (_content_len)
+        getSimple(tmp);
+  }
 }
 
 void Request::print(){
@@ -281,8 +287,8 @@ void Request::print(){
     for (map<string, string>::iterator it = _headers.begin(); it != _headers.end(); ++it){
       cout << (*it).first << ":" << (*it).second << endl;
     }
+    cout << _body << endl;
 }
-
 
 int Request::getRequest(t_server const& server_config) {
   size_t i = server_config.client_max_body_size;
