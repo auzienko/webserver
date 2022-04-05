@@ -9,7 +9,7 @@ server test {
   location /index.html {
     root ./www-static-site/index.html
   }
-  cgi .test /Users/wgaunt/Desktop/ws/cgi/cgi_tester.test
+  cgi .test /Users/wgaunt/Desktop/webserver/cgi/my_cgi.test
 }
 server test2 {
   127.0.0.1:4242

@@ -59,39 +59,58 @@ static bool isCGI(std::vector<std::string> dirs, std::map<std::string, std::stri
 {
   std::map<std::string, std::string>::const_iterator  it;
   std::map<std::string, std::string>::const_iterator  end = cgi.cend();
-  bool isMiss = false, isPass = false;
-  std::string path(".");
-
-  for (size_t i = 0; !isMiss && !isPass; ++i)
+  size_t  pPos;
+  std::string file(dirs.back());
+  
+  if ((pPos = file.find('.')) != std::string::npos)
   {
-    isMiss = true;
-    for (it = cgi.cbegin(); !isPass && it != end; ++it)
+    file.erase(0, pPos);
+    if ((it = cgi.find(file)) != end)
     {
-      if (it->first == path)
-        isPass = true;
-      else if (it->first.find(path) != std::string::npos)
-        isMiss = false;
-    }
-    if (dirs.empty() || isPass)
-      break;
-    if (path == ".")
-      path = dirs.front();
-    else
-      path = path + "/" + dirs.front();
-    dirs.erase(dirs.begin());
-  }
-  if (isPass)
-  {
-    res.uri = (--it)->second;
-    res.loc = NULL;
-    res.isCgi = true;
-    while (!dirs.empty())
-    {
-      res.pathInfo = res.pathInfo + "/" + dirs.front();
-      dirs.erase(dirs.begin());
+      res.uri = it->second;
+      res.loc = NULL;
+      res.isCgi = true;
+      while (!dirs.empty())
+      {
+        if (res.pathInfo.empty())
+          res.pathInfo = dirs.front();
+        else
+          res.pathInfo = res.pathInfo + "/" + dirs.front();
+        dirs.erase(dirs.begin());
+      }
+      return (true);
     }
   }
-  return (isPass);
+  return (false);
+  // for (size_t i = 0; !isMiss && !isPass; ++i)
+  // {
+  //   isMiss = true;
+  //   for (it = cgi.cbegin(); !isPass && it != end; ++it)
+  //   {
+  //     if (it->first == path)
+  //       isPass = true;
+  //     else if (it->first.find(path) != std::string::npos)
+  //       isMiss = false;
+  //   }
+  //   if (dirs.empty() || isPass)
+  //     break;
+  //   if (path == ".")
+  //     path = dirs.front();
+  //   else
+  //     path = path + "/" + dirs.front();
+  //   dirs.erase(dirs.begin());
+  // }
+  // if (isPass)
+  // {
+  //   res.uri = (--it)->second;
+  //   res.loc = NULL;
+  //   res.isCgi = true;
+  //   while (!dirs.empty())
+  //   {
+  //     res.pathInfo = res.pathInfo + "/" + dirs.front();
+  //     dirs.erase(dirs.begin());
+  //   }
+  // }
 }
 
 static void fillUri(std::string const &line, t_server const& server_config, t_uriInfo &res)
