@@ -7,6 +7,11 @@ Config::Config(std::string const& file_name) : _configFile(file_name), _debugLin
 
 Config::~Config(void) {}
 
+void	Config::close()
+{
+	_fileStream.close();
+}
+
 static void	skipWS(std::string &line)
 {
 	const char	*ptr = line.c_str();

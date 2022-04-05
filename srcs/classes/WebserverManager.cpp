@@ -16,6 +16,7 @@ WebserverManager::WebserverManager(std::string const &config_path)
       throw;
     }
   }
+  _config->close();
 }
 
 int WebserverManager::start(void) {
