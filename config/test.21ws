@@ -1,4 +1,4 @@
-#fd, return, cgi, index, autoindex
+#return, cgi, index, autoindex
 server test {
   127.0.0.1:8081
   error_page 404 ../../some.html

@@ -61,7 +61,13 @@ static bool isCGI(std::vector<std::string> dirs, std::map<std::string, std::stri
   std::map<std::string, std::string>::const_iterator  end = cgi.cend();
   size_t  pPos;
   std::string file(dirs.back());
-  
+  std::string pathInfo;
+
+  while (file.find('.') != std::string::npos)
+  {
+    pathInfo = '/' + file + pathInfo;
+    file = dirs.back();
+  }
   if ((pPos = file.find('.')) != std::string::npos)
   {
     file.erase(0, pPos);
@@ -70,14 +76,7 @@ static bool isCGI(std::vector<std::string> dirs, std::map<std::string, std::stri
       res.uri = it->second;
       res.loc = NULL;
       res.isCgi = true;
-      while (!dirs.empty())
-      {
-        if (res.pathInfo.empty())
-          res.pathInfo = dirs.front();
-        else
-          res.pathInfo = res.pathInfo + "/" + dirs.front();
-        dirs.erase(dirs.begin());
-      }
+      res.pathInfo = pathInfo;
       return (true);
     }
   }
