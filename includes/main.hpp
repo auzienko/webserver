@@ -26,6 +26,7 @@
 #include "z_array.hpp"
 #include "http_status_codes.hpp"
 #include "structs.hpp"
+#include "./classes/ATask.hpp"
 #include "./classes/Config.hpp"
 #include "./classes/Webserver.hpp"
 #include "./classes/WebserverManager.hpp"

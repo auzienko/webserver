@@ -31,3 +31,14 @@ void Connection::killTask(void) {
   delete _task;
   _task = nullptr;
 }
+
+int Connection::readData(t_server const& server_config) {
+  if (_task == nullptr) _task = new Request(this, _fd);
+  _task->getRequest(server_config);
+  return 0;
+}
+
+int Connection::sendData(void) {
+  if (_task->getStatus() == READY_TO_SEND) return _task->sendResult();
+  return 0;
+}

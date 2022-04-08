@@ -9,19 +9,15 @@ Request::Request(void) : _fd(-1), _parentFd(-1), _status(NEW), _connection(nullp
 Request::~Request(void) {}
 
 Request::Request(Connection* connection, int const& fd)
-    : _fd(fd), _parentFd(-1), _status(NEW), _connection(connection) {
+    : _fd(fd), _parentFd(-1), _connection(connection) {
   reset();
 }
 Request::Request(Connection* connection, int const& fd, int const& parentFd)
-    : _fd(fd), _parentFd(parentFd), _status(NEW), _connection(connection) {
+    : _fd(fd), _parentFd(parentFd), _connection(connection) {
   reset();
 }
 
 int Request::getFd(void) const { return _fd; }
-
-int Request::getStatus(void) const { return _status; }
-
-void Request::setStatus(int status) { _status = status; }
 
 int Request::_RequestHandler(t_server const& server_config) {
   t_uriInfo cur;
@@ -54,18 +50,6 @@ int Request::_MakeResponseBody(t_server const& server_config, t_uriInfo &cur) {
     else
       _MakeStdRequest(cur.uri);
   }
-//cgi headers
-// _MakeCgiRequest(server_config);
-
-
-
-// //// заглушка на ГЕТ
-//   _header.Method = "GET";
-
-//   std::pair<std::string, t_location const*> p =
-//       ConfigUtils::getLocationSettings(server_config, _header.Request_URI);
-//   if (p.second == nullptr) return -1;
-
   return 0;
 }
 
@@ -186,11 +170,6 @@ int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks)
     ++i;
   }
   z_array_null_terminate(&zc_env);
-
-  // for (size_t i = 0; i < zc_env.size; ++i){
-  //  printf("%s \n",zc_env.elem[i]);
-  // }
-
   t_z_array zc_cgi_path;
   z_array_init(&zc_cgi_path);
   z_array_append(&zc_cgi_path, (char*)env["SCRIPT_NAME"].c_str());
@@ -252,20 +231,6 @@ int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks)
   else
     _connection->getConnectionManager()->at(fd_input[1])->getTask()->makeResponseFromString("");
   _connection->getConnectionManager()->at(fd_input[1])->getTask()->setStatus(READY_TO_SEND);
-
-
-   // test print for cgi response fd_output[0]
-  // std::cout << "cgi re";
-  // char buff[2000];
-  // int r;
-  // while (1) {
-  //   r = read(fd_output[0], buff, 2000);
-  //   if (r <= 0) break;
-  //   write(2, buff, r);
-  // }
-  // printf("\n");
-  ////////////////
-
   return 0;
 }
 
@@ -284,47 +249,11 @@ int Request::sendResult(void) {
   printf("Server: write return %d, connection %d ", ret, sendfd);
   setStatus(DONE);
   _connection->setLastActivity();
+//когда закрывать коннекшены??? ориентироваться на статусы и кипэлайф наверно.
+  _connection->getConnectionManager()->remove(_fd);
+
   return ret;
 }
-
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages
-  // https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
-  //необходимо сделать чтение пока не встретим пустую строку (типа гетнекст
-  //лайна) далее необходимо сделать разбор заголовка с сложить в структуру
-  //t_requestHeader т.е читаем из входящего fd пока не встретим пустую строку,
-  //думаю можно побайтово пока не встретим комбинацию \r\n\r\n все что читали
-  //куда-то сохраняли то что насохраняли отдаем в парсер, который собирает
-  //структуру.
-
-  // GET /hello.htm HTTP/1.1
-  // User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-  // Host: www.tutorialspoint.com
-  // Accept-Language: en-us
-  // Accept-Encoding: gzip, deflate
-  // Connection: Keep-Alive
-
-  // POST /cgi-bin/process.cgi HTTP/1.1
-  // User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-  // Host: www.tutorialspoint.com
-  // Content-Type: application/x-www-form-urlencoded
-  // Content-Length: length
-  // Accept-Language: en-us
-  // Accept-Encoding: gzip, deflate
-  // Connection: Keep-Alive
-  // r\n\r\n
-  // licenseID=string&content=string&/paramsXML=string
-
-  // POST /cgi-bin/process.cgi HTTP/1.1
-  // User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-  // Host: www.tutorialspoint.com
-  // Content-Type: text/xml; charset=utf-8
-  // Content-Length: length
-  // Accept-Language: en-us
-  // Accept-Encoding: gzip, deflate
-  // Connection: Keep-Alive
-  // пустая строка
-  // <?xml version="1.0" encoding="utf-8"?>
-  // <string xmlns="http://clearforest.com/">string</string>
 
 void Request::getSimple(string& body){
     if (_content_len > _client_max_body_size || _body.size() + body.size() > _client_max_body_size)
@@ -484,9 +413,11 @@ int Request::getRequest(t_server const& server_config) {
     } else {
       if (_parentFd != -1) {
         //тестовый вывод cgi
-        printf("cgi request body");
-        write(2, buf, nbytes);
-        _connection->getConnectionManager()->remove(fd);
+        // printf("cgi request body");
+        // write(2, buf, nbytes);
+        // _connection->getConnectionManager()->remove(fd);
+        status = HEADERS;
+        parse(buf, nbytes, i);
         return 0;
       } else {
         //тут надо подумать, почему только buf берется? (Рита, надо подумать

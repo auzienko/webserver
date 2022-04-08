@@ -18,11 +18,9 @@ enum States{
     END
 };
 
-enum Status { NEW, READING, READY_TO_HANDLE, READY_TO_SEND, SENDING, DONE };
-
 class Connection;
 
-class Request {
+class Request : public ATask{
  private:
   int _fd;
   int _parentFd;
@@ -38,8 +36,6 @@ class Request {
   Request(Connection* connection, int const& fd, int const& parentFd);
   ~Request();
   int getFd(void) const;
-  int getStatus(void) const;
-  void setStatus(int status);
   int getRequest(t_server const& server_config);
   int sendResult(void);
   int makeResponseFromString(std::string str);

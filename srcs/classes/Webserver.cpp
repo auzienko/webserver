@@ -89,7 +89,7 @@ int Webserver::readHandler(int fd) {
       close(new_sock);
     }
   } else {
-    if (_connectionManager->getRequest(fd, _serverConfig) < 0) {
+    if (_connectionManager->readData(fd, _serverConfig) < 0) {
       ws::printE(ERROR_READ_FROM_CLIENT, "\n");
       closeConnection(fd);
     }
@@ -103,7 +103,7 @@ int Webserver::writeHandler(int fd) {
   if (_connectionManager->at(fd) == nullptr || _connectionManager->at(fd)->getTask()->getStatus() != READY_TO_SEND)
     return 0;
   ws::print(MESSAGE_TRY_SEND_DATA, " ");
-  if (_connectionManager->sendResult(fd) < 0) {
+  if (_connectionManager->sendData(fd) < 0) {
     ws::print(MESSAGE_FAIL, "\n");
     ws::printE(ERROR_SEND_TO_CLIENT, "\n");
   } else {

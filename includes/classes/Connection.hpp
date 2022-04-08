@@ -27,6 +27,8 @@ public:
 	Request* getTask(void) const;
 	void killTask(void);
 	ConnectionManager* getConnectionManager(void) const;
+	int readData(t_server const& server_config);
+	int sendData(void);
 
 };
 

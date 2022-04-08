@@ -18,8 +18,8 @@ class ConnectionManager {
   void add(int fd, int parentFd);
   void remove(int fd);
   Connection* at(int fd) const;
-  int getRequest(int fd, t_server const& server_config);
-  int sendResult(int fd);
+  int readData(int fd, t_server const& server_config);
+  int sendData(int fd);
   std::vector<int> getAllConnectionsFds(void) const;
   int getConnectionCount(void) const;
 

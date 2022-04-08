@@ -29,7 +29,6 @@ void ConnectionManager::remove(int fd) {
   if (it != _list.end()) {
     delete (*it).second;
     _list.erase(it);
-    //close(fd); закрываю в деструкторе коннекшена
   }
 }
 
@@ -42,15 +41,15 @@ Connection* ConnectionManager::at(int fd) const {
   return nullptr;
 }
 
-int ConnectionManager::getRequest(int fd, t_server const& server_config) {
+int ConnectionManager::readData(int fd, t_server const& server_config) {
   Connection* tmp = at(fd);
-  if (tmp != nullptr) return tmp->getTask()->getRequest(server_config);
+  if (tmp != nullptr) return tmp->readData(server_config);
   return 0;
 }
 
-int ConnectionManager::sendResult(int fd) {
+int ConnectionManager::sendData(int fd) {
   Connection* tmp = at(fd);
-  if (tmp != nullptr && tmp->getTask()->getStatus() == READY_TO_SEND) return tmp->getTask()->sendResult();
+  if (tmp != nullptr) return tmp->sendData();
   return 0;
 }
 
