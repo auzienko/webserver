@@ -30,8 +30,8 @@ class Request : public ATask{
   std::stringstream _responseBody;
   std::stringstream _response;
 
- public:
   Request(void);
+ public:
   Request(Connection* connection, int const& fd);
   Request(Connection* connection, int const& fd, int const& parentFd);
   ~Request();

@@ -2,18 +2,14 @@
 
 using namespace std;
 
-Request::Request(void) : _fd(-1), _parentFd(-1), _status(NEW), _connection(nullptr) {
-  reset();
-}
-
 Request::~Request(void) {}
 
 Request::Request(Connection* connection, int const& fd)
-    : _fd(fd), _parentFd(-1), _connection(connection) {
+    : ATask(NETWORK), _fd(fd), _parentFd(-1), _connection(connection) {
   reset();
 }
 Request::Request(Connection* connection, int const& fd, int const& parentFd)
-    : _fd(fd), _parentFd(parentFd), _connection(connection) {
+    : ATask(CGI), _fd(fd), _parentFd(parentFd), _connection(connection) {
   reset();
 }
 
@@ -225,7 +221,7 @@ int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks)
   _body = "foo=bar";
   ///
   _connection->getConnectionManager()->add(fd_output[0], _fd);
-  _connection->getConnectionManager()->add(fd_input[1]);
+  _connection->getConnectionManager()->add(fd_input[1], _fd);
   if (!_body.empty())
     _connection->getConnectionManager()->at(fd_input[1])->getTask()->makeResponseFromString(_body);
   else
@@ -411,13 +407,13 @@ int Request::getRequest(t_server const& server_config) {
       std::cout << "fd: " << _fd << " reading no data\n";
       return 0;
     } else {
-      if (_parentFd != -1) {
+      if (getType() == CGI) {
         //тестовый вывод cgi
-        // printf("cgi request body");
-        // write(2, buf, nbytes);
-        // _connection->getConnectionManager()->remove(fd);
-        status = HEADERS;
-        parse(buf, nbytes, i);
+        printf("cgi request body");
+        write(2, buf, nbytes);
+        _connection->getConnectionManager()->remove(fd);
+        // status = HEADERS;
+        // parse(buf, nbytes, i);
         return 0;
       } else {
         //тут надо подумать, почему только buf берется? (Рита, надо подумать
