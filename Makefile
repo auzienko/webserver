@@ -14,9 +14,9 @@ classes/Config.cpp \
 classes/ATask.cpp \
 classes/Connection.cpp \
 classes/Webserver.cpp \
+classes/WebserverManager.cpp \
 classes/ConnectionManager.cpp \
 classes/Request.cpp \
-classes/RequestManager.cpp \
 classes/MimeTypes.cpp \
 classes/ConfigUtils.cpp \
 z_array/z_array_utils.cpp \
@@ -34,9 +34,9 @@ classes/Config.hpp \
 classes/ATask.hpp \
 classes/Connection.hpp \
 classes/Webserver.hpp \
+classes/WebserverManager.hpp \
 classes/ConnectionManager.hpp \
 classes/Request.hpp \
-classes/RequestManager.hpp \
 classes/MimeTypes.hpp \
 classes/ConfigUtils.hpp
 
