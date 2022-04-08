@@ -20,22 +20,22 @@ enum States{
 
 enum Status { NEW, READING, READY_TO_HANDLE, READY_TO_SEND, SENDING, DONE };
 
-class RequestManager;
+class Connection;
 
 class Request {
  private:
   int _fd;
   int _parentFd;
   int _status;
-  RequestManager* _rm;
+  Connection* _connection;
   std::stringstream _responseHeader;
   std::stringstream _responseBody;
   std::stringstream _response;
 
  public:
   Request(void);
-  Request(RequestManager* rm, int const& fd);
-  Request(RequestManager* rm, int const& fd, int const& parentFd);
+  Request(Connection* connection, int const& fd);
+  Request(Connection* connection, int const& fd, int const& parentFd);
   ~Request();
   int getFd(void) const;
   int getStatus(void) const;

@@ -2,18 +2,18 @@
 
 using namespace std;
 
-Request::Request(void) : _fd(-1), _parentFd(-1), _status(NEW), _rm(nullptr) {
+Request::Request(void) : _fd(-1), _parentFd(-1), _status(NEW), _connection(nullptr) {
   reset();
 }
 
 Request::~Request(void) {}
 
-Request::Request(RequestManager* rm, int const& fd)
-    : _fd(fd), _parentFd(-1), _status(NEW), _rm(rm) {
+Request::Request(Connection* connection, int const& fd)
+    : _fd(fd), _parentFd(-1), _status(NEW), _connection(connection) {
   reset();
 }
-Request::Request(RequestManager* rm, int const& fd, int const& parentFd)
-    : _fd(fd), _parentFd(parentFd), _status(NEW), _rm(rm) {
+Request::Request(Connection* connection, int const& fd, int const& parentFd)
+    : _fd(fd), _parentFd(parentFd), _status(NEW), _connection(connection) {
   reset();
 }
 
@@ -245,13 +245,13 @@ int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks)
   //удалить это тестовое боди по готовности парсера
   _body = "foo=bar";
   ///
-  _rm->add(fd_output[0], _fd);
-  _rm->add(fd_input[1]);
+  _connection->getConnectionManager()->add(fd_output[0], _fd);
+  _connection->getConnectionManager()->add(fd_input[1]);
   if (!_body.empty())
-    _rm->at(fd_input[1])->makeResponseFromString(_body);
+    _connection->getConnectionManager()->at(fd_input[1])->getTask()->makeResponseFromString(_body);
   else
-    _rm->at(fd_input[1])->makeResponseFromString("");
-  _rm->at(fd_input[1])->setStatus(READY_TO_SEND);
+    _connection->getConnectionManager()->at(fd_input[1])->getTask()->makeResponseFromString("");
+  _connection->getConnectionManager()->at(fd_input[1])->getTask()->setStatus(READY_TO_SEND);
 
 
    // test print for cgi response fd_output[0]
@@ -283,6 +283,7 @@ int Request::sendResult(void) {
   if (nbytes < 0) ret = -1;
   printf("Server: write return %d, connection %d ", ret, sendfd);
   setStatus(DONE);
+  _connection->setLastActivity();
   return ret;
 }
 
@@ -485,7 +486,7 @@ int Request::getRequest(t_server const& server_config) {
         //тестовый вывод cgi
         printf("cgi request body");
         write(2, buf, nbytes);
-        _rm->remove(fd);
+        _connection->getConnectionManager()->remove(fd);
         return 0;
       } else {
         //тут надо подумать, почему только buf берется? (Рита, надо подумать

@@ -18,6 +18,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <ctime>
 
 #include "default_settings.hpp"
 #include "errors.hpp"
@@ -29,7 +30,8 @@
 #include "./classes/Webserver.hpp"
 #include "./classes/WebserverManager.hpp"
 #include "./classes/Request.hpp"
-#include "./classes/RequestManager.hpp"
+#include "./classes/Connection.hpp"
+#include "./classes/ConnectionManager.hpp"
 #include "./classes/MimeTypes.hpp"
 #include "./classes/ConfigUtils.hpp"
 

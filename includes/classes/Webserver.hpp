@@ -4,14 +4,13 @@
 #include "../main.hpp"
 
 class Config;
-class Socket;
-class RequestManager;
+class ConnectionManager;
 
 class Webserver {
  private:
   int _maxConnection;
   int _listenSocket;
-  RequestManager* _rm;
+  ConnectionManager* _connectionManager;
   t_server _serverConfig;
 
  public:
@@ -25,6 +24,7 @@ class Webserver {
   void makeActiveFdsSet(fd_set* fds, int* max_fd) const;
   int readHandler(int fd);
   int writeHandler(int fd);
+  void closeConnectionIfTimout(int seconds);
 
  private:
   Webserver(Webserver const& src);

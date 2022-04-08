@@ -2,20 +2,20 @@
 
 Webserver::Webserver(t_server &src, int maxConnection)
     : _maxConnection(maxConnection), _serverConfig(src) {
-  _rm = new RequestManager();
+  _connectionManager = new ConnectionManager();
 }
 
-Webserver::~Webserver() { delete _rm; }
+Webserver::~Webserver() { delete _connectionManager; }
 
-int Webserver::getClientsCount(void) const { return _rm->getConnectionCount(); }
+int Webserver::getClientsCount(void) const { return _connectionManager->getConnectionCount(); }
 
 void Webserver::addConnection(int fd) {
-  _rm->add(fd);
+  _connectionManager->add(fd);
 }
 
 void Webserver::closeConnection(int fd) {
-  if (_rm->isExist(fd)) {
-    _rm->remove(fd);
+  if (_connectionManager->isExist(fd)) {
+    _connectionManager->remove(fd);
   }
 }
 
@@ -59,7 +59,7 @@ int Webserver::createServerListenSocket(void) {
     close(_listenSocket);
     return -1;
   }
-  addConnection(_listenSocket);
+  //addConnection(_listenSocket);
 
   char str[sizeof(addr)];
   inet_ntop(AF_INET, &(addr.sin_addr), str, sizeof(addr));
@@ -69,7 +69,7 @@ int Webserver::createServerListenSocket(void) {
 }
 
 int Webserver::readHandler(int fd) {
-  if (fd != _listenSocket && _rm->isExist(fd) == 0)
+  if (fd != _listenSocket && _connectionManager->isExist(fd) == 0)
     return -1;
   if (fd == _listenSocket) {
   
@@ -81,7 +81,7 @@ int Webserver::readHandler(int fd) {
       //добавить обработчик
       exit(EXIT_FAILURE);
     }
-    if (_rm->getConnectionCount() < _maxConnection) {
+    if (_connectionManager->getConnectionCount() < _maxConnection) {
       fcntl(new_sock, F_SETFL, O_NONBLOCK);
       addConnection(new_sock);
     } else {
@@ -89,7 +89,7 @@ int Webserver::readHandler(int fd) {
       close(new_sock);
     }
   } else {
-    if (_rm->getRequest(fd, _serverConfig) < 0) {
+    if (_connectionManager->getRequest(fd, _serverConfig) < 0) {
       ws::printE(ERROR_READ_FROM_CLIENT, "\n");
       closeConnection(fd);
     }
@@ -99,18 +99,18 @@ int Webserver::readHandler(int fd) {
 
 int Webserver::writeHandler(int fd) {
   if (fd == _listenSocket) return 0;
-  if (_rm->isExist(fd) == 0) return -1;
-  if (_rm->at(fd) == nullptr || _rm->at(fd)->getStatus() != READY_TO_SEND)
+  if (_connectionManager->isExist(fd) == 0) return -1;
+  if (_connectionManager->at(fd) == nullptr || _connectionManager->at(fd)->getTask()->getStatus() != READY_TO_SEND)
     return 0;
   ws::print(MESSAGE_TRY_SEND_DATA, " ");
-  if (_rm->sendResult(fd) < 0) {
+  if (_connectionManager->sendResult(fd) < 0) {
     ws::print(MESSAGE_FAIL, "\n");
     ws::printE(ERROR_SEND_TO_CLIENT, "\n");
   } else {
     ws::print(MESSAGE_SUCCESS, "\n");
   }
   //понять когда закрывать коннекшены корректно
-  closeConnection(fd);
+  //closeConnection(fd);
   return 0;
 }
 
@@ -129,7 +129,7 @@ int Webserver::run(void) {
 void Webserver::makeActiveFdsSet(fd_set* fds, int* max_fd) const {
   FD_SET(_listenSocket, fds);
   *max_fd = _listenSocket > *max_fd ? _listenSocket : *max_fd;
-  std::vector<int> tmp = _rm->getAllRequestsFds();
+  std::vector<int> tmp = _connectionManager->getAllConnectionsFds();
   std::vector<int>::const_iterator i = tmp.begin();
   std::vector<int>::const_iterator e = tmp.end();
   while (i != e) {
@@ -137,4 +137,8 @@ void Webserver::makeActiveFdsSet(fd_set* fds, int* max_fd) const {
     *max_fd = *i > *max_fd ? *i : *max_fd;
     ++i;
   }
+}
+
+void Webserver::closeConnectionIfTimout(int seconds){
+  _connectionManager->closeConnectionIfTimout(seconds);
 }
