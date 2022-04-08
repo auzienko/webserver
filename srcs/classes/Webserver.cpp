@@ -1,38 +1,22 @@
 #include "../../includes/classes/Webserver.hpp"
 
 Webserver::Webserver(t_server &src, int maxConnection)
-    : _connectionCount(0), _maxConnection(maxConnection), _serverConfig(src) {
-  _rm = new RequestManager();
+    : _maxConnection(maxConnection), _serverConfig(src) {
+  _connectionManager = new ConnectionManager();
 }
 
-Webserver::~Webserver() { delete _rm; }
+Webserver::~Webserver() { delete _connectionManager; }
 
-int const& Webserver::getClientsCount(void) const { return _connectionCount; }
-
-void Webserver::plusConnection(void) {
-  if (_connectionCount < _maxConnection) ++_connectionCount;
-}
-
-void Webserver::minusConnection(void) {
-  if (_connectionCount != 0) --_connectionCount;
-}
+int Webserver::getClientsCount(void) const { return _connectionManager->getConnectionCount(); }
 
 void Webserver::addConnection(int fd) {
-  _connections.insert(fd);
-  plusConnection();
-  _rm->add(fd);
-  std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> NEW CONNECTION : " << fd << std::endl;
+  _connectionManager->add(fd);
 }
 
 void Webserver::closeConnection(int fd) {
-  std::set<int>::iterator i = _connections.find(fd);
-  if (i != _connections.end()) {
-    close(fd);
-    _connections.erase(i);
-    minusConnection();
+  if (_connectionManager->isExist(fd)) {
+    _connectionManager->remove(fd);
   }
-  _rm->remove(fd);
-  std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> CLOSE CONNECTION : " << fd << std::endl;
 }
 
 int Webserver::createServerListenSocket(void) {
@@ -75,7 +59,7 @@ int Webserver::createServerListenSocket(void) {
     close(_listenSocket);
     return -1;
   }
-  addConnection(_listenSocket);
+  //addConnection(_listenSocket);
 
   char str[sizeof(addr)];
   inet_ntop(AF_INET, &(addr.sin_addr), str, sizeof(addr));
@@ -85,7 +69,7 @@ int Webserver::createServerListenSocket(void) {
 }
 
 int Webserver::readHandler(int fd) {
-  if (fd != _listenSocket && _connections.find(fd) == _connections.end())
+  if (fd != _listenSocket && _connectionManager->isExist(fd) == 0)
     return -1;
   if (fd == _listenSocket) {
   
@@ -97,7 +81,7 @@ int Webserver::readHandler(int fd) {
       //добавить обработчик
       exit(EXIT_FAILURE);
     }
-    if (_connectionCount < _maxConnection) {
+    if (_connectionManager->getConnectionCount() < _maxConnection) {
       fcntl(new_sock, F_SETFL, O_NONBLOCK);
       addConnection(new_sock);
     } else {
@@ -105,7 +89,7 @@ int Webserver::readHandler(int fd) {
       close(new_sock);
     }
   } else {
-    if (_rm->getRequest(fd, _serverConfig) < 0) {
+    if (_connectionManager->readData(fd, _serverConfig) < 0) {
       ws::printE(ERROR_READ_FROM_CLIENT, "\n");
       closeConnection(fd);
     }
@@ -115,18 +99,18 @@ int Webserver::readHandler(int fd) {
 
 int Webserver::writeHandler(int fd) {
   if (fd == _listenSocket) return 0;
-  if (_connections.find(fd) == _connections.end()) return -1;
-  if (_rm->at(fd) == nullptr || _rm->at(fd)->getStatus() != READY_TO_SEND)
+  if (_connectionManager->isExist(fd) == 0) return -1;
+  if (_connectionManager->at(fd) == nullptr || _connectionManager->at(fd)->getTask()->getStatus() != READY_TO_SEND)
     return 0;
   ws::print(MESSAGE_TRY_SEND_DATA, " ");
-  if (_rm->sendResult(fd) < 0) {
+  if (_connectionManager->sendData(fd) < 0) {
     ws::print(MESSAGE_FAIL, "\n");
     ws::printE(ERROR_SEND_TO_CLIENT, "\n");
   } else {
     ws::print(MESSAGE_SUCCESS, "\n");
   }
   //понять когда закрывать коннекшены корректно
-  closeConnection(fd);
+  //closeConnection(fd);
   return 0;
 }
 
@@ -142,14 +126,19 @@ int Webserver::run(void) {
   return 0;
 }
 
-void Webserver::appendSocketsToFdsSet(fd_set* fds, int* max_fd) const {
+void Webserver::makeActiveFdsSet(fd_set* fds, int* max_fd) const {
   FD_SET(_listenSocket, fds);
   *max_fd = _listenSocket > *max_fd ? _listenSocket : *max_fd;
-  std::set<int>::const_iterator i = _connections.begin();
-  std::set<int>::const_iterator e = _connections.end();
+  std::vector<int> tmp = _connectionManager->getAllConnectionsFds();
+  std::vector<int>::const_iterator i = tmp.begin();
+  std::vector<int>::const_iterator e = tmp.end();
   while (i != e) {
     FD_SET(*i, fds);
     *max_fd = *i > *max_fd ? *i : *max_fd;
     ++i;
   }
+}
+
+void Webserver::closeConnectionIfTimout(int seconds){
+  _connectionManager->closeConnectionIfTimout(seconds);
 }

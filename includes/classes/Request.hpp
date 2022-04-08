@@ -18,36 +18,37 @@ enum States{
     END
 };
 
-enum Status { NEW, READING, READY_TO_HANDLE, READY_TO_SEND, SENDING, DONE };
+class Connection;
 
-class Request {
+class Request : public ATask{
  private:
   int _fd;
+  int _parentFd;
   int _status;
-  // std::vector<char> _body;
+  Connection* _connection;
   std::stringstream _responseHeader;
   std::stringstream _responseBody;
   std::stringstream _response;
 
- public:
   Request(void);
-  Request(int const& fd);
+ public:
+  Request(Connection* connection, int const& fd);
+  Request(Connection* connection, int const& fd, int const& parentFd);
   ~Request();
   int getFd(void) const;
-  int getStatus(void) const;
-  void setStatus(int status);
   int getRequest(t_server const& server_config);
   int sendResult(void);
+  int makeResponseFromString(std::string str);
 
  private:
   Request(Request const& src);
   Request& operator=(Request const& rhs);
   int _RequestHandler(t_server const& server_config);
-  int _MakeResponseBody(t_uriInfo &cur);
+  int _MakeResponseBody(t_server const& server_config, t_uriInfo &cur);
   int _MakeResponseHeaders(t_uriInfo &cur);
   int _AssembleRespose(void);
   int _MakeAutoIndex(std::string const& show_path, std::string const& real_path);
-  int _MakeCgiRequest(void);
+  int _MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks);
   int _MakeStdRequest(std::string uri);
 
 
@@ -57,8 +58,8 @@ class Request {
     string  _http_version;
     string  _query; 
     map<string, string> _headers;
-    int     _content_len;
-    int     _client_max_body_size; //from config
+    unsigned int     _content_len;
+    unsigned int     _client_max_body_size; //from config
     bool    _chunked;
     string  _body;
     int     status;
@@ -70,8 +71,8 @@ public:
     void parseHeaders(string headers);
     // void parseRequest(string& buf);
     void parseFirstLine(string& firstLine);
-    // void getChunked(string& str);
-    // void getSimple(string& str);
+    void getChunked(string& str);
+    void getSimple(string& str);
     void print();
     void reset(); 
     void parse(char *buf, int nbytes, size_t i);

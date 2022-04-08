@@ -2,18 +2,18 @@
 
 using namespace std;
 
-Request::Request(void) : _fd(-1), _status(NEW) {  reset();
-}
-
 Request::~Request(void) {}
 
-Request::Request(int const& fd) : _fd(fd), _status(NEW) {  reset(); }
+Request::Request(Connection* connection, int const& fd)
+    : ATask(NETWORK), _fd(fd), _parentFd(-1), _connection(connection) {
+  reset();
+}
+Request::Request(Connection* connection, int const& fd, int const& parentFd)
+    : ATask(CGI), _fd(fd), _parentFd(parentFd), _connection(connection) {
+  reset();
+}
 
 int Request::getFd(void) const { return _fd; }
-
-int Request::getStatus(void) const { return _status; }
-
-void Request::setStatus(int status) { _status = status; }
 
 int Request::_RequestHandler(t_server const& server_config) {
   t_uriInfo cur;
@@ -26,27 +26,26 @@ int Request::_RequestHandler(t_server const& server_config) {
   {
     std::cerr << ex.what() << std::endl;
   }
-  _MakeResponseBody(cur);
-  _MakeResponseHeaders(cur);
-  _AssembleRespose();
+  if (_MakeResponseBody(server_config, cur) == 0 &&
+      _MakeResponseHeaders(cur) == 0)
+    _AssembleRespose();
   return 0;
 }
 
-int Request::_MakeResponseBody(t_uriInfo &cur) {
+int Request::_MakeResponseBody(t_server const& server_config, t_uriInfo &cur) {
   _responseBody.clear();
 
-  if (cur.isCgi)
-    _MakeCgiRequest();
-  else
-  {
+  if (cur.isCgi) {
+    _MakeCgiRequest(server_config, cur);
+    return 1;
+  } else {
     if (!cur.loc)
       throw std::logic_error("Cannt find location");
     else if (cur.loc->autoindex)
-      _MakeAutoIndex(cur.uri, cur.loc->root);
+      _MakeAutoIndex(cur.loc->path, cur.loc->root);
     else
       _MakeStdRequest(cur.uri);
   }
-
   return 0;
 }
 
@@ -123,103 +122,169 @@ int Request::_MakeAutoIndex(std::string const& show_path,
   return 0;
 }
 
-
 //https://datatracker.ietf.org/doc/html/rfc3875
 //https://firststeps.ru/cgi/cgi1.html
-int Request::_MakeCgiRequest(void){
-  
-  std::cout << "Find CGI!" << std::endl;
+int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks){
+  std::map<std::string, std::string> env;
+  env["PATH_INFO"] = uriBlocks.pathInfo;
+  env["SERVER_NAME"] = server_config.listen;
+  env["AUTH_TYPE"] = ws::stringFromMap(_headers.find("Authorization"), _headers.end());
+  env["CONTENT_LENGTH"] = ws::intToStr(_content_len);
+  env["GATEWAY_INTERFACE"] = "CGI/1.1";
+  env["PATH_TRANSLATED"] = uriBlocks.uri;
+  env["CONTENT_TYPE"] =  ws::stringFromMap(_headers.find("Content-Type"), _headers.end());
+  env["QUERY_STRING"] = _query;
+  env["REMOTE_ADDR"] = ws::socketGetIP(_fd);
+  //env["REMOTE_HOST"] = "empty";
+  // env["REMOTE_IDENT"] =  remote_ident_pwd;
+  // env["REMOTE_USER"] = remote_username;
+  env["REQUEST_METHOD"] = _method;
+  env["SCRIPT_NAME"] = ws::stringFromMap(server_config.cgi.find("." + ws::stringTail(uriBlocks.uri, '.')), _headers.end());
+  env["SERVER_PORT"] = ws::intToStr(server_config.port);
+  env["SERVER_PROTOCOL"] = _http_version;
+  env["SERVER_SOFTWARE"] = PROGRAMM_NAME;
 
-  return (0);
+  std::map<std::string, std::string>::iterator it = _headers.begin();
+  std::map<std::string, std::string>::iterator en = _headers.end();
+  while (it != en) {
+    env["HTTP_" + ws::stringToCGIFormat(it->first)] = it->second;
+    ++it;
+  }
+
+  //make env char**
+  t_z_array zc_env;
+  z_array_init(&zc_env);
+  std::map<std::string, std::string>::iterator i = env.begin();
+  std::map<std::string, std::string>::iterator e = env.end();
+  std::string tmp;
+  while( i != e){
+    if ((*i).second.empty())
+      tmp = (*i).first;
+    else
+      tmp = (*i).first + '=' + (*i).second;
+    z_array_append(&zc_env, (char*)tmp.c_str());
+    ++i;
+  }
+  z_array_null_terminate(&zc_env);
+  t_z_array zc_cgi_path;
+  z_array_init(&zc_cgi_path);
+  z_array_append(&zc_cgi_path, (char*)env["SCRIPT_NAME"].c_str());
+  z_array_null_terminate(&zc_cgi_path);
+
+  // RUN cgi
+  std::cout << "~~~ CGI REQUEST\n";
+
+  pid_t pid;
+  int status;
+  int fd_input[2];
+  int fd_output[2];
+
+  if (pipe(fd_input) < 0) {
+    ws::printE(ERROR_CGI_PIPE, "\n");
+    return -1;
+  }
+  if (pipe(fd_output) < 0) {
+    ws::printE(ERROR_CGI_PIPE, "\n");
+    close(fd_input[0]);
+    close(fd_input[1]);
+    return -1;
+  }
+  pid = fork();
+  if (pid < 0) {
+    ws::printE(ERROR_CGI_EXECVE_FORK, "\n");
+    return -1;
+  }
+  if (pid == 0) {
+    if (dup2(fd_input[0], STDIN_FILENO) < 0 ||
+        dup2(fd_output[1], STDOUT_FILENO) < 0) {
+      ws::printE(ERROR_CGI_DUP2, "\n");
+      exit(-1);
+    }
+    close(fd_input[0]);
+    close(fd_input[1]);
+    close(fd_output[0]);
+    close(fd_output[1]);
+    status = execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
+    ws::printE(ERROR_CGI_EXECVE, "\n");
+    exit(status);
+  }
+
+  close(fd_input[0]);
+  close(fd_output[1]);
+  z_array_free(&zc_env);
+  z_array_free(&zc_cgi_path);
+
+  // if you need to write something to cgi - use fd_input[1]
+  // if you need to read something from cgi - use fd_output[0]
+
+  //удалить это тестовое боди по готовности парсера
+  _body = "foo=bar";
+  ///
+  _connection->getConnectionManager()->add(fd_output[0], _fd);
+  _connection->getConnectionManager()->add(fd_input[1], _fd);
+  if (!_body.empty())
+    _connection->getConnectionManager()->at(fd_input[1])->getTask()->makeResponseFromString(_body);
+  else
+    _connection->getConnectionManager()->at(fd_input[1])->getTask()->makeResponseFromString("");
+  _connection->getConnectionManager()->at(fd_input[1])->getTask()->setStatus(READY_TO_SEND);
+  return 0;
 }
 
-
 int Request::sendResult(void) {
+  if (getStatus() != READY_TO_SEND) return -1;
   setStatus(SENDING);
 
-  int nbytes, ret;
+  int nbytes, ret, sendfd;
   ret = 0;
-  nbytes = send(_fd, _response.str().c_str(), _response.str().length(), 0);
+
+  sendfd = _parentFd == -1 ? _fd : _parentFd;
+  std::cout <<  _response.str().c_str() << std::endl;
+  //nbytes = send(sendfd, _response.str().c_str(), _response.str().length(), 0);
+  nbytes = write(sendfd, _response.str().c_str(), _response.str().length());
   if (nbytes < 0) ret = -1;
-  printf("Server: write return %d ", ret);
+  printf("Server: write return %d, connection %d ", ret, sendfd);
   setStatus(DONE);
+  _connection->setLastActivity();
+//когда закрывать коннекшены??? ориентироваться на статусы и кипэлайф наверно.
+  _connection->getConnectionManager()->remove(_fd);
+
   return ret;
 }
 
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages
-  // https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
-  //необходимо сделать чтение пока не встретим пустую строку (типа гетнекст
-  //лайна) далее необходимо сделать разбор заголовка с сложить в структуру
-  //t_requestHeader т.е читаем из входящего fd пока не встретим пустую строку,
-  //думаю можно побайтово пока не встретим комбинацию \r\n\r\n все что читали
-  //куда-то сохраняли то что насохраняли отдаем в парсер, который собирает
-  //структуру.
+void Request::getSimple(string& body){
+    if (_content_len > _client_max_body_size || _body.size() + body.size() > _client_max_body_size)
+        throw logic_error(CODE_413);
+    _body.append(body);
+    body.clear();
+    if (_body.length() == _content_len)
+        status = END;
+}
 
-  // GET /hello.htm HTTP/1.1
-  // User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-  // Host: www.tutorialspoint.com
-  // Accept-Language: en-us
-  // Accept-Encoding: gzip, deflate
-  // Connection: Keep-Alive
-
-  // POST /cgi-bin/process.cgi HTTP/1.1
-  // User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-  // Host: www.tutorialspoint.com
-  // Content-Type: application/x-www-form-urlencoded
-  // Content-Length: length
-  // Accept-Language: en-us
-  // Accept-Encoding: gzip, deflate
-  // Connection: Keep-Alive
-  // r\n\r\n
-  // licenseID=string&content=string&/paramsXML=string
-
-  // POST /cgi-bin/process.cgi HTTP/1.1
-  // User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-  // Host: www.tutorialspoint.com
-  // Content-Type: text/xml; charset=utf-8
-  // Content-Length: length
-  // Accept-Language: en-us
-  // Accept-Encoding: gzip, deflate
-  // Connection: Keep-Alive
-  // пустая строка
-  // <?xml version="1.0" encoding="utf-8"?>
-  // <string xmlns="http://clearforest.com/">string</string>
-
-// void Request::getSimple(string& body){
-//     if (_content_len > _client_max_body_size || _body.size() + body.size() > _client_max_body_size)
-//         throw WebException(CODE_413);
-//     _body.append(body);
-//     if (_body.length() == _content_len)
-//         _status = END;
-// }
-
-// void Request::getChunked(string& body){
-//     int chunkSize;
+void Request::getChunked(string& body){
+    if (!body.size())
+        status = END;
     
-//     if (!body.size())
-//         _status = END;
-//     size_t i = body.find(CRLF);
-//     if (i == strnpos)
-//         throw WebException(CODE_400); //?
-//     if (i != strnpos){
-//         stringstream ss;
-//         ss << std::hex << body.substr(0, i);
-//         ss >> chunkSize;
-//         if (!chunkSize)
-//             _status = END;
-//     }
-// }
-
-// void Request::parseBody(std::string& body){
-//     if (!_chunked){
-//         if (_content_len > _client_max_body_size || _body.size() + body.size() > _client_max_body_size)
-//             throw WebException(CODE_413);
-//         _body.append(body);
-//         return ;
-//     }
-// }
-
-
+    while (status != END){
+        int chunkSize;
+        size_t i = body.find(CRLF);
+        if (i != strnpos){
+            stringstream ss;
+            ss << std::hex << body.substr(0, i);
+            ss >> chunkSize;
+            body.erase(0, i + 2);
+            if (!chunkSize){
+                status = END;
+                return ;
+            }
+            for (int j = 0; j < chunkSize; j++){
+                    _body.push_back(body[j]);
+            }
+            body.erase(0, chunkSize + 2);
+            i = body.find(CRLF);
+        }
+    }
+    //status = END;
+}
 
  void Request::parseFirstLine(string& firstLine){
      size_t j = firstLine.find(CRLF);
@@ -266,7 +331,7 @@ void Request::parseHeaders(string head){
     key = head.substr(0, i);
     value = head.substr(i + 1);
     _headers.insert(make_pair(key, value));
-    if (key == "Content-lenght")
+    if (key == "Content-Length")
         _content_len = stoi(value);
     if (key == "Transfer-Encoding" && value == " chunked")
         _chunked = true;
@@ -301,37 +366,70 @@ void Request::parse(char *buf, int nbytes, size_t i){
          i = tmp.find(CRLF);
      }
   }
+  if (status == BODY)
+  {
+    if (_chunked)
+        getChunked(tmp);
+    if (_content_len)
+        getSimple(tmp);
+  }
 }
 
 void Request::print(){
-    cout << "HTTP REQUEST\n" << _method << " " << _request_uri << " " << _http_version << endl;
-    for (map<string, string>::iterator it = _headers.begin(); it != _headers.end(); ++it){
+  if (_parentFd == -1) {
+    cout << "HTTP REQUEST (fd: " << _fd << ")\n"
+         << _method << " " << _request_uri << " " << _http_version << endl;
+    for (map<string, string>::iterator it = _headers.begin();
+         it != _headers.end(); ++it) {
       cout << (*it).first << ":" << (*it).second << endl;
     }
+    cout << _body << endl;
+  }
 }
 
-
 int Request::getRequest(t_server const& server_config) {
+  if (getStatus() < READY_TO_HANDLE)
+    setStatus(READING);
+  else
+    return 0;
   size_t i = server_config.client_max_body_size;
   int nbytes;
   char buf[DEFAULT_BUFLEN];
   int fd = _fd;
   while (1){
-    nbytes = recv(fd, &buf, DEFAULT_BUFLEN, 0);
-    if (nbytes == -1 && errno == 35)
+    nbytes = read(fd, &buf, DEFAULT_BUFLEN);
+    if (nbytes == -1)
       break;
     if (nbytes < 0) {
      ws::printE("~~ 😞 Server: read failture", "\n");
      return -1;
     } else if (nbytes == 0) {
-      ws::print("reading no data", "\n");
+      std::cout << "fd: " << _fd << " reading no data\n";
       return 0;
+    } else {
+      if (getType() == CGI) {
+        //тестовый вывод cgi
+        printf("cgi request body");
+        write(2, buf, nbytes);
+        _connection->getConnectionManager()->remove(fd);
+        // status = HEADERS;
+        // parse(buf, nbytes, i);
+        return 0;
+      } else {
+        //тут надо подумать, почему только buf берется? (Рита, надо подумать
+        //тут)
+        parse(buf, nbytes, i);
+        print();
+        //проставить этот статус после успешного парсинга
+        setStatus(READY_TO_HANDLE);
+        _RequestHandler(server_config);
+      }
     }
-    else
-     parse(buf, nbytes, i);
   }
-  print();
-  setStatus(READY_TO_HANDLE);
-  if (getStatus() == READY_TO_HANDLE) _RequestHandler(server_config);
   return 0;
+  }
+
+  int Request::makeResponseFromString(std::string str) {
+    _response << str;
+    return 0;
   }

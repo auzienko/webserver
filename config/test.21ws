@@ -1,3 +1,4 @@
+#fd, return, cgi, index, autoindex
 server test {
   127.0.0.1:8081
   error_page 404 ../../some.html
@@ -5,13 +6,10 @@ server test {
   location / {
     root ./www-static-site/
   }
-  location /my/test/for/ {
-    root ./www-static-site/
-  }
-  location /my/test/for/index.html {
+  location /index.html {
     root ./www-static-site/index.html
   }
-  cgi /cgi /Users/wgaunt/Desktop/ws/my-cgi
+  cgi .test /Users/wgaunt/Desktop/webserver/cgi/my_cgi.test
 }
 server test2 {
   127.0.0.1:4242
@@ -32,5 +30,5 @@ server test2 {
     index index.html
     upload /Downloads
   }
-  cgi .php /Users/wgaunt/Desktop/ws/my-cgi
+  cgi .test /Users/aleksandruzienko/Documents/21projects/webserver/cgi/my_cgi.test
 }

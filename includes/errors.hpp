@@ -14,4 +14,9 @@
 #define ERROR_SOCKET_COUNT_LIMIT "No more sockets for client"
 #define ERROR_SEND_TO_CLIENT "Can't send data to client"
 #define ERROR_READ_FROM_CLIENT "Can't read from client"
+#define ERROR_CGI_EXECVE_FORK "Can't execute CGI (new process)"
+#define ERROR_CGI_EXECVE "Can't execute CGI"
+#define ERROR_CGI_PIPE "Can't create PIPE"
+#define ERROR_CGI_DUP2 "Can't clone descriptor (dup2)"
+#define ERROR_CGI_WAITPID "Can't execute CGI (waitpid)"
 #endif

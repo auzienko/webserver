@@ -18,17 +18,21 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <ctime>
 
 #include "default_settings.hpp"
 #include "errors.hpp"
 #include "messages.hpp"
+#include "z_array.hpp"
 #include "http_status_codes.hpp"
 #include "structs.hpp"
+#include "./classes/ATask.hpp"
 #include "./classes/Config.hpp"
 #include "./classes/Webserver.hpp"
 #include "./classes/WebserverManager.hpp"
 #include "./classes/Request.hpp"
-#include "./classes/RequestManager.hpp"
+#include "./classes/Connection.hpp"
+#include "./classes/ConnectionManager.hpp"
 #include "./classes/MimeTypes.hpp"
 #include "./classes/ConfigUtils.hpp"
 
@@ -44,6 +48,10 @@ std::string intToStr(int i);
 std::string stringTail(std::string const& str, char c);
 std::string stringReverse(std::string& str);
 std::string stringUrlDecode(std::string const& str);
+std::string socketGetIP(int const& fd);
+std::string stringFromMap(std::map<std::string, std::string>::const_iterator it,
+    std::map<std::string, std::string>::const_iterator end);
+std::string stringToCGIFormat(std::string const& str);
 }  // namespace ws
 
 #endif

@@ -16,6 +16,7 @@ WebserverManager::WebserverManager(std::string const &config_path)
       throw;
     }
   }
+  _config->close();
 }
 
 int WebserverManager::start(void) {
@@ -45,26 +46,29 @@ int WebserverManager::start(void) {
     all_fds = _GetAllSocketsFds();
     read_fds = all_fds;
     write_fds = all_fds;
-   // std::cout << "\n😴 Waiting on select()...\n";
-    select_result = select(_maxFd + 1, &read_fds, &write_fds, 0, NULL);
+    select_result = select(_maxFd + 1, &read_fds, &write_fds, 0, 0);
     if (select_result < 0) {
       ws::printE(ERROR_SELECT, "\n");
       //добавить обработчик для < 0 + if select == 0 -> timeout;
       exit(EXIT_FAILURE);
     }
-   // std::cout << "Check to see if this descriptor is ready...\n";
     int max_fd = _maxFd;
     for (int i = 0; i <= max_fd && select_result > 0; ++i) {
       if (FD_ISSET(i, &read_fds)) {
-      //  std::cout << "FD: " << i << " is ready for Reading..." << std::endl; 
         _ReadHandler(i);
         --select_result;
       }
       if (FD_ISSET(i, &write_fds)) {
-       // std::cout << "FD: " << i << " is ready for Writing..." << std::endl;
         _WriteHandler(i);
         --select_result;
       }
+    }
+   // установить таймаут закрытия соединения
+    std::vector<Webserver*>::iterator it = _webservers.begin();
+    std::vector<Webserver*>::iterator en = _webservers.end();
+    while (it != en) {
+      (*it)->closeConnectionIfTimout(1);
+      ++it;
     }
   }
   return 0;
@@ -96,7 +100,7 @@ fd_set WebserverManager::_GetAllSocketsFds(void) {
   std::vector<Webserver *>::iterator i = _webservers.begin();
   std::vector<Webserver *>::iterator e = _webservers.end();
   while (i != e) {
-    (*i)->appendSocketsToFdsSet(&result, &_maxFd);
+    (*i)->makeActiveFdsSet(&result, &_maxFd);
     ++i;
   }
   return result;

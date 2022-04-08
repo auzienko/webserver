@@ -4,31 +4,27 @@
 #include "../main.hpp"
 
 class Config;
-class Socket;
-class RequestManager;
+class ConnectionManager;
 
 class Webserver {
  private:
-  int _connectionCount;
   int _maxConnection;
   int _listenSocket;
-  std::set<int> _connections;
-  RequestManager* _rm;
+  ConnectionManager* _connectionManager;
   t_server _serverConfig;
 
  public:
   Webserver(t_server &src, int maxConnection = MAX_CLIENTS);
   ~Webserver(void);
   int run(void);
-  int const& getClientsCount(void) const;
+  int getClientsCount(void) const;
   int createServerListenSocket(void);
-  void plusConnection(void);
-  void minusConnection(void);
   void addConnection(int fd);
   void closeConnection(int index);
-  void appendSocketsToFdsSet(fd_set* fds, int* max_fd) const;
+  void makeActiveFdsSet(fd_set* fds, int* max_fd) const;
   int readHandler(int fd);
   int writeHandler(int fd);
+  void closeConnectionIfTimout(int seconds);
 
  private:
   Webserver(Webserver const& src);
