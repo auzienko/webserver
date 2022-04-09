@@ -44,17 +44,27 @@ int Request::_MakeResponseBody(t_server const& server_config, t_uriInfo &cur) {
     else if (cur.loc->autoindex)
       _MakeAutoIndex(cur.loc->path, cur.loc->root);
     else
-      _MakeStdRequest(cur.uri);
+      if (_MakeStdRequest(cur) != 0)
+        return (404);
   }
   return 0;
 }
 
-int Request::_MakeStdRequest(std::string uri) {       // Заглушка из прежней версии
+int Request::_MakeStdRequest(t_uriInfo parsedURI) {       // Заглушка из прежней версии
   if (_method == "GET") {
-    std::ifstream tmp(uri, std::ifstream::binary);
+    std::ifstream tmp(parsedURI.uri, std::ifstream::binary);
     if (!tmp.is_open()) {
-      std::cout << "Can't GET file " << uri << std::endl;
-      return 404;
+      if (!parsedURI.loc->index.empty() && parsedURI.loc->index != parsedURI.uri)
+      {
+        tmp.open(parsedURI.loc->root + parsedURI.loc->index, std::ifstream::binary);
+        if (!tmp.is_open()) {
+          std::cout << "Can't GET file " << parsedURI.loc->root + parsedURI.loc->index << std::endl;
+          return 404;
+        }
+      } else {
+        std::cout << "Can't GET file " << parsedURI.uri << std::endl;
+        return 404;
+      }
     }
     _responseBody << tmp.rdbuf();
     tmp.close();
@@ -383,7 +393,7 @@ void Request::print(){
          it != _headers.end(); ++it) {
       cout << (*it).first << ":" << (*it).second << endl;
     }
-    cout << _body << endl;
+    // cout << _body << endl;
   }
 }
 
