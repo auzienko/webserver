@@ -1,4 +1,4 @@
-#return, index, autoindex
+#return
 server test {
   127.0.0.1:8081
   error_page 404 ../../some.html
@@ -18,7 +18,7 @@ server test2 {
   limit_size 1000
   location /usr/ {
     methods GET POST LOL
-    root /Users/zcris/Downloads/
+    root /Users/wgaunt/Downloads/
     autoindex on
     limit_size 1000
     index index.html

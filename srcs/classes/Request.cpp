@@ -27,8 +27,12 @@ int Request::_RequestHandler(t_server const& server_config) {
     std::cerr << ex.what() << std::endl;
   }
   if (_MakeResponseBody(server_config, cur) == 0 &&
-      _MakeResponseHeaders(cur) == 0)
-    _AssembleRespose();
+      _MakeResponseHeaders() == 0)
+    _AssembleResponse();
+  else {
+    //error handler
+    //_AssembleResponse
+  }
   return 0;
 }
 
@@ -41,7 +45,7 @@ int Request::_MakeResponseBody(t_server const& server_config, t_uriInfo &cur) {
   } else {
     if (!cur.loc)
       throw std::logic_error("Cannt find location");
-    else if (cur.loc->autoindex)
+    else if (cur.loc->autoindex && ws::filesIsDir(cur.uri))
       _MakeAutoIndex(cur.loc->path, cur.loc->root);
     else
       if (_MakeStdRequest(cur) != 0)
@@ -52,19 +56,32 @@ int Request::_MakeResponseBody(t_server const& server_config, t_uriInfo &cur) {
 
 int Request::_MakeStdRequest(t_uriInfo parsedURI) {       // Заглушка из прежней версии
   if (_method == "GET") {
-    std::ifstream tmp(parsedURI.uri, std::ifstream::binary);
-    if (!tmp.is_open()) {
-      if (!parsedURI.loc->index.empty() && parsedURI.loc->index != parsedURI.uri)
-      {
-        tmp.open(parsedURI.loc->root + parsedURI.loc->index, std::ifstream::binary);
-        if (!tmp.is_open()) {
-          std::cout << "Can't GET file " << parsedURI.loc->root + parsedURI.loc->index << std::endl;
-          return 404;
-        }
-      } else {
+    std::ifstream tmp;
+    struct stat  file;
+    if (stat(parsedURI.uri.c_str(), &file)) {
+      if (errno == ENOENT) {
         std::cout << "Can't GET file " << parsedURI.uri << std::endl;
         return 404;
       }
+      else {
+        std::cout << "Inprog error" << std::endl;
+        return (111);                                     // Внутренняя ошибка
+      }
+    }
+    if (S_ISDIR(file.st_mode) && (!parsedURI.loc->index.empty() && parsedURI.loc->index != parsedURI.uri)) {
+      tmp.open(parsedURI.loc->root + parsedURI.loc->index, std::ifstream::binary);
+      if (!tmp.is_open()) {
+        std::cout << "Can't GET file " << parsedURI.loc->root + parsedURI.loc->index << std::endl;
+        return 404;
+      }
+      _resBodyType = MimeTypes::getMimeType(parsedURI.loc->root + parsedURI.loc->index);
+    } else {
+      tmp.open(parsedURI.uri, std::ifstream::binary);
+      if (!tmp.is_open()) {
+        std::cout << "Can't GET file " << parsedURI.uri << std::endl;
+        return 404;
+      }
+      _resBodyType = MimeTypes::getMimeType(parsedURI.uri);
     }
     _responseBody << tmp.rdbuf();
     tmp.close();
@@ -73,15 +90,15 @@ int Request::_MakeStdRequest(t_uriInfo parsedURI) {       // Заглушка и
   return 0;
 }
 
-int Request::_MakeResponseHeaders(t_uriInfo &cur) {
+int Request::_MakeResponseHeaders() {
   _responseHeader.clear();
   _responseHeader << "HTTP/1.1 200 OK\r\n";
   _responseHeader << "Connection: keep-alive\r\n";
-  _responseHeader << "Content-type: " << MimeTypes::getMimeType(cur.uri) << "\r\n";
+  _responseHeader << "Content-type: " << _resBodyType << "\r\n";
   return 0;
 }
 
-int Request::_AssembleRespose(void) {
+int Request::_AssembleResponse(void) {
   _response.clear();
   _response << _responseHeader.str();
   _response << "Content-lenght: " << _responseBody.str().length() << "\r\n";
@@ -97,6 +114,7 @@ int Request::_MakeAutoIndex(std::string const& show_path,
   std::pair<bool, std::vector<std::string> > content =
       ws::filesReadDirectory(real_path);
   if (content.first) {
+    _resBodyType = "text/html";
     _responseBody
         << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n";
     _responseBody << "<html><head><title>Index of " << show_path

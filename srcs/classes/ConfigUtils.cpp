@@ -129,7 +129,7 @@ static void fillUri(std::string const &line, t_server const& server_config, t_ur
     it = server_config.locations.cbegin();
     while (!isFind && it != end)
     {
-      if (checkLine == it->path)
+      if (checkLine == it->path || checkLine + '/' == it->path)
       {
         isFind = true;
         res.loc = it.base();

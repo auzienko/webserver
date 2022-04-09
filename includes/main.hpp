@@ -44,6 +44,7 @@ namespace ws {
 void printE(std::string const& msg, std::string const& divider);
 void print(std::string const& msg, std::string const& divider);
 std::pair<bool, std::vector<std::string> > filesReadDirectory(std::string const& path);
+bool filesIsDir(std::string const &file);
 std::string intToStr(int i);
 std::string stringTail(std::string const& str, char c);
 std::string stringReverse(std::string& str);

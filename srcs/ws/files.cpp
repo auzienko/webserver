@@ -19,3 +19,13 @@ std::pair<bool, std::vector<std::string> > ws::filesReadDirectory(
     return std::make_pair(false, result);
   return std::make_pair(true, result);
 }
+
+bool ws::filesIsDir(std::string const &file) {
+  struct stat  buf;
+
+  if (stat(file.c_str(), &buf))
+    return (false);
+  if (S_ISDIR(buf.st_mode))
+    return (true);
+  return (false);
+}
