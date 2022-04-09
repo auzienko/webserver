@@ -63,7 +63,7 @@ static bool isCGI(std::vector<std::string> dirs, std::map<std::string, std::stri
   std::string file(dirs.back());
   std::string pathInfo;
 
-  while (file.find('.') == std::string::npos)
+  while (file.find('.') == std::string::npos && !dirs.empty())
   {
     pathInfo = '/' + file + pathInfo;
     dirs.pop_back();

@@ -1,10 +1,11 @@
-#return, cgi, index, autoindex
+#return, index, autoindex
 server test {
   127.0.0.1:8081
   error_page 404 ../../some.html
   limit_size 1000
   location / {
     root ./www-static-site/
+    index index.html
   }
   location /index.html {
     root ./www-static-site/index.html

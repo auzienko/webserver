@@ -52,8 +52,8 @@ class Request {
   int _MakeResponseHeaders(t_uriInfo &cur);
   int _AssembleRespose(void);
   int _MakeAutoIndex(std::string const& show_path, std::string const& real_path);
-  int _MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks);
-  int _MakeStdRequest(std::string uri);
+  int _MakeCgiRequest(t_server const& server_config, t_uriInfo parsedURI);
+  int _MakeStdRequest(t_uriInfo parsedURI);
 
 
   private:
