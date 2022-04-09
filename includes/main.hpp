@@ -49,10 +49,14 @@ std::string intToStr(int i);
 std::string stringTail(std::string const& str, char c);
 std::string stringReverse(std::string& str);
 std::string stringUrlDecode(std::string const& str);
+std::vector<std::string> stringTrim(std::string line);
 std::string socketGetIP(int const& fd);
 std::string stringFromMap(std::map<std::string, std::string>::const_iterator it,
     std::map<std::string, std::string>::const_iterator end);
 std::string stringToCGIFormat(std::string const& str);
+bool uriIsCGI(std::vector<std::string> dirs, std::map<std::string, std::string> const& cgi, t_uriInfo &res);
+void uriFill(std::string const &line, t_server const& server_config, t_uriInfo &res);
+void stringSkipWS(std::string &line);
 }  // namespace ws
 
 #endif
