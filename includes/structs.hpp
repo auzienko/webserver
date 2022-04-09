@@ -7,6 +7,7 @@ typedef struct tag_location {
   std::string index;
   size_t client_max_body_size;
   std::string uploads_path;
+  std::string redir;
   bool autoindex;
   bool file_uploads;
 
@@ -31,4 +32,6 @@ typedef struct s_uriInfo{
     std::string args;
     std::string pathInfo;
     const t_location  *loc;
+
+    s_uriInfo(void) : isCgi(false), loc(0) {}
 }   t_uriInfo;

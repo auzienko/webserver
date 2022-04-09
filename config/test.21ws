@@ -7,8 +7,8 @@ server test {
     root ./www-static-site/
     index index.html
   }
-  location /index.html {
-    root ./www-static-site/index.html
+  location /redir/ {
+    redir /
   }
   cgi .test /Users/wgaunt/Desktop/webserver/cgi/my_cgi.test
 }
