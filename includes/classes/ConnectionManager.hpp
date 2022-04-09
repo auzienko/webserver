@@ -2,22 +2,24 @@
 #define CONNECTION_MANAGER_HPP
 
 #include "../main.hpp"
+#include "AConnection.hpp"
+#include "NetworkConnection.hpp"
+#include "LocalConnection.hpp"
 
-class Connection;
+class AConnection;
 
 class ConnectionManager {
  private:
-  std::map<int, Connection*> _list;
+  std::map<int, AConnection*> _list;
 
  public:
   ConnectionManager();
-  ~ConnectionManager(); //реализовать, там зачистка с указателей
+  ~ConnectionManager();
 
   int isExist(int const fd) const;
-  void add(int fd);
-  void add(int fd, int parentFd);
+  void add(AConnection* connection);
   void remove(int fd);
-  Connection* at(int fd) const;
+  AConnection* at(int fd) const;
   int readData(int fd, t_server const& server_config);
   int sendData(int fd);
   std::vector<int> getAllConnectionsFds(void) const;

@@ -4,11 +4,11 @@ using namespace std;
 
 Request::~Request(void) {}
 
-Request::Request(Connection* connection, int const& fd)
+Request::Request(AConnection* connection, int const& fd)
     : ATask(NETWORK), _fd(fd), _parentFd(-1), _connection(connection) {
   reset();
 }
-Request::Request(Connection* connection, int const& fd, int const& parentFd)
+Request::Request(AConnection* connection, int const& fd, int const& parentFd)
     : ATask(CGI), _fd(fd), _parentFd(parentFd), _connection(connection) {
   reset();
 }
@@ -78,6 +78,7 @@ int Request::_AssembleRespose(void) {
   _response << "\r\n";
   _response << _responseBody.str();
   setStatus(READY_TO_SEND);
+  sendResult();
   return 0;
 }
 
@@ -220,35 +221,36 @@ int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks)
   //удалить это тестовое боди по готовности парсера
   _body = "foo=bar";
   ///
-  _connection->getConnectionManager()->add(fd_output[0], _fd);
-  _connection->getConnectionManager()->add(fd_input[1], _fd);
-  if (!_body.empty())
-    _connection->getConnectionManager()->at(fd_input[1])->getTask()->makeResponseFromString(_body);
-  else
-    _connection->getConnectionManager()->at(fd_input[1])->getTask()->makeResponseFromString("");
-  _connection->getConnectionManager()->at(fd_input[1])->getTask()->setStatus(READY_TO_SEND);
+  // _connection->getConnectionManager()->add(fd_output[0], _fd);
+  //_connection->getConnectionManager()->add(fd_input[1], _fd);
+
+
+  // _connection->getConnectionManager()->add(new LocalConnection(
+  //     _connection->getConnectionManager(), fd_input[0], _fd));
+  // _connection->getConnectionManager()->add(new LocalConnection(
+  //     _connection->getConnectionManager(), fd_input[1], fd_input[1]));
+  // if (!_body.empty())
+  //   _connection->getConnectionManager()
+  //       ->at(fd_input[1])
+  //       ->getTask()
+  //       ->makeResponseFromString(_body);
+  // else
+  //   _connection->getConnectionManager()
+  //       ->at(fd_input[1])
+  //       ->getTask()
+  //       ->makeResponseFromString("");
+  // _connection->getConnectionManager()
+  //     ->at(fd_input[1])
+  //     ->getTask()
+  //     ->setStatus(READY_TO_SEND);
   return 0;
 }
 
 int Request::sendResult(void) {
   if (getStatus() != READY_TO_SEND) return -1;
+  _connection->addToOutput(_response.str());
   setStatus(SENDING);
-
-  int nbytes, ret, sendfd;
-  ret = 0;
-
-  sendfd = _parentFd == -1 ? _fd : _parentFd;
-  std::cout <<  _response.str().c_str() << std::endl;
-  //nbytes = send(sendfd, _response.str().c_str(), _response.str().length(), 0);
-  nbytes = write(sendfd, _response.str().c_str(), _response.str().length());
-  if (nbytes < 0) ret = -1;
-  printf("Server: write return %d, connection %d ", ret, sendfd);
-  setStatus(DONE);
-  _connection->setLastActivity();
-//когда закрывать коннекшены??? ориентироваться на статусы и кипэлайф наверно.
-  _connection->getConnectionManager()->remove(_fd);
-
-  return ret;
+  return 0;
 }
 
 void Request::getSimple(string& body){

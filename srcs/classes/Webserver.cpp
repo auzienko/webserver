@@ -10,7 +10,7 @@ Webserver::~Webserver() { delete _connectionManager; }
 int Webserver::getClientsCount(void) const { return _connectionManager->getConnectionCount(); }
 
 void Webserver::addConnection(int fd) {
-  _connectionManager->add(fd);
+  _connectionManager->add(new NetworkConnection(_connectionManager, fd));
 }
 
 void Webserver::closeConnection(int fd) {
@@ -100,7 +100,9 @@ int Webserver::readHandler(int fd) {
 int Webserver::writeHandler(int fd) {
   if (fd == _listenSocket) return 0;
   if (_connectionManager->isExist(fd) == 0) return -1;
-  if (_connectionManager->at(fd) == nullptr || _connectionManager->at(fd)->getTask()->getStatus() != READY_TO_SEND)
+  if (_connectionManager->at(fd) == nullptr ||
+      _connectionManager->at(fd)->getTask() == nullptr ||
+      _connectionManager->at(fd)->getTask()->getStatus() != SENDING)
     return 0;
   ws::print(MESSAGE_TRY_SEND_DATA, " ");
   if (_connectionManager->sendData(fd) < 0) {

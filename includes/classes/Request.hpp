@@ -8,6 +8,12 @@
 #define strnpos std::string::npos 
 
 #include "../main.hpp"
+#include "ATask.hpp"
+#include "ConfigUtils.hpp"
+#include "MimeTypes.hpp"
+#include "ConnectionManager.hpp"
+
+class AConnection;
 
 using namespace std;
 
@@ -18,22 +24,21 @@ enum States{
     END
 };
 
-class Connection;
 
 class Request : public ATask{
  private:
   int _fd;
   int _parentFd;
   int _status;
-  Connection* _connection;
+  AConnection* _connection;
   std::stringstream _responseHeader;
   std::stringstream _responseBody;
   std::stringstream _response;
 
   Request(void);
  public:
-  Request(Connection* connection, int const& fd);
-  Request(Connection* connection, int const& fd, int const& parentFd);
+  Request(AConnection* connection, int const& fd);
+  Request(AConnection* connection, int const& fd, int const& parentFd);
   ~Request();
   int getFd(void) const;
   int getRequest(t_server const& server_config);
