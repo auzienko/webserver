@@ -1,4 +1,7 @@
 #include "../../includes/classes/Request.hpp"
+#include "../../includes/classes/MimeTypes.hpp"
+#include "../../includes/classes/ConfigUtils.hpp"
+#include "../../includes/classes/LocalConnection.hpp"
 
 using namespace std;
 

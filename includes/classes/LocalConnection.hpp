@@ -2,7 +2,6 @@
 #define LOCALCONNECTION_HPP
 
 #include "ConnectionManager.hpp"
-#include "AConnection.hpp"
 
 class ConnectionManager;
 

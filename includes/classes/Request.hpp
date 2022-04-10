@@ -9,9 +9,7 @@
 
 #include "../main.hpp"
 #include "ATask.hpp"
-#include "ConfigUtils.hpp"
-#include "MimeTypes.hpp"
-#include "ConnectionManager.hpp"
+#include "AConnection.hpp"
 
 class AConnection;
 

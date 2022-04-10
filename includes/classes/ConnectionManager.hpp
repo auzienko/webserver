@@ -3,8 +3,6 @@
 
 #include "../main.hpp"
 #include "AConnection.hpp"
-#include "NetworkConnection.hpp"
-#include "LocalConnection.hpp"
 
 class AConnection;
 

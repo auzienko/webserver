@@ -1,4 +1,5 @@
 #include "../../includes/classes/Webserver.hpp"
+#include "../../includes/classes/NetworkConnection.hpp"
 
 Webserver::Webserver(t_server &src, int maxConnection)
     : _maxConnection(maxConnection), _serverConfig(src) {
