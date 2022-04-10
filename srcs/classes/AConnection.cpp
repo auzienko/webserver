@@ -1,27 +1,27 @@
 #include "../../includes/classes/AConnection.hpp"
 
 AConnection::AConnection()
-    : _connectionManager(nullptr), _inputFd(-1), _outputFd(-1), _task(nullptr) {}
+    : _connectionManager(nullptr), _subscriptionFd(-1), _sendResultFd(-1), _task(nullptr) {}
 
 AConnection::~AConnection() {
   killTask();
-  close(_inputFd);
+  close(_subscriptionFd);
   std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🖖 CLOSE FD : "
-            << _inputFd << std::endl;
+            << _subscriptionFd << std::endl;
 }
 
 AConnection::AConnection(ConnectionManager* cm, int inputFd)
-    : _connectionManager(cm), _inputFd(inputFd), _outputFd(inputFd), _task(nullptr) {
+    : _connectionManager(cm), _subscriptionFd(inputFd), _sendResultFd(inputFd), _task(nullptr) {
   setLastActivity();
   std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🐣 NEW FD : "
-            << _inputFd << std::endl;
+            << _subscriptionFd << std::endl;
 }
 
 AConnection::AConnection(ConnectionManager* cm, int inputFd, int outputFd)
-    : _connectionManager(cm), _inputFd(inputFd), _outputFd(outputFd), _task(nullptr) {
+    : _connectionManager(cm), _subscriptionFd(inputFd), _sendResultFd(outputFd), _task(nullptr) {
   setLastActivity();
   std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🐣 NEW FD : "
-            << _inputFd << std::endl;
+            << _subscriptionFd << std::endl;
 }
 
 
@@ -44,7 +44,7 @@ void AConnection::killTask(void) {
 }
 
 int AConnection::readData(t_server const& server_config) {
-  if (_task == nullptr) _task = new Request(this, _inputFd);
+  if (_task == nullptr) _task = new Request(this, _subscriptionFd);
   _task->getRequest(server_config);
   return 0;
 }
@@ -54,5 +54,5 @@ void AConnection::addToOutput(std::string str){
 }
 
 int AConnection::getFd(void){
-  return _inputFd;
+  return _subscriptionFd;
 }
