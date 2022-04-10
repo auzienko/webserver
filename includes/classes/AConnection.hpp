@@ -13,8 +13,8 @@ class ConnectionManager;
 class AConnection {
  protected:
   ConnectionManager* _connectionManager;
-  int _inputFd;
-  int _outputFd;
+  int _subscriptionFd;
+  int _sendResultFd;
   int _type;
   Request* _task;
   std::time_t _lastActivity;
