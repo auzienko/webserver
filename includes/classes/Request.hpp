@@ -7,7 +7,10 @@
 #define CRLF "\r\n"
 #define strnpos std::string::npos 
 
-#include "../main.hpp"
+#include "ATask.hpp"
+#include "AConnection.hpp"
+
+class AConnection;
 
 using namespace std;
 
@@ -18,35 +21,36 @@ enum States{
     END
 };
 
-class Connection;
 
 class Request : public ATask{
  private:
   int _fd;
   int _parentFd;
   int _status;
-  Connection* _connection;
+  AConnection* _connection;
+  t_server const& _server_config;
   std::stringstream _responseHeader;
   std::stringstream _responseBody;
   std::stringstream _response;
 
   Request(void);
  public:
-  Request(Connection* connection, int const& fd);
-  Request(Connection* connection, int const& fd, int const& parentFd);
+  Request(AConnection* connection, t_server const& server_config, int const& fd);
+  Request(AConnection* connection, t_server const& server_config, int const& fd, int const& parentFd);
   ~Request();
   int getFd(void) const;
-  int getRequest(t_server const& server_config);
+  int collectData(void);
+  int executeTask(void);
   int sendResult(void);
   int makeResponseFromString(std::string str);
 
  private:
   Request(Request const& src);
   Request& operator=(Request const& rhs);
-  int _RequestHandler(t_server const& server_config);
-  int _MakeResponseBody(t_server const& server_config, t_uriInfo &cur);
+  int _RequestHandler(void);
+  int _MakeResponseBody(t_uriInfo &cur);
   int _MakeResponseHeaders(t_uriInfo &cur);
-  int _AssembleRespose(void);
+  int _AssembleResponse(void);
   int _MakeAutoIndex(std::string const& show_path, std::string const& real_path);
   int _MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks);
   int _MakeStdRequest(std::string uri);

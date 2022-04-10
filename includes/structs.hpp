@@ -1,3 +1,6 @@
+#ifndef STRUCTS_HPP
+#define STRUCTS_HPP
+
 #include "main.hpp"
 
 typedef struct tag_location {
@@ -32,3 +35,5 @@ typedef struct s_uriInfo{
     std::string pathInfo;
     const t_location  *loc;
 }   t_uriInfo;
+
+#endif

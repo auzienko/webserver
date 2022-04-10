@@ -2,6 +2,8 @@
 #define WEBSERVER_HPP
 
 #include "../main.hpp"
+#include "Config.hpp"
+#include "ConnectionManager.hpp"
 
 class Config;
 class ConnectionManager;

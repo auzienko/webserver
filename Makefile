@@ -12,7 +12,8 @@ ws/string.cpp \
 ws/socket.cpp \
 classes/Config.cpp \
 classes/ATask.cpp \
-classes/Connection.cpp \
+classes/AConnection.cpp \
+classes/NetworkConnection.cpp \
 classes/Webserver.cpp \
 classes/WebserverManager.cpp \
 classes/ConnectionManager.cpp \
@@ -32,7 +33,8 @@ messages.hpp \
 z_array.hpp \
 classes/Config.hpp \
 classes/ATask.hpp \
-classes/Connection.hpp \
+classes/AConnection.hpp \
+classes/NetworkConnection.hpp \
 classes/Webserver.hpp \
 classes/WebserverManager.hpp \
 classes/ConnectionManager.hpp \
