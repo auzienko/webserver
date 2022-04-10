@@ -44,8 +44,8 @@ void AConnection::killTask(void) {
 }
 
 int AConnection::readData(t_server const& server_config) {
-  if (_task == nullptr) _task = new Request(this, _subscriptionFd);
-  _task->getRequest(server_config);
+  if (_task == nullptr) _task = new Request(this, server_config, _subscriptionFd);
+  _task->collectData();
   return 0;
 }
 

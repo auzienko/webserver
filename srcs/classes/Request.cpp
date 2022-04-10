@@ -7,39 +7,39 @@ using namespace std;
 
 Request::~Request(void) {}
 
-Request::Request(AConnection* connection, int const& fd)
-    : ATask(NETWORK), _fd(fd), _parentFd(-1), _connection(connection) {
+Request::Request(AConnection* connection, t_server const& server_config, int const& fd)
+    : ATask(NETWORK), _fd(fd), _parentFd(-1), _connection(connection), _server_config(server_config) {
   reset();
 }
-Request::Request(AConnection* connection, int const& fd, int const& parentFd)
-    : ATask(CGI), _fd(fd), _parentFd(parentFd), _connection(connection) {
+Request::Request(AConnection* connection, t_server const& server_config, int const& fd, int const& parentFd)
+    : ATask(CGI), _fd(fd), _parentFd(parentFd), _connection(connection), _server_config(server_config) {
   reset();
 }
 
 int Request::getFd(void) const { return _fd; }
 
-int Request::_RequestHandler(t_server const& server_config) {
+int Request::_RequestHandler(void) {
   t_uriInfo cur;
 
   try
   {
-    cur = ConfigUtils::parseURI(_request_uri, server_config);
+    cur = ConfigUtils::parseURI(_request_uri, _server_config);
   }
   catch (std::exception &ex)
   {
     std::cerr << ex.what() << std::endl;
   }
-  if (_MakeResponseBody(server_config, cur) == 0 &&
+  if (_MakeResponseBody(cur) == 0 &&
       _MakeResponseHeaders(cur) == 0)
-    _AssembleRespose();
+    _AssembleResponse();
   return 0;
 }
 
-int Request::_MakeResponseBody(t_server const& server_config, t_uriInfo &cur) {
+int Request::_MakeResponseBody(t_uriInfo &cur) {
   _responseBody.clear();
 
   if (cur.isCgi) {
-    _MakeCgiRequest(server_config, cur);
+    _MakeCgiRequest(_server_config, cur);
     return 1;
   } else {
     if (!cur.loc)
@@ -74,7 +74,7 @@ int Request::_MakeResponseHeaders(t_uriInfo &cur) {
   return 0;
 }
 
-int Request::_AssembleRespose(void) {
+int Request::_AssembleResponse(void) {
   _response.clear();
   _response << _responseHeader.str();
   _response << "Content-lenght: " << _responseBody.str().length() << "\r\n";
@@ -392,12 +392,12 @@ void Request::print(){
   }
 }
 
-int Request::getRequest(t_server const& server_config) {
+int Request::collectData(void) {
   if (getStatus() < READY_TO_HANDLE)
     setStatus(READING);
   else
     return 0;
-  size_t i = server_config.client_max_body_size;
+  size_t i = _server_config.client_max_body_size;
   int nbytes;
   char buf[DEFAULT_BUFLEN];
   int fd = _fd;
@@ -427,11 +427,16 @@ int Request::getRequest(t_server const& server_config) {
         print();
         //проставить этот статус после успешного парсинга
         setStatus(READY_TO_HANDLE);
-        _RequestHandler(server_config);
+        executeTask();
       }
     }
   }
   return 0;
+  }
+
+  int Request::executeTask(void) {
+    _RequestHandler();
+    return 0;
   }
 
   int Request::makeResponseFromString(std::string str) {
