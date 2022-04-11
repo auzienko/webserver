@@ -3,11 +3,11 @@
 
 #include "../main.hpp"
 #include "ConnectionManager.hpp"
-#include "Request.hpp"
+#include "UnknownNetworkTask.hpp"
 
 enum ConnectionType { NETWORK_CONNECTION, LOCAL_CONNECTION };
 
-class Request;
+class ATask;
 class ConnectionManager;
 
 class AConnection {
@@ -16,7 +16,7 @@ class AConnection {
   int _subscriptionFd;
   int _sendResultFd;
   int _type;
-  Request* _task;
+  ATask* _task;
   std::time_t _lastActivity;
   std::stringstream _input;
   std::stringstream _output;
@@ -34,14 +34,16 @@ class AConnection {
   std::time_t getLastActivity(void) const;
 
   int getFd(void);
-  void setTask(Request* task);
-  Request* getTask(void) const;
+  void setTask(ATask* task);
+  ATask* getTask(void) const;
   void killTask(void);
+  void replaceTask(ATask* newTask);
   ConnectionManager* getConnectionManager(void) const;
 
+  std::stringstream& getInputData(void);
   void addToOutput(std::string str);
-  int readData(t_server const& server_config);
-  virtual int sendData(void) = 0;
+  virtual int readData(void) = 0;
+  virtual int handleData(void) = 0;
 };
 
 #endif

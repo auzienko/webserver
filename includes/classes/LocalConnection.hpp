@@ -15,7 +15,8 @@ class LocalConnection : public AConnection {
   LocalConnection(ConnectionManager* cm, int inputFd);
   LocalConnection(ConnectionManager* cm, int inputFd, int outputFd);
   virtual ~LocalConnection();
-  int sendData(void);
+  int readData(void);
+  int handleData(void);
 };
 
 #endif

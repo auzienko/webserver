@@ -14,7 +14,7 @@ LocalConnection::LocalConnection(ConnectionManager* cm, int inputFd,
 
 LocalConnection::~LocalConnection(){}
 
-int LocalConnection::sendData(void) {
+int LocalConnection::handleData(void) {
   if (!(_task && _task->getStatus() == SENDING)) return 0;
 
   int nbytes, ret = 0;

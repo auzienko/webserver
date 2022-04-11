@@ -27,7 +27,7 @@ class WebserverManager {
   void _Banner(void) const;
   fd_set _GetAllSocketsFds(void);
   void _ReadHandler(int fd);
-  void _WriteHandler(int fd);
+  void _OtherHandler(int fd);
 };
 
 #endif

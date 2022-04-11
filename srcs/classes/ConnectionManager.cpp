@@ -32,15 +32,15 @@ AConnection* ConnectionManager::at(int fd) const {
   return nullptr;
 }
 
-int ConnectionManager::readData(int fd, t_server const& server_config) {
+int ConnectionManager::readData(int fd) {
   AConnection* tmp = at(fd);
-  if (tmp != nullptr) return tmp->readData(server_config);
+  if (tmp != nullptr) return tmp->readData();
   return 0;
 }
 
-int ConnectionManager::sendData(int fd) {
+int ConnectionManager::handleData(int fd) {
   AConnection* tmp = at(fd);
-  if (tmp != nullptr) return tmp->sendData();
+  if (tmp != nullptr) return tmp->handleData();
   return 0;
 }
 

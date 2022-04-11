@@ -15,7 +15,8 @@ class NetworkConnection : public AConnection {
   NetworkConnection(ConnectionManager* cm, int inputFd);
   NetworkConnection(ConnectionManager* cm, int inputFd, int outputFd);
   virtual ~NetworkConnection();
-  int sendData(void);
+  int readData(void);
+  int handleData(void);
 };
 
 #endif

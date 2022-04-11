@@ -8,11 +8,11 @@ using namespace std;
 Request::~Request(void) {}
 
 Request::Request(AConnection* connection, t_server const& server_config, int const& fd)
-    : ATask(NETWORK), _fd(fd), _parentFd(-1), _connection(connection), _server_config(server_config) {
+    : ATask(NETWORK), _fd(fd), _connection(connection), _server_config(server_config) {
   reset();
 }
 Request::Request(AConnection* connection, t_server const& server_config, int const& fd, int const& parentFd)
-    : ATask(CGI), _fd(fd), _parentFd(parentFd), _connection(connection), _server_config(server_config) {
+    : ATask(CGI), _fd(fd),  _connection(connection), _server_config(server_config) {
   reset();
 }
 
@@ -123,129 +123,6 @@ int Request::_MakeAutoIndex(std::string const& show_path,
   } else {
     return -1;
   }
-  return 0;
-}
-
-//https://datatracker.ietf.org/doc/html/rfc3875
-//https://firststeps.ru/cgi/cgi1.html
-int Request::_MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks){
-  std::map<std::string, std::string> env;
-  env["PATH_INFO"] = uriBlocks.pathInfo;
-  env["SERVER_NAME"] = server_config.listen;
-  env["AUTH_TYPE"] = ws::stringFromMap(_headers.find("Authorization"), _headers.end());
-  env["CONTENT_LENGTH"] = ws::intToStr(_content_len);
-  env["GATEWAY_INTERFACE"] = "CGI/1.1";
-  env["PATH_TRANSLATED"] = uriBlocks.uri;
-  env["CONTENT_TYPE"] =  ws::stringFromMap(_headers.find("Content-Type"), _headers.end());
-  env["QUERY_STRING"] = _query;
-  env["REMOTE_ADDR"] = ws::socketGetIP(_fd);
-  //env["REMOTE_HOST"] = "empty";
-  // env["REMOTE_IDENT"] =  remote_ident_pwd;
-  // env["REMOTE_USER"] = remote_username;
-  env["REQUEST_METHOD"] = _method;
-  env["SCRIPT_NAME"] = ws::stringFromMap(server_config.cgi.find("." + ws::stringTail(uriBlocks.uri, '.')), _headers.end());
-  env["SERVER_PORT"] = ws::intToStr(server_config.port);
-  env["SERVER_PROTOCOL"] = _http_version;
-  env["SERVER_SOFTWARE"] = PROGRAMM_NAME;
-
-  std::map<std::string, std::string>::iterator it = _headers.begin();
-  std::map<std::string, std::string>::iterator en = _headers.end();
-  while (it != en) {
-    env["HTTP_" + ws::stringToCGIFormat(it->first)] = it->second;
-    ++it;
-  }
-
-  //make env char**
-  t_z_array zc_env;
-  z_array_init(&zc_env);
-  std::map<std::string, std::string>::iterator i = env.begin();
-  std::map<std::string, std::string>::iterator e = env.end();
-  std::string tmp;
-  while( i != e){
-    if ((*i).second.empty())
-      tmp = (*i).first;
-    else
-      tmp = (*i).first + '=' + (*i).second;
-    z_array_append(&zc_env, (char*)tmp.c_str());
-    ++i;
-  }
-  z_array_null_terminate(&zc_env);
-  t_z_array zc_cgi_path;
-  z_array_init(&zc_cgi_path);
-  z_array_append(&zc_cgi_path, (char*)env["SCRIPT_NAME"].c_str());
-  z_array_null_terminate(&zc_cgi_path);
-
-  // RUN cgi
-  std::cout << "~~~ CGI REQUEST\n";
-
-  pid_t pid;
-  int status;
-  int fd_input[2];
-  int fd_output[2];
-
-  if (pipe(fd_input) < 0) {
-    ws::printE(ERROR_CGI_PIPE, "\n");
-    return -1;
-  }
-  if (pipe(fd_output) < 0) {
-    ws::printE(ERROR_CGI_PIPE, "\n");
-    close(fd_input[0]);
-    close(fd_input[1]);
-    return -1;
-  }
-  pid = fork();
-  if (pid < 0) {
-    ws::printE(ERROR_CGI_EXECVE_FORK, "\n");
-    return -1;
-  }
-  if (pid == 0) {
-    if (dup2(fd_input[0], STDIN_FILENO) < 0 ||
-        dup2(fd_output[1], STDOUT_FILENO) < 0) {
-      ws::printE(ERROR_CGI_DUP2, "\n");
-      exit(-1);
-    }
-    close(fd_input[0]);
-    close(fd_input[1]);
-    close(fd_output[0]);
-    close(fd_output[1]);
-    status = execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
-    ws::printE(ERROR_CGI_EXECVE, "\n");
-    exit(status);
-  }
-
-  close(fd_input[0]);
-  close(fd_output[1]);
-  z_array_free(&zc_env);
-  z_array_free(&zc_cgi_path);
-
-  // if you need to write something to cgi - use fd_input[1]
-  // if you need to read something from cgi - use fd_output[0]
-
-  //удалить это тестовое боди по готовности парсера
-  _body = "foo=bar";
-  ///
-  // _connection->getConnectionManager()->add(fd_output[0], _fd);
-  //_connection->getConnectionManager()->add(fd_input[1], _fd);
-
-
-  // _connection->getConnectionManager()->add(new LocalConnection(
-  //     _connection->getConnectionManager(), fd_input[0], _fd));
-  // _connection->getConnectionManager()->add(new LocalConnection(
-  //     _connection->getConnectionManager(), fd_input[1], fd_input[1]));
-  // if (!_body.empty())
-  //   _connection->getConnectionManager()
-  //       ->at(fd_input[1])
-  //       ->getTask()
-  //       ->makeResponseFromString(_body);
-  // else
-  //   _connection->getConnectionManager()
-  //       ->at(fd_input[1])
-  //       ->getTask()
-  //       ->makeResponseFromString("");
-  // _connection->getConnectionManager()
-  //     ->at(fd_input[1])
-  //     ->getTask()
-  //     ->setStatus(READY_TO_SEND);
   return 0;
 }
 
@@ -381,7 +258,6 @@ void Request::parse(char *buf, int nbytes, size_t i){
 }
 
 void Request::print(){
-  if (_parentFd == -1) {
     cout << "HTTP REQUEST (fd: " << _fd << ")\n"
          << _method << " " << _request_uri << " " << _http_version << endl;
     for (map<string, string>::iterator it = _headers.begin();
@@ -389,7 +265,6 @@ void Request::print(){
       cout << (*it).first << ":" << (*it).second << endl;
     }
     cout << _body << endl;
-  }
 }
 
 int Request::collectData(void) {
