@@ -25,8 +25,6 @@ enum States{
 class Request : public ATask{
  private:
   int _fd;
-  int _parentFd;
-  int _status;
   AConnection* _connection;
   t_server const& _server_config;
   std::stringstream _responseHeader;

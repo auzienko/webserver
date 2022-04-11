@@ -59,7 +59,7 @@ int WebserverManager::start(void) {
         --select_result;
       }
       if (FD_ISSET(i, &write_fds)) {
-        _WriteHandler(i);
+        _OtherHandler(i);
         --select_result;
       }
     }
@@ -115,11 +115,11 @@ void WebserverManager::_ReadHandler(int fd) {
   }
 }
 
-void WebserverManager::_WriteHandler(int fd) {
+void WebserverManager::_OtherHandler(int fd) {
   std::vector<Webserver *>::iterator i = _webservers.begin();
   std::vector<Webserver *>::iterator e = _webservers.end();
   while (i != e) {
-    if ((*i)->writeHandler(fd) == 0) return;
+    if ((*i)->otherHandler(fd) == 0) return;
     ++i;
   }
 }

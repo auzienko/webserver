@@ -25,7 +25,7 @@ class Webserver {
   void closeConnection(int index);
   void makeActiveFdsSet(fd_set* fds, int* max_fd) const;
   int readHandler(int fd);
-  int writeHandler(int fd);
+  int otherHandler(int fd);
   void closeConnectionIfTimout(int seconds);
 
  private:

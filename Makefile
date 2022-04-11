@@ -17,7 +17,8 @@ classes/NetworkConnection.cpp \
 classes/Webserver.cpp \
 classes/WebserverManager.cpp \
 classes/ConnectionManager.cpp \
-classes/Request.cpp \
+classes/UnknownNetworkTask.cpp \
+classes/AutoindexTask.cpp \
 classes/MimeTypes.cpp \
 classes/ConfigUtils.cpp \
 z_array/z_array_utils.cpp \
@@ -38,7 +39,8 @@ classes/NetworkConnection.hpp \
 classes/Webserver.hpp \
 classes/WebserverManager.hpp \
 classes/ConnectionManager.hpp \
-classes/Request.hpp \
+classes/UnknownNetworkTask.hpp \
+classes/AutoindexTask.hpp \
 classes/MimeTypes.hpp \
 classes/ConfigUtils.hpp
 
