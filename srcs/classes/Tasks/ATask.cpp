@@ -5,7 +5,7 @@ ATask::ATask(int type, int fd) : _fd(fd), _status(NEW) {
     case UNKNOWN_NETWORK:
     case NETWORK_AUTOINDEX:
     case NETWORK_GET:
-    case NETWORK:
+    case NETWORK_CGI_PARENT:
     case CGI:
       _type = type;
       break;

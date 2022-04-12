@@ -1,5 +1,4 @@
 #include "../../../includes/classes/Tasks/GetTask.hpp"
-
 #include "../../../includes/classes/MimeTypes.hpp"
 
 GetTask::GetTask(AConnection* connection, int const& fd, std::string path)

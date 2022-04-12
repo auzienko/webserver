@@ -2,35 +2,23 @@
 
 AConnection::AConnection()
     : _connectionManager(nullptr),
-      _subscriptionFd(-1),
-      _sendResultFd(-1),
+      _idFd(-1),
       _task(nullptr) {}
 
 AConnection::~AConnection() {
   killTask();
-  close(_subscriptionFd);
+  close(_idFd);
   std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🖖 CLOSE FD : "
-            << _subscriptionFd << std::endl;
+            << _idFd << std::endl;
 }
 
-AConnection::AConnection(ConnectionManager* cm, int inputFd)
+AConnection::AConnection(ConnectionManager* cm, int fd)
     : _connectionManager(cm),
-      _subscriptionFd(inputFd),
-      _sendResultFd(inputFd),
+      _idFd(fd),
       _task(nullptr) {
   setLastActivity();
   std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🐣 NEW FD : "
-            << _subscriptionFd << std::endl;
-}
-
-AConnection::AConnection(ConnectionManager* cm, int inputFd, int outputFd)
-    : _connectionManager(cm),
-      _subscriptionFd(inputFd),
-      _sendResultFd(outputFd),
-      _task(nullptr) {
-  setLastActivity();
-  std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🐣 NEW FD : "
-            << _subscriptionFd << std::endl;
+            << _idFd << std::endl;
 }
 
 void AConnection::setLastActivity(void) { _lastActivity = std::time(0); }
@@ -53,7 +41,7 @@ void AConnection::killTask(void) {
 
 void AConnection::addToOutput(std::string str) { _output << str; }
 
-int AConnection::getFd(void) { return _subscriptionFd; }
+int AConnection::getFd(void) { return _idFd; }
 
 std::stringstream& AConnection::getInputData(void) { return _input; }
 

@@ -25,6 +25,7 @@ class UnknownNetworkTask : public ATask {
   UnknownNetworkTask(UnknownNetworkTask const& src);
   UnknownNetworkTask& operator=(UnknownNetworkTask const& rhs);
   int _MakeKnownTask(t_uriInfo& cur);
+  int _MakeCgiTasks(t_server const& server_config, t_uriInfo uriBlocks);
   int _MakeCgiUnknownNetworkTask(t_server const& server_config,
                                  t_uriInfo uriBlocks);
 
@@ -59,8 +60,6 @@ class UnknownNetworkTask : public ATask {
   void getSimple(string& str);
   void print();
   void reset();
-  // void parse(char* buf, int nbytes, size_t i);
-
   void parse(std::stringstream& str);
 };
 

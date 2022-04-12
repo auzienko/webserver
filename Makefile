@@ -14,6 +14,9 @@ classes/Tasks/ATask.cpp \
 classes/Tasks/UnknownNetworkTask.cpp \
 classes/Tasks/AutoindexTask.cpp \
 classes/Tasks/GetTask.cpp \
+classes/Tasks/CgiParentTask.cpp \
+classes/Tasks/CgiInputTask.cpp \
+classes/Tasks/CgiOutputTask.cpp \
 classes/Connections/AConnection.cpp \
 classes/Connections/NetworkConnection.cpp \
 classes/Connections/LocalConnection.cpp \
@@ -38,6 +41,9 @@ classes/Tasks/ATask.hpp \
 classes/Tasks/UnknownNetworkTask.hpp \
 classes/Tasks/AutoindexTask.hpp \
 classes/Tasks/GetTask.hpp \
+classes/Tasks/CgiParentTask.hpp \
+classes/Tasks/CgiInputTask.hpp \
+classes/Tasks/CgiOutputTask.hpp \
 classes/Connections/AConnection.hpp \
 classes/Connections/NetworkConnection.hpp \
 classes/Connections/LocalConnection.hpp \
