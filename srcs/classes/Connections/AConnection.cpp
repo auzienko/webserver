@@ -1,4 +1,4 @@
-#include "../../includes/classes/AConnection.hpp"
+#include "../../../includes/classes/Connections/AConnection.hpp"
 
 AConnection::AConnection()
     : _connectionManager(nullptr),

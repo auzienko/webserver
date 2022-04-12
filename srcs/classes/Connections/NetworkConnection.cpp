@@ -1,4 +1,4 @@
-#include "../../includes/classes/NetworkConnection.hpp"
+#include "../../../includes/classes/Connections/NetworkConnection.hpp"
 
 NetworkConnection::NetworkConnection(ConnectionManager* cm, int inputFd)
     : AConnection(cm, inputFd, inputFd) {

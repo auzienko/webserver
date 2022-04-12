@@ -1,4 +1,4 @@
-#include "../../includes/classes/ConnectionManager.hpp"
+#include "../../../includes/classes/Connections/ConnectionManager.hpp"
 
 ConnectionManager::ConnectionManager() {}
 

@@ -1,6 +1,6 @@
-#include "../../includes/classes/CGITask.hpp"
-#include "../../includes/classes/MimeTypes.hpp"
-#include "../../includes/classes/ConfigUtils.hpp"
+#include "../../../includes/classes/Tasks/CGITask.hpp"
+#include "../../../includes/classes/MimeTypes.hpp"
+#include "../../../includes/classes/ConfigUtils.hpp"
 
 CGITask::~CGITask(){
 

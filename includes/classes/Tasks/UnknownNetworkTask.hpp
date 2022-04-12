@@ -7,7 +7,7 @@
 #define CRLF "\r\n"
 #define strnpos std::string::npos
 
-#include "AConnection.hpp"
+#include "../Connections/AConnection.hpp"
 #include "ATask.hpp"
 
 class AConnection;
@@ -20,10 +20,13 @@ class UnknownNetworkTask : public ATask {
  private:
   AConnection* _connection;
   t_server const& _server_config;
-  std::stringstream _responseHeader;
-  std::stringstream _responseBody;
 
   UnknownNetworkTask(void);
+  UnknownNetworkTask(UnknownNetworkTask const& src);
+  UnknownNetworkTask& operator=(UnknownNetworkTask const& rhs);
+  int _MakeKnownTask(t_uriInfo& cur);
+  int _MakeCgiUnknownNetworkTask(t_server const& server_config,
+                                 t_uriInfo uriBlocks);
 
  public:
   UnknownNetworkTask(AConnection* connection, t_server const& server_config,
@@ -32,17 +35,6 @@ class UnknownNetworkTask : public ATask {
   int collectData(void);
   int executeTask(void);
   int sendResult(void);
-
- private:
-  UnknownNetworkTask(UnknownNetworkTask const& src);
-  UnknownNetworkTask& operator=(UnknownNetworkTask const& rhs);
-  int _UnknownNetworkTaskHandler(void);
-  int _MakeResponseBody(t_uriInfo& cur);
-  int _MakeResponseHeaders(t_uriInfo& cur);
-  int _AssembleResponse(void);
-  int _MakeCgiUnknownNetworkTask(t_server const& server_config,
-                                 t_uriInfo uriBlocks);
-  int _MakeStdUnknownNetworkTask(std::string uri);
 
  private:
   string _method;
@@ -67,7 +59,7 @@ class UnknownNetworkTask : public ATask {
   void getSimple(string& str);
   void print();
   void reset();
-  void parse(char* buf, int nbytes, size_t i);
+  // void parse(char* buf, int nbytes, size_t i);
 
   void parse(std::stringstream& str);
 };

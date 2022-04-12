@@ -2,9 +2,9 @@
 #define ATASK_HPP
 
 enum Status { NEW, READING, READY_TO_HANDLE, EXECUTION, READY_TO_SEND, SENDING, DONE };
-enum Type { UNKNOWN_NETWORK, NETWORK_AUTOINDEX, NETWORK, CGI };
+enum Type { UNKNOWN_NETWORK, NETWORK_AUTOINDEX, NETWORK_GET, NETWORK, CGI };
 
-#include "../main.hpp"
+#include "../../main.hpp"
 
 class ATask
 {

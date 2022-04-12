@@ -10,15 +10,17 @@ ws/files.cpp \
 ws/int.cpp \
 ws/string.cpp \
 ws/socket.cpp \
+classes/Tasks/ATask.cpp \
+classes/Tasks/UnknownNetworkTask.cpp \
+classes/Tasks/AutoindexTask.cpp \
+classes/Tasks/GetTask.cpp \
+classes/Connections/AConnection.cpp \
+classes/Connections/NetworkConnection.cpp \
+classes/Connections/LocalConnection.cpp \
+classes/Connections/ConnectionManager.cpp \
+classes/Webservers/Webserver.cpp \
+classes/Webservers/WebserverManager.cpp \
 classes/Config.cpp \
-classes/ATask.cpp \
-classes/AConnection.cpp \
-classes/NetworkConnection.cpp \
-classes/Webserver.cpp \
-classes/WebserverManager.cpp \
-classes/ConnectionManager.cpp \
-classes/UnknownNetworkTask.cpp \
-classes/AutoindexTask.cpp \
 classes/MimeTypes.cpp \
 classes/ConfigUtils.cpp \
 z_array/z_array_utils.cpp \
@@ -32,17 +34,19 @@ structs.hpp \
 errors.hpp \
 messages.hpp \
 z_array.hpp \
+classes/Tasks/ATask.hpp \
+classes/Tasks/UnknownNetworkTask.hpp \
+classes/Tasks/AutoindexTask.hpp \
+classes/Tasks/GetTask.hpp \
+classes/Connections/AConnection.hpp \
+classes/Connections/NetworkConnection.hpp \
+classes/Connections/LocalConnection.hpp \
+classes/Connections/ConnectionManager.hpp \
+classes/Webservers/Webserver.hpp \
+classes/Webservers/WebserverManager.hpp \
 classes/Config.hpp \
-classes/ATask.hpp \
-classes/AConnection.hpp \
-classes/NetworkConnection.hpp \
-classes/Webserver.hpp \
-classes/WebserverManager.hpp \
-classes/ConnectionManager.hpp \
-classes/UnknownNetworkTask.hpp \
-classes/AutoindexTask.hpp \
 classes/MimeTypes.hpp \
-classes/ConfigUtils.hpp
+classes/ConfigUtils.hpp \
 
 SRCS = $(addprefix $(SRC_FOLDER), $(SRC_LIST))
 HEADERS = $(addprefix $(HEADER_FOLDER), $(HEADER_LIST))
