@@ -3,14 +3,23 @@
 
 CgiOutputTask::CgiOutputTask(AConnection* connection, int const& fd,
                            int const& parentFd)
-    : ATask(NETWORK_CGI_PARENT, fd),
+    : ATask(LOCAL_CGI_OUTPUT, fd),
       _connection(connection),
       _parentFd(parentFd) {}
 
 CgiOutputTask::~CgiOutputTask() {}
 
-int CgiOutputTask::collectData(void) { return 0; }
+int CgiOutputTask::collectData(void) {
+  std::cout << "~~~ CgiOutputTask::collectData:\n" << _connection->getInputData().str() << std::endl;
+  setStatus(DONE);
+  return 0;
+}
 
-int CgiOutputTask::executeTask(void) { return 0; }
+int CgiOutputTask::executeTask(void) {
+    std::cout << "~~~ CgiOutputTask::executeTask\n";
+     return 0; }
 
-int CgiOutputTask::sendResult(void) { return 0; }
+int CgiOutputTask::sendResult(void) {
+    std::cout << "~~~ CgiOutputTask::sendResult\n";
+  return 0;
+}

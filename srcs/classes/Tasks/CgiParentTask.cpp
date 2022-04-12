@@ -13,6 +13,7 @@ CgiParentTask::~CgiParentTask() {}
 int CgiParentTask::collectData(void) { return 0; }
 
 int CgiParentTask::executeTask(void) {
+ //   std::cout << "~~~ Parent task\n";
 //   if (_MakeHeader(_MakeBody()) == 0) _AssembleResponse();
   return 0;
 }

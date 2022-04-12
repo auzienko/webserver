@@ -8,6 +8,24 @@ LocalConnection::LocalConnection(ConnectionManager* cm, int fd)
 LocalConnection::~LocalConnection(){}
 
 int LocalConnection::hasDataToReadEvent(void) {
+if (!_task) return 0;
+  //тут подумать еще.
+  if (_task->getStatus() >= READY_TO_HANDLE) return 0;
+  int nbytes;
+  char buf[DEFAULT_BUFLEN];
+  memset(buf,0,DEFAULT_BUFLEN);
+  nbytes = read(_idFd, &buf, DEFAULT_BUFLEN);
+  if (nbytes == -1) return 0;
+  if (nbytes < 0) {
+    ws::printE("~~ 😞 Server: read failture", "\n");
+    return -1;
+  } else if (nbytes == 0) {
+    std::cout << "fd (LocalConnection): " << _idFd << " reading no data\n";
+    return 0;
+  } else {
+    _input << buf;
+  }
+  _task->doTask();
   return 0;
 }
 

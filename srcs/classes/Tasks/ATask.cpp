@@ -6,7 +6,8 @@ ATask::ATask(int type, int fd) : _fd(fd), _status(NEW) {
     case NETWORK_AUTOINDEX:
     case NETWORK_GET:
     case NETWORK_CGI_PARENT:
-    case CGI:
+    case LOCAL_CGI_INPUT:
+    case LOCAL_CGI_OUTPUT:
       _type = type;
       break;
     default:

@@ -289,14 +289,17 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
   //удалить это тестовое боди по готовности парсера
   _body = "foo=bar";
 
-  CgiParentTask* tmpParent = new CgiParentTask(_connection, getFd(), fd_input[1], fd_output[0]);
-  CgiInputTask* tmpInput = new CgiInputTask(_connection, fd_input[1], getFd());
-  CgiOutputTask* tmpOutput = new CgiOutputTask(_connection, fd_input[0], getFd());
-  tmpParent->setStatus(READY_TO_HANDLE);
-  tmpInput->setStatus(NEW);
-  tmpOutput->setStatus(NEW);
+  std::cout << "~~~ CREATE CGI TASKs\n";
+
   LocalConnection* tmpConnectionInput = new LocalConnection(_connection->getConnectionManager(), fd_input[1]);
-  LocalConnection* tmpConnectionOutput = new LocalConnection(_connection->getConnectionManager(), fd_input[0]);
+  tmpConnectionInput->addToOutput(_body);
+  LocalConnection* tmpConnectionOutput = new LocalConnection(_connection->getConnectionManager(), fd_output[0]);
+  CgiParentTask* tmpParent = new CgiParentTask(_connection, getFd(), fd_input[1], fd_output[0]);
+  CgiInputTask* tmpInput = new CgiInputTask(tmpConnectionInput, fd_input[1], getFd());
+  CgiOutputTask* tmpOutput = new CgiOutputTask(tmpConnectionOutput, fd_output[0], getFd());
+  tmpParent->setStatus(READY_TO_HANDLE);
+  tmpInput->setStatus(READY_TO_SEND);
+  tmpOutput->setStatus(NEW);
   tmpConnectionInput->setTask(tmpInput);
   tmpConnectionOutput->setTask(tmpOutput);
   _connection->getConnectionManager()->add(tmpConnectionInput);
