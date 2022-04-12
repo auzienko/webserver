@@ -12,11 +12,10 @@ class LocalConnection : public AConnection {
   LocalConnection& operator=(LocalConnection const& rhs);
 
  public:
-  LocalConnection(ConnectionManager* cm, int inputFd);
-  LocalConnection(ConnectionManager* cm, int inputFd, int outputFd);
+  LocalConnection(ConnectionManager* cm, int fd);
   virtual ~LocalConnection();
-  int readData(void);
-  int handleData(void);
+  int hasDataToReadEvent(void);
+  int readyToAcceptDataEvent(void);
 };
 
 #endif

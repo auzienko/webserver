@@ -13,8 +13,7 @@ class ConnectionManager;
 class AConnection {
  protected:
   ConnectionManager* _connectionManager;
-  int _subscriptionFd;
-  int _sendResultFd;
+  int _idFd;
   int _type;
   ATask* _task;
   std::time_t _lastActivity;
@@ -27,8 +26,7 @@ class AConnection {
 
  public:
   AConnection(void);
-  AConnection(ConnectionManager* cm, int inputFd);
-  AConnection(ConnectionManager* cm, int inputFd, int outputFd);
+  AConnection(ConnectionManager* cm, int fd);
   virtual ~AConnection(void);
   void setLastActivity(void);
   std::time_t getLastActivity(void) const;
@@ -42,8 +40,8 @@ class AConnection {
 
   std::stringstream& getInputData(void);
   void addToOutput(std::string str);
-  virtual int readData(void) = 0;
-  virtual int handleData(void) = 0;
+  virtual int hasDataToReadEvent(void) = 0;
+  virtual int readyToAcceptDataEvent(void) = 0;
 };
 
 #endif

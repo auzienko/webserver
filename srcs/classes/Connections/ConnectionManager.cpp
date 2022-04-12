@@ -32,15 +32,15 @@ AConnection* ConnectionManager::at(int fd) const {
   return nullptr;
 }
 
-int ConnectionManager::readData(int fd) {
+int ConnectionManager::hasDataToReadEvent(int fd) {
   AConnection* tmp = at(fd);
-  if (tmp != nullptr) return tmp->readData();
+  if (tmp != nullptr) return tmp->hasDataToReadEvent();
   return 0;
 }
 
-int ConnectionManager::handleData(int fd) {
+int ConnectionManager::readyToAcceptDataEvent(int fd) {
   AConnection* tmp = at(fd);
-  if (tmp != nullptr) return tmp->handleData();
+  if (tmp != nullptr) return tmp->readyToAcceptDataEvent();
   return 0;
 }
 

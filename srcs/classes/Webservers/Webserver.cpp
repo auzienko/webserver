@@ -93,7 +93,7 @@ int Webserver::readHandler(int fd) {
       close(new_sock);
     }
   } else {
-    if (_connectionManager->readData(fd) < 0) {
+    if (_connectionManager->hasDataToReadEvent(fd) < 0) {
       ws::printE(ERROR_READ_FROM_CLIENT, "\n");
       closeConnection(fd);
     }
@@ -107,7 +107,7 @@ int Webserver::otherHandler(int fd) {
   if (_connectionManager->at(fd) == nullptr ||
       _connectionManager->at(fd)->getTask() == nullptr)
     return 0;
-  if (_connectionManager->handleData(fd) < 0) {
+  if (_connectionManager->readyToAcceptDataEvent(fd) < 0) {
   //надо другой оброботчик ошибок. сейчас только про отправку.
     ws::print(MESSAGE_FAIL, "\n");
     ws::printE(ERROR_SEND_TO_CLIENT, "\n");
