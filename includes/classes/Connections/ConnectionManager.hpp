@@ -1,7 +1,7 @@
 #ifndef CONNECTION_MANAGER_HPP
 #define CONNECTION_MANAGER_HPP
 
-#include "../main.hpp"
+#include "../../main.hpp"
 #include "AConnection.hpp"
 
 class AConnection;

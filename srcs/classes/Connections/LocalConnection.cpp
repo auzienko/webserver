@@ -1,4 +1,4 @@
-#include "../../includes/classes/LocalConnection.hpp"
+#include "../../../includes/classes/Connections/LocalConnection.hpp"
 
 LocalConnection::LocalConnection(ConnectionManager* cm, int inputFd)
     : AConnection(cm, inputFd, inputFd) {
@@ -13,6 +13,10 @@ LocalConnection::LocalConnection(ConnectionManager* cm, int inputFd,
 
 
 LocalConnection::~LocalConnection(){}
+
+int LocalConnection::readData(void) {
+  return 0;
+}
 
 int LocalConnection::handleData(void) {
   if (!(_task && _task->getStatus() == SENDING)) return 0;

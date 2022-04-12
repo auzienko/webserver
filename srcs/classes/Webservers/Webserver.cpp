@@ -1,5 +1,6 @@
-#include "../../includes/classes/Webserver.hpp"
-#include "../../includes/classes/NetworkConnection.hpp"
+#include "../../../includes/classes/Webservers/Webserver.hpp"
+#include "../../../includes/classes/Connections/NetworkConnection.hpp"
+#include "../../../includes/classes/Tasks/UnknownNetworkTask.hpp"
 
 Webserver::Webserver(t_server &src, int maxConnection)
     : _maxConnection(maxConnection), _serverConfig(src) {

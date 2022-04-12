@@ -1,9 +1,10 @@
-#include "../../includes/classes/ATask.hpp"
+#include "../../../includes/classes/Tasks/ATask.hpp"
 
 ATask::ATask(int type, int fd) : _fd(fd), _status(NEW) {
   switch (type) {
     case UNKNOWN_NETWORK:
     case NETWORK_AUTOINDEX:
+    case NETWORK_GET:
     case NETWORK:
     case CGI:
       _type = type;

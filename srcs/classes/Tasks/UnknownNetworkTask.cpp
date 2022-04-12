@@ -1,8 +1,9 @@
-#include "../../includes/classes/UnknownNetworkTask.hpp"
-#include "../../includes/classes/AutoindexTask.hpp"
-#include "../../includes/classes/ConfigUtils.hpp"
-#include "../../includes/classes/LocalConnection.hpp"
-#include "../../includes/classes/MimeTypes.hpp"
+#include "../../../includes/classes/Tasks/UnknownNetworkTask.hpp"
+#include "../../../includes/classes/Tasks/AutoindexTask.hpp"
+#include "../../../includes/classes/Tasks/GetTask.hpp"
+#include "../../../includes/classes/ConfigUtils.hpp"
+#include "../../../includes/classes/Connections/LocalConnection.hpp"
+#include "../../../includes/classes/MimeTypes.hpp"
 
 using namespace std;
 
@@ -29,15 +30,6 @@ int UnknownNetworkTask::collectData(void) {
 }
 
 int UnknownNetworkTask::executeTask(void) {
-  return _UnknownNetworkTaskHandler();
-}
-
-int UnknownNetworkTask::sendResult(void) {
-  setStatus(SENDING);
-  return 0;
-}
-
-int UnknownNetworkTask::_UnknownNetworkTaskHandler(void) {
   t_uriInfo cur;
 
   try {
@@ -45,66 +37,37 @@ int UnknownNetworkTask::_UnknownNetworkTaskHandler(void) {
   } catch (std::exception& ex) {
     std::cerr << ex.what() << std::endl;
   }
-  if (_MakeResponseBody(cur) == 0 && _MakeResponseHeaders(cur) == 0)
-    _AssembleResponse();
+  return _MakeKnownTask(cur);
+}
+
+int UnknownNetworkTask::sendResult(void) {
   return 0;
 }
 
-int UnknownNetworkTask::_MakeResponseBody(t_uriInfo& cur) {
-  _responseBody.clear();
-
+int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
   if (cur.isCgi) {
     //   _MakeCgiUnknownNetworkTask(_server_config, cur);
-    return 1;
+    return 42;
   } else {
     if (!cur.loc)
       throw std::logic_error("Cannt find location");
-    else if (cur.loc->autoindex) {
+    else if (cur.loc->autoindex && _UnknownNetworkTask_uri == "/") {
       // start autoindex flow
+      std::cout << "~~~~~~~~~~~~~~~> CREATE AUTOINDEX TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
       AutoindexTask* tmp =
           new AutoindexTask(_connection, getFd(), cur.loc->root, cur.loc->path);
       tmp->setStatus(READY_TO_HANDLE);
       _connection->replaceTask(tmp);
       return 42;
-    } else
-      _MakeStdUnknownNetworkTask(cur.uri);
-  }
-  return 0;
-}
-
-int UnknownNetworkTask::_MakeStdUnknownNetworkTask(
-    std::string uri) {  // Заглушка из прежней версии
-  if (_method == "GET") {
-    std::ifstream tmp(uri, std::ifstream::binary);
-    if (!tmp.is_open()) {
-      std::cout << "Can't GET file " << uri << std::endl;
-      return 404;
+    } else {
+      // GET flow
+      std::cout << "~~~~~~~~~~~~~~~> CREATE GET TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
+      GetTask* tmp = new GetTask(_connection, getFd(), cur.uri);
+      tmp->setStatus(READY_TO_HANDLE);
+      _connection->replaceTask(tmp);
+      return 42;
     }
-    _responseBody << tmp.rdbuf();
-    tmp.close();
-  } else if (_method == "POST") {
   }
-  return 0;
-}
-
-int UnknownNetworkTask::_MakeResponseHeaders(t_uriInfo& cur) {
-  _responseHeader.clear();
-  _responseHeader << "HTTP/1.1 200 OK\r\n";
-  _responseHeader << "Connection: keep-alive\r\n";
-  _responseHeader << "Content-type: " << MimeTypes::getMimeType(cur.uri)
-                  << "\r\n";
-  return 0;
-}
-
-int UnknownNetworkTask::_AssembleResponse(void) {
-  std::stringstream response;
-  response.clear();
-  response << _responseHeader.str();
-  response << "Content-lenght: " << _responseBody.str().length() << "\r\n";
-  response << "\r\n";
-  response << _responseBody.str();
-  _connection->addToOutput(response.str());
-  sendResult();
   return 0;
 }
 
@@ -198,25 +161,25 @@ void UnknownNetworkTask::reset() {
   _code_status = 0;
 }
 
-void UnknownNetworkTask::parse(char* buf, int nbytes, size_t i) {
-  std::string tmp;
-  buf[nbytes] = 0;
-  _client_max_body_size = i;
-  tmp.append(buf, nbytes);
-  if (status == START) parseFirstLine(tmp);
-  if (status == HEADERS) {
-    size_t i = tmp.find(CRLF);
-    while (status == HEADERS && i != strnpos) {
-      parseHeaders(tmp.substr(0, i));
-      tmp.erase(0, i + 2);
-      i = tmp.find(CRLF);
-    }
-  }
-  if (status == BODY) {
-    if (_chunked) getChunked(tmp);
-    if (_content_len) getSimple(tmp);
-  }
-}
+// void UnknownNetworkTask::parse(char* buf, int nbytes, size_t i) {
+//   std::string tmp;
+//   buf[nbytes] = 0;
+//   _client_max_body_size = i;
+//   tmp.append(buf, nbytes);
+//   if (status == START) parseFirstLine(tmp);
+//   if (status == HEADERS) {
+//     size_t i = tmp.find(CRLF);
+//     while (status == HEADERS && i != strnpos) {
+//       parseHeaders(tmp.substr(0, i));
+//       tmp.erase(0, i + 2);
+//       i = tmp.find(CRLF);
+//     }
+//   }
+//   if (status == BODY) {
+//     if (_chunked) getChunked(tmp);
+//     if (_content_len) getSimple(tmp);
+//   }
+// }
 
 void UnknownNetworkTask::parse(std::stringstream& str) {
   std::string tmp = str.str();

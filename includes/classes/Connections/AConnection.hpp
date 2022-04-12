@@ -1,9 +1,9 @@
 #ifndef ACONNECTION_HPP
 #define ACONNECTION_HPP
 
-#include "../main.hpp"
+#include "../../main.hpp"
 #include "ConnectionManager.hpp"
-#include "UnknownNetworkTask.hpp"
+#include "../Tasks/ATask.hpp"
 
 enum ConnectionType { NETWORK_CONNECTION, LOCAL_CONNECTION };
 
