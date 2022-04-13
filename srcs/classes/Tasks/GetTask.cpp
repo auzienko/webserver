@@ -1,5 +1,6 @@
 #include "../../../includes/classes/Tasks/GetTask.hpp"
 #include "../../../includes/classes/MimeTypes.hpp"
+#include "../../../includes/classes/HTTPCodes.hpp"
 
 GetTask::GetTask(AConnection* connection, int const& fd, std::string path)
     : ATask(NETWORK_GET, fd), _connection(connection), _path(path) {}
@@ -15,20 +16,23 @@ int GetTask::executeTask(void) {
 
 int GetTask::_MakeHeader(int status) {
   _Header.clear();
-  switch (status) {
-    case 404:
-      _Header << "HTTP/1.1 404 Not Found\r\n";
-      _Header << "Connection: keep-alive\r\n";
-      _Header << "Content-type: "
-              << "text/html"
-              << "\r\n";
-      break;
-    default:
-      _Header << "HTTP/1.1 200 OK\r\n";
-      _Header << "Connection: keep-alive\r\n";
-      _Header << "Content-type: " << MimeTypes::getMimeType(_path) << "\r\n";
-      break;
-  }
+  // switch (status) {
+  //   case 404:
+  //     _Header << "HTTP/1.1 404 Not Found\r\n";
+  //     _Header << "Connection: keep-alive\r\n";
+  //     _Header << "Content-type: "
+  //             << "text/html"
+  //             << "\r\n";
+  //     break;
+  //   default:
+  //     _Header << "HTTP/1.1 200 OK\r\n";
+  //     _Header << "Connection: keep-alive\r\n";
+  //     _Header << "Content-type: " << MimeTypes::getMimeType(_path) << "\r\n";
+  //     break;
+  //}
+  _Header << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(status) << "\r\n";
+  _Header << "Connection: keep-alive\r\n";
+  _Header << "Content-type: " << MimeTypes::getMimeType(_path) << "\r\n";
   return 0;
 }
 
