@@ -25,6 +25,7 @@ classes/Webservers/Webserver.cpp \
 classes/Webservers/WebserverManager.cpp \
 classes/Config.cpp \
 classes/MimeTypes.cpp \
+classes/HTTPCodes.cpp \
 classes/ConfigUtils.cpp \
 z_array/z_array_utils.cpp \
 z_array/z_array.cpp
@@ -52,6 +53,7 @@ classes/Webservers/Webserver.hpp \
 classes/Webservers/WebserverManager.hpp \
 classes/Config.hpp \
 classes/MimeTypes.hpp \
+classes/HTTPCodes.hpp \
 classes/ConfigUtils.hpp \
 
 SRCS = $(addprefix $(SRC_FOLDER), $(SRC_LIST))
