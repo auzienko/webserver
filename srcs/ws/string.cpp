@@ -53,3 +53,30 @@ std::string ws::stringToCGIFormat(std::string const& str){
     std::transform(result.begin(), result.end(), result.begin(), ::toupper);
     return result;
 }
+
+std::vector<std::string> ws::stringTrim(std::string line)
+{
+  std::vector<std::string> res;
+  size_t  delim = line.find('/', 1);
+
+  while (delim != std::string::npos)
+  {
+    res.push_back(line.substr(1, delim - 1));
+    line.erase(0, delim);
+    delim = line.find('/', 1);
+  }
+  res.push_back(line.substr(1, delim - 1));
+  return (res);
+}
+
+void	ws::stringSkipWS(std::string &line)
+{
+	const char	*ptr = line.c_str();
+	std::string	spaces = WHITE_SPACES;
+
+	while (*ptr && spaces.find(*ptr) != std::string::npos)
+	{
+		ptr++;
+	}
+	line = ptr;
+}

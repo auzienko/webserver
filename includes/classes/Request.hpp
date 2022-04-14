@@ -45,11 +45,11 @@ class Request : public ATask{
   Request& operator=(Request const& rhs);
   int _RequestHandler(t_server const& server_config);
   int _MakeResponseBody(t_server const& server_config, t_uriInfo &cur);
-  int _MakeResponseHeaders(t_uriInfo &cur);
-  int _AssembleRespose(void);
+  int _MakeResponseHeaders(void);
+  int _AssembleResponse(void);
   int _MakeAutoIndex(std::string const& show_path, std::string const& real_path);
-  int _MakeCgiRequest(t_server const& server_config, t_uriInfo uriBlocks);
-  int _MakeStdRequest(std::string uri);
+  int _MakeCgiRequest(t_server const& server_config, t_uriInfo parsedURI);
+  int _MakeStdRequest(t_uriInfo parsedURI);
 
 
   private:
@@ -57,6 +57,7 @@ class Request : public ATask{
     string  _request_uri;
     string  _http_version;
     string  _query; 
+    string  _resBodyType;
     map<string, string> _headers;
     unsigned int     _content_len;
     unsigned int     _client_max_body_size; //from config

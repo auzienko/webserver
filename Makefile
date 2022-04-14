@@ -9,6 +9,7 @@ ws/print.cpp \
 ws/files.cpp \
 ws/int.cpp \
 ws/string.cpp \
+ws/uri.cpp \
 ws/socket.cpp \
 classes/Config.cpp \
 classes/ATask.cpp \
