@@ -1,4 +1,6 @@
-#include "../../includes/classes/Webserver.hpp"
+#include "../../../includes/classes/Webservers/Webserver.hpp"
+#include "../../../includes/classes/Connections/NetworkConnection.hpp"
+#include "../../../includes/classes/Tasks/UnknownNetworkTask.hpp"
 
 Webserver::Webserver(t_server &src, int maxConnection)
     : _maxConnection(maxConnection), _serverConfig(src) {
@@ -10,7 +12,9 @@ Webserver::~Webserver() { delete _connectionManager; }
 int Webserver::getClientsCount(void) const { return _connectionManager->getConnectionCount(); }
 
 void Webserver::addConnection(int fd) {
-  _connectionManager->add(fd);
+  NetworkConnection* tmp = new NetworkConnection(_connectionManager, fd);
+  tmp->setTask(new UnknownNetworkTask(tmp, _serverConfig, fd));
+  _connectionManager->add(tmp);
 }
 
 void Webserver::closeConnection(int fd) {
@@ -89,7 +93,7 @@ int Webserver::readHandler(int fd) {
       close(new_sock);
     }
   } else {
-    if (_connectionManager->readData(fd, _serverConfig) < 0) {
+    if (_connectionManager->hasDataToReadEvent(fd) < 0) {
       ws::printE(ERROR_READ_FROM_CLIENT, "\n");
       closeConnection(fd);
     }
@@ -97,17 +101,16 @@ int Webserver::readHandler(int fd) {
   return 0;
 }
 
-int Webserver::writeHandler(int fd) {
+int Webserver::otherHandler(int fd) {
   if (fd == _listenSocket) return 0;
   if (_connectionManager->isExist(fd) == 0) return -1;
-  if (_connectionManager->at(fd) == nullptr || _connectionManager->at(fd)->getTask()->getStatus() != READY_TO_SEND)
+  if (_connectionManager->at(fd) == nullptr ||
+      _connectionManager->at(fd)->getTask() == nullptr)
     return 0;
-  ws::print(MESSAGE_TRY_SEND_DATA, " ");
-  if (_connectionManager->sendData(fd) < 0) {
+  if (_connectionManager->readyToAcceptDataEvent(fd) < 0) {
+  //надо другой оброботчик ошибок. сейчас только про отправку.
     ws::print(MESSAGE_FAIL, "\n");
     ws::printE(ERROR_SEND_TO_CLIENT, "\n");
-  } else {
-    ws::print(MESSAGE_SUCCESS, "\n");
   }
   //понять когда закрывать коннекшены корректно
   //closeConnection(fd);

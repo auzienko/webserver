@@ -11,14 +11,22 @@ ws/int.cpp \
 ws/string.cpp \
 ws/uri.cpp \
 ws/socket.cpp \
+classes/Tasks/ATask.cpp \
+classes/Tasks/UnknownNetworkTask.cpp \
+classes/Tasks/AutoindexTask.cpp \
+classes/Tasks/GetTask.cpp \
+classes/Tasks/CgiParentTask.cpp \
+classes/Tasks/CgiInputTask.cpp \
+classes/Tasks/CgiOutputTask.cpp \
+classes/Connections/AConnection.cpp \
+classes/Connections/NetworkConnection.cpp \
+classes/Connections/LocalConnection.cpp \
+classes/Connections/ConnectionManager.cpp \
+classes/Webservers/Webserver.cpp \
+classes/Webservers/WebserverManager.cpp \
 classes/Config.cpp \
-classes/ATask.cpp \
-classes/Connection.cpp \
-classes/Webserver.cpp \
-classes/WebserverManager.cpp \
-classes/ConnectionManager.cpp \
-classes/Request.cpp \
 classes/MimeTypes.cpp \
+classes/HTTPCodes.cpp \
 classes/ConfigUtils.cpp \
 z_array/z_array_utils.cpp \
 z_array/z_array.cpp
@@ -31,15 +39,23 @@ structs.hpp \
 errors.hpp \
 messages.hpp \
 z_array.hpp \
+classes/Tasks/ATask.hpp \
+classes/Tasks/UnknownNetworkTask.hpp \
+classes/Tasks/AutoindexTask.hpp \
+classes/Tasks/GetTask.hpp \
+classes/Tasks/CgiParentTask.hpp \
+classes/Tasks/CgiInputTask.hpp \
+classes/Tasks/CgiOutputTask.hpp \
+classes/Connections/AConnection.hpp \
+classes/Connections/NetworkConnection.hpp \
+classes/Connections/LocalConnection.hpp \
+classes/Connections/ConnectionManager.hpp \
+classes/Webservers/Webserver.hpp \
+classes/Webservers/WebserverManager.hpp \
 classes/Config.hpp \
-classes/ATask.hpp \
-classes/Connection.hpp \
-classes/Webserver.hpp \
-classes/WebserverManager.hpp \
-classes/ConnectionManager.hpp \
-classes/Request.hpp \
 classes/MimeTypes.hpp \
-classes/ConfigUtils.hpp
+classes/HTTPCodes.hpp \
+classes/ConfigUtils.hpp \
 
 SRCS = $(addprefix $(SRC_FOLDER), $(SRC_LIST))
 HEADERS = $(addprefix $(HEADER_FOLDER), $(HEADER_LIST))

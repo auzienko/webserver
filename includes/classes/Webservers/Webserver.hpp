@@ -1,7 +1,9 @@
 #ifndef WEBSERVER_HPP
 #define WEBSERVER_HPP
 
-#include "../main.hpp"
+#include "../../main.hpp"
+#include "../Config.hpp"
+#include "../Connections/ConnectionManager.hpp"
 
 class Config;
 class ConnectionManager;
@@ -23,7 +25,7 @@ class Webserver {
   void closeConnection(int index);
   void makeActiveFdsSet(fd_set* fds, int* max_fd) const;
   int readHandler(int fd);
-  int writeHandler(int fd);
+  int otherHandler(int fd);
   void closeConnectionIfTimout(int seconds);
 
  private:

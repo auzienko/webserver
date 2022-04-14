@@ -1,7 +1,9 @@
 #ifndef WEBSERVERMANAGER_HPP
 #define WEBSERVERMANAGER_HPP
 
-#include "../main.hpp"
+#include "../../main.hpp"
+#include "../Config.hpp"
+#include "Webserver.hpp"
 
 class Config;
 class Webserver;
@@ -25,7 +27,7 @@ class WebserverManager {
   void _Banner(void) const;
   fd_set _GetAllSocketsFds(void);
   void _ReadHandler(int fd);
-  void _WriteHandler(int fd);
+  void _OtherHandler(int fd);
 };
 
 #endif

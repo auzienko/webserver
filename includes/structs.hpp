@@ -1,3 +1,6 @@
+#ifndef STRUCTS_HPP
+#define STRUCTS_HPP
+
 #include "main.hpp"
 
 typedef struct tag_location {
@@ -35,3 +38,5 @@ typedef struct s_uriInfo{
 
     s_uriInfo(void) : isCgi(false), loc(0) {}
 }   t_uriInfo;
+
+#endif
