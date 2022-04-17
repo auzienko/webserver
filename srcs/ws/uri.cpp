@@ -5,11 +5,12 @@ bool ws::uriIsCGI(std::vector<std::string> dirs, std::map<std::string, std::stri
   std::map<std::string, std::string>::const_iterator  it;
   std::map<std::string, std::string>::const_iterator  end = cgi.cend();
   size_t  pPos;
-  std::string file(dirs.back());
+  std::string file;
   std::string pathInfo;
 
   if (dirs.empty())
     return (false);
+  file = dirs.back();
   while (!dirs.empty() && file.find('.') == std::string::npos)
   {
     pathInfo = '/' + file + pathInfo;
