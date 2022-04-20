@@ -75,6 +75,7 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
 }
 
 void UnknownNetworkTask::getSimple(string& body) {
+  if (_content_len < 0) throw logic_error(CODE_400);
   if (_content_len > _client_max_body_size ||
       _body.size() + body.size() > _client_max_body_size)
     throw logic_error(CODE_413);
@@ -83,29 +84,32 @@ void UnknownNetworkTask::getSimple(string& body) {
   if (_body.length() == _content_len) status = END;
 }
 
-void UnknownNetworkTask::getChunked(string& body) {
+void UnknownNetworkTask::getChunked(string& body){
   if (!body.size()) status = END;
 
-  while (status != END) {
-    int chunkSize;
-    size_t i = body.find(CRLF);
-    if (i != strnpos) {
-      stringstream ss;
-      ss << std::hex << body.substr(0, i);
-      ss >> chunkSize;
-      body.erase(0, i + 2);
-      if (!chunkSize) {
+  while (status != END)
+  {
+     size_t i = body.find(CRLF);
+     if (!_chunkSize){
+        if (i != strnpos) {
+          stringstream ss;
+          ss << std::hex << body.substr(0, i);
+          ss >> _chunkSize;
+          body.erase(0, i + 2);
+        }
+    }
+    if (!_chunkSize){
         status = END;
         return;
-      }
-      for (int j = 0; j < chunkSize; j++) {
-        _body.push_back(body[j]);
-      }
-      body.erase(0, chunkSize + 2);
-      i = body.find(CRLF);
     }
+    int k = -1, j = -1;
+    while (++k < body.length() && ++j < _chunkSize){
+        _body.push_back(body[j]);
+        _chunkSize--;
+    }
+    body.erase(0, j + 2);
+    if (!body.size()) return;
   }
-  // status = END;
 }
 
 void UnknownNetworkTask::parseFirstLine(string& firstLine) {
@@ -136,6 +140,8 @@ void UnknownNetworkTask::parseHeaders(string head) {
   string value;
 
   if (head.empty()) {
+    if (_content_len > 0 && _chunked) throw logic_error(CODE_400);
+    if (_headers.find("Host") == std::end(_headers)) throw logic_error(CODE_400);
     if (_chunked || _content_len)
       status = BODY;
     else
@@ -148,7 +154,12 @@ void UnknownNetworkTask::parseHeaders(string head) {
   value = head.substr(i + 1);
   _headers.insert(make_pair(key, value));
   if (key == "Content-Length") _content_len = stoi(value);
-  if (key == "Transfer-Encoding" && value == " chunked") _chunked = true;
+  if (key == "Transfer-Encoding"){
+    if (value == " chunked")
+      _chunked = true;
+    else 
+      throw logic_error(CODE_400);
+  }
 }
 
 void UnknownNetworkTask::reset() {
@@ -162,10 +173,16 @@ void UnknownNetworkTask::reset() {
   _body.clear();
   status = START;
   _code_status = 0;
+  _done = false;
+  _chunkSize = 0;
 }
 
 void UnknownNetworkTask::parse(std::stringstream& str) {
-  std::string tmp = str.str();
+  std::string tmp1 = str.str();
+  std::string tmp = _read;
+  tmp.append(tmp1);
+  
+  if (status == END) reset();
   _client_max_body_size = _server_config.client_max_body_size;
   if (status == START) parseFirstLine(tmp);
   if (status == HEADERS) {
@@ -180,6 +197,8 @@ void UnknownNetworkTask::parse(std::stringstream& str) {
     if (_chunked) getChunked(tmp);
     if (_content_len) getSimple(tmp);
   }
+  _read = tmp;
+  if (status == END) _done = true;
 }
 
 void UnknownNetworkTask::print() {
@@ -275,6 +294,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
     close(fd_output[1]);
     status = execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
     ws::printE(ERROR_CGI_EXECVE, "\n");
+    std::cerr << zc_cgi_path.elem[0] << std::endl;
     exit(status);
   }
 

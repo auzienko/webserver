@@ -20,6 +20,8 @@
 #include <arpa/inet.h>
 #include <ctime>
 
+#include <cstring>
+
 #include "default_settings.hpp"
 #include "errors.hpp"
 #include "messages.hpp"

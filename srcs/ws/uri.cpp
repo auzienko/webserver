@@ -8,8 +8,9 @@ bool ws::uriIsCGI(std::vector<std::string> dirs, std::map<std::string, std::stri
   std::string file;
   std::string pathInfo;
 
-  if (dirs.empty())
+  if (dirs.empty() || dirs.back().empty())
     return (false);
+  std::cout << "Here " << dirs.size() << " " << dirs.back().empty() << std::endl;
   file = dirs.back();
   while (!dirs.empty() && file.find('.') == std::string::npos)
   {

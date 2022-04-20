@@ -49,6 +49,9 @@ class UnknownNetworkTask : public ATask {
   string _body;
   int status;
   int _code_status;
+  bool _done;
+  string _read;
+  int _chunkSize;
 
  public:
   // void modifyUri();
