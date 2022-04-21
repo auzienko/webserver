@@ -74,6 +74,7 @@ Makefile
 
 $(NAME):	$(OTHER_DEPEND) $(OBJS) $(HEADERS) 
 	$(CC) $(CFLAGS) $(ALL_HEADERS) $(OBJS) -o $(NAME)
+	$(CC) cgi.cpp -o cgi #DONT FORGET TO RM IT!!!
 
 clean:
 	$(RM) $(OBJS)

@@ -1,0 +1,20 @@
+server {
+  127.0.0.1:4242
+  location / {
+    methods GET
+  }
+  location /put_test/ {
+    methods PUT
+	upload Downloads
+  }
+  location /post_body {
+    methods POST
+    limit_size 100
+  }
+  location /directory/ {
+    methods GET
+	root ./YoupiBanane/
+	index YoupiBanane/youpi.bad_extension
+  }
+  cgi .bla cgi_tester
+}
