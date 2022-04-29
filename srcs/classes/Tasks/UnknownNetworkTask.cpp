@@ -37,7 +37,7 @@ int UnknownNetworkTask::executeTask(void) {
   t_uriInfo cur;
 
   try {
-    cur = ConfigUtils::parseURI(_UnknownNetworkTask_uri, _server_config);
+    cur = ConfigUtils::parseURI(_UnknownNetworkTask_uri, _server_config, _method);
   } catch (std::exception& ex) {
     std::cerr << ex.what() << std::endl;
   }
@@ -49,27 +49,33 @@ int UnknownNetworkTask::sendResult(void) {
 }
 
 int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
-  if (cur.loc->redir.code != 0) {
-    std::cout << "~~~~~~~~~~~~~~~> CREATE REDIR TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
-    RedirTask* tmp = new RedirTask(_connection, getFd(), cur);
-    tmp->setStatus(READY_TO_HANDLE);
-    _connection->replaceTask(tmp);
-    return 42;
-  } else if (cur.isCgi) {
-    _MakeCgiTasks(_server_config, cur);
+  if (cur.isCgi) {
+    if (cur.cgi_methods.find(_method) != cur.cgi_methods.end() || cur.cgi_methods.empty())
+      _MakeCgiTasks(_server_config, cur);
+    else
+      throw std::logic_error("CGI wrong method");             //Добавить нормальный обработчик ошибок (сега деструкторов)
     return 42;
   } else {
     if (!cur.loc)
       throw std::logic_error("Cannt find location");
-    else if (cur.loc->autoindex && ws::filesIsDir(cur.uri)) {
-      // start autoindex flow
-      std::cout << "~~~~~~~~~~~~~~~> CREATE AUTOINDEX TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
-      AutoindexTask* tmp =
-          new AutoindexTask(_connection, getFd(), cur.loc->root, cur.loc->path);
+    else if (cur.loc->redir.code != 0) {
+      std::cout << "~~~~~~~~~~~~~~~> CREATE REDIR TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
+      RedirTask* tmp = new RedirTask(_connection, getFd(), cur);
       tmp->setStatus(READY_TO_HANDLE);
       _connection->replaceTask(tmp);
       return 42;
-    } else {
+    } else if (cur.loc->autoindex) {
+      // start autoindex flow
+      std::cout << "~~~~~~~~~~~~~~~> CREATE AUTOINDEX TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
+      if (cur.loc->root == cur.uri && ws::filesIsDir(cur.uri)) {
+        AutoindexTask* tmp =
+            new AutoindexTask(_connection, getFd(), cur.loc->root, cur.loc->path);
+        tmp->setStatus(READY_TO_HANDLE);
+        _connection->replaceTask(tmp);
+        return 42;
+      } else
+        throw std::logic_error("404");                        //Добавить нормальный обработчик ошибок (сега деструкторов)
+    } else if (_method == "GET") {
       // GET flow
       std::cout << "~~~~~~~~~~~~~~~> CREATE GET TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
       GetTask* tmp = new GetTask(_connection, getFd(), cur);
@@ -78,6 +84,7 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       return 42;
     }
   }
+  throw std::logic_error("Wrong method (mb 404)");             //Добавить нормальный обработчик ошибок (сега деструкторов)
   return 0;
 }
 

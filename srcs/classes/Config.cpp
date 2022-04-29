@@ -71,7 +71,7 @@ void	Config::_serverNameLine(std::string &line, bool &is_server, bool &is_inserv
 	throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 }
 
-void	Config::_savePath(std::string &line, std::string &field)
+void	Config::_savePath(std::string &line, std::string &field, bool is_end)
 {
 	size_t		len = 0;
 	std::string	spaces = WHITE_SPACES "#";
@@ -83,7 +83,7 @@ void	Config::_savePath(std::string &line, std::string &field)
 	field = line.substr(0, len);
 	line = line.c_str() + len;
 	ws::stringSkipWS(line);
-	if (line.length() && line[0] != '#')
+	if (is_end && line.length() && line[0] != '#')
 		throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 }
 
@@ -282,6 +282,8 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 		size_t								len = 0;
 		std::string							spaces = WHITE_SPACES "#";
 		std::pair<std::string, std::string>	cgi;
+		std::pair<std::string, std::set<std::string> >	cgi_methods;
+		std::set<std::string>	methods;
 
 		line = line.c_str() + 3;
 		ws::stringSkipWS(line);
@@ -290,12 +292,32 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 		if (!len)
 			throw std::logic_error("End of line in config file when waiting an argument line " + std::to_string(_debugLine));
 		cgi.first = line.substr(0, len);
+		cgi_methods.first = line.substr(0, len);
 		line = line.c_str() + len;
 		ws::stringSkipWS(line);
 		if (!line.length() || line[0] == '#')
 			throw std::logic_error("End of line in config file when waiting an argument line " + std::to_string(_debugLine));
-		_savePath(line, cgi.second);
+		_savePath(line, cgi.second, false);
 		_server.cgi.insert(cgi);
+		line = line.c_str() + cgi.second.length();
+		ws::stringSkipWS(line);
+		if (!line.length())
+			cgi_methods.second = methods;
+		else
+		{
+			while (line.length() && line[0] != '#')
+			{
+				size_t	len = 0;
+				std::string	spaces = WHITE_SPACES "#";
+				while (line[len] && spaces.find(line[len]) == std::string::npos)
+					len++;
+				methods.insert(line.substr(0, len));
+				line = line.c_str() + len;
+				ws::stringSkipWS(line);
+			}
+			cgi_methods.second = methods;
+		}
+		_server.cgi_methods.insert(cgi_methods);
 	}
 	else
 		throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));

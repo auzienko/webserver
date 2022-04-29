@@ -20,7 +20,7 @@ class Config {
   void  _serverArgs(std::string &line, bool &is_location, bool &is_inlocation);
   void  _locationNameLine(std::string &line, bool &is_location, bool &is_inlocation);
   void  _serverNameLine(std::string &line, bool &is_server, bool &is_inserver);
-  void  _savePath(std::string &line, std::string &field);
+  void  _savePath(std::string &line, std::string &field, bool is_end = true);
   void	_checkisin(std::string &line, bool &isIn);
 
  public:
