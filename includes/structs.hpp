@@ -34,14 +34,16 @@ typedef struct tag_server {
   std::map<int, std::string> error_pages;
   std::map<std::string, std::string>
       cgi;  //расширение - ключ, значение - путь к cgi-файлу
+  std::map<std::string, std::set<std::string> > cgi_methods;
 } t_server;
 
 typedef struct s_uriInfo{
     std::string uri;
-    bool        isCgi;
+    bool isCgi;
+    std::set<std::string> cgi_methods;
     std::string args;
     std::string pathInfo;
-    const t_location  *loc;
+    const t_location *loc;
 
     s_uriInfo(void) : isCgi(false), loc(0) {}
 }   t_uriInfo;

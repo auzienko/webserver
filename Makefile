@@ -76,7 +76,7 @@ Makefile
 
 $(NAME):	$(OTHER_DEPEND) $(OBJS) $(HEADERS) 
 	$(CC) $(CFLAGS) $(ALL_HEADERS) $(OBJS) -o $(NAME)
-	$(CC) cgi.cpp -o test #DONT FORGET TO RM IT!!!
+	$(CC) cgi.cpp -o cgi/my_cgi.test #DONT FORGET TO RM IT!!!
 
 clean:
 	$(RM) $(OBJS)

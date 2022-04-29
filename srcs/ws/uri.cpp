@@ -1,6 +1,6 @@
 #include "../../includes/main.hpp"
 
-bool ws::uriIsCGI(std::vector<std::string> dirs, std::map<std::string, std::string> const& cgi, t_uriInfo &res)
+bool ws::uriIsCGI(std::vector<std::string> dirs, std::map<std::string, std::string> const& cgi, t_uriInfo &res, std::map<std::string, std::set<std::string> > cgi_methods)
 {
   std::map<std::string, std::string>::const_iterator  it;
   std::map<std::string, std::string>::const_iterator  end = cgi.cend();
@@ -28,6 +28,7 @@ bool ws::uriIsCGI(std::vector<std::string> dirs, std::map<std::string, std::stri
       res.loc = NULL;
       res.isCgi = true;
       res.pathInfo = pathInfo;
+      res.cgi_methods = cgi_methods.find(file)->second;
       return (true);
     }
   }
@@ -48,7 +49,7 @@ static std::string  setLine(std::vector<std::string> dirs, size_t nLast)
   return (res);
 }
 
-void ws::uriFill(std::string const &line, t_server const& server_config, t_uriInfo &res)
+void ws::uriFill(std::string const &line, t_server const& server_config, t_uriInfo &res, std::string method)
 {
   bool  isFind = false;
   std::vector<t_location>::const_iterator it;
@@ -57,14 +58,14 @@ void ws::uriFill(std::string const &line, t_server const& server_config, t_uriIn
   std::vector<std::string> dirs = ws::stringTrim(line);
   size_t  max_i = dirs.size();
 
-  isFind = ws::uriIsCGI(dirs, server_config.cgi, res);
+  isFind = ws::uriIsCGI(dirs, server_config.cgi, res, server_config.cgi_methods);
   for (size_t i = 0; !isFind && max_i >= i; ++i)
   {
     checkLine = setLine(dirs, i);
     it = server_config.locations.cbegin();
     while (!isFind && it != end)
     {
-      if (checkLine == it->path || checkLine + '/' == it->path)
+      if ((checkLine == it->path || checkLine + '/' == it->path) && (!it->methods.size() || it->methods.find(method) != it->methods.end()))
       {
         isFind = true;
         res.loc = it.base();

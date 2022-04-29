@@ -59,8 +59,8 @@ std::string socketGetIP(int const& fd);
 std::string stringFromMap(std::map<std::string, std::string>::const_iterator it,
     std::map<std::string, std::string>::const_iterator end);
 std::string stringToCGIFormat(std::string const& str);
-bool uriIsCGI(std::vector<std::string> dirs, std::map<std::string, std::string> const& cgi, t_uriInfo &res);
-void uriFill(std::string const &line, t_server const& server_config, t_uriInfo &res);
+bool uriIsCGI(std::vector<std::string> dirs, std::map<std::string, std::string> const& cgi, t_uriInfo &res, std::map<std::string, std::set<std::string> > cgi_methods);
+void uriFill(std::string const &line, t_server const& server_config, t_uriInfo &res, std::string method);
 void stringSkipWS(std::string &line);
 }  // namespace ws
 

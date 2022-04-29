@@ -26,7 +26,7 @@ std::pair<std::string, t_location const*> ConfigUtils::getLocationSettings(
   return std::make_pair(request_path, &(s.locations.at(0)));
 }
 
-t_uriInfo ConfigUtils::parseURI(std::string &uri, t_server const& server_config){
+t_uriInfo ConfigUtils::parseURI(std::string &uri, t_server const& server_config, std::string method){
   t_uriInfo res;
 
   res.isCgi = false;
@@ -34,10 +34,10 @@ t_uriInfo ConfigUtils::parseURI(std::string &uri, t_server const& server_config)
   size_t  delim = url.find('?');
 
   if (delim == std::string::npos)
-    ws::uriFill(url, server_config, res);
+    ws::uriFill(url, server_config, res, method);
   else
   {
-    ws::uriFill(url.substr(0, delim), server_config, res);
+    ws::uriFill(url.substr(0, delim), server_config, res, method);
     res.args = url.substr(delim + 1);
   }
   return (res);

@@ -1,4 +1,4 @@
-#return path(autoindex) cgi(methods)
+#path(autoindex) cgi(methods)
 server test {
   127.0.0.1:8081
   error_page 404 ../../some.html
@@ -7,17 +7,20 @@ server test {
     root ./www-static-site/
     index index.html
   }
-  location /my/test/redir/1/ {
+  location /redir/ {
+    redir 301 /                    # Никогда так не делайте для тестов (307 вместо 301)
+  }
+  location /my/test/redir/ {
     redir 307 https://www.google.com/
   }
-  cgi .test /Users/wgaunt/Desktop/webserver/cgi/my_cgi.test
+  cgi .test /Users/wgaunt/Desktop/ws/cgi/my_cgi.test PUT
 }
 server test2 {
   127.0.0.1:4242
   error_page 404 ../../some.html
   limit_size 1000
   location /usr/ {
-    methods GET POST LOL
+    methods POST LOL
     root /Users/wgaunt/Downloads/
     autoindex on
     limit_size 1000
