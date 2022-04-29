@@ -16,7 +16,8 @@ bool ws::uriIsCGI(std::vector<std::string> dirs, std::map<std::string, std::stri
   {
     pathInfo = '/' + file + pathInfo;
     dirs.pop_back();
-    file = dirs.back();
+    if (!dirs.empty())
+      file = dirs.back();
   }
   if ((pPos = file.find('.')) != std::string::npos)
   {
@@ -47,7 +48,7 @@ static std::string  setLine(std::vector<std::string> dirs, size_t nLast)
   return (res);
 }
 
-void ws::uriFill(std::string const &line, t_server const& server_config, t_uriInfo &res, std::string lPath)
+void ws::uriFill(std::string const &line, t_server const& server_config, t_uriInfo &res)
 {
   bool  isFind = false;
   std::vector<t_location>::const_iterator it;
@@ -65,30 +66,28 @@ void ws::uriFill(std::string const &line, t_server const& server_config, t_uriIn
     {
       if (checkLine == it->path || checkLine + '/' == it->path)
       {
-		if (checkLine == lPath)
-			throw std::logic_error("Recursive redirect found (" + lPath + ")");
         isFind = true;
         res.loc = it.base();
-		if (!res.loc->redir.empty())
-		{
-			t_uriInfo	tRes;
-			std::string	tLine(res.loc->redir);
-			std::vector<std::string>::iterator	end = dirs.end();
-			std::vector<std::string>::iterator it = dirs.begin();
+    		// if (!res.loc->redir.empty())
+    		// {
+    		// 	t_uriInfo	tRes;
+    		// 	std::string	tLine(res.loc->redir);
+    		// 	std::vector<std::string>::iterator	end = dirs.end();
+    		// 	std::vector<std::string>::iterator it = dirs.begin();
 
-			for (size_t j = dirs.size() - i; j > 0; j--)
-				++it;
-			if (it != end) {
-				for ( ; it != end; it++) {
-					tLine += *it + "/";
-				}
-				tLine.pop_back();
-			}
-			uriFill(tLine, server_config, tRes, checkLine);
-			res = tRes;
-			std::cout << res.loc->path << std::endl;
-			return ;
-		}
+    		// 	for (size_t j = dirs.size() - i; j > 0; j--)
+    		// 		++it;
+    		// 	if (it != end) {
+    		// 		for ( ; it != end; it++) {
+    		// 			tLine += *it + "/";
+    		// 		}
+    		// 		tLine.pop_back();
+    		// 	}
+    		// 	uriFill(tLine, server_config, tRes, checkLine);
+    		// 	res = tRes;
+    		// 	std::cout << res.loc->path << std::endl;
+    		// 	return ;
+    		// }
         res.uri = it->root;
         while (dirs.size() > i)
           dirs.erase(dirs.begin());

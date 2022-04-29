@@ -13,8 +13,8 @@ server {
   }
   location /directory/ {
     methods GET
-	root ./YoupiBanane/
-	index YoupiBanane/youpi.bad_extension
+	  root ./YoupiBanane/
+	  index youpi.bad_extension
   }
   cgi .bla cgi_tester
 }

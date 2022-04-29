@@ -15,6 +15,7 @@ classes/Tasks/ATask.cpp \
 classes/Tasks/UnknownNetworkTask.cpp \
 classes/Tasks/AutoindexTask.cpp \
 classes/Tasks/GetTask.cpp \
+classes/Tasks/RedirTask.cpp \
 classes/Tasks/CgiParentTask.cpp \
 classes/Tasks/CgiInputTask.cpp \
 classes/Tasks/CgiOutputTask.cpp \
@@ -43,6 +44,7 @@ classes/Tasks/ATask.hpp \
 classes/Tasks/UnknownNetworkTask.hpp \
 classes/Tasks/AutoindexTask.hpp \
 classes/Tasks/GetTask.hpp \
+classes/Tasks/RedirTask.hpp \
 classes/Tasks/CgiParentTask.hpp \
 classes/Tasks/CgiInputTask.hpp \
 classes/Tasks/CgiOutputTask.hpp \
@@ -74,7 +76,7 @@ Makefile
 
 $(NAME):	$(OTHER_DEPEND) $(OBJS) $(HEADERS) 
 	$(CC) $(CFLAGS) $(ALL_HEADERS) $(OBJS) -o $(NAME)
-	$(CC) cgi.cpp -o cgi #DONT FORGET TO RM IT!!!
+	$(CC) cgi.cpp -o test #DONT FORGET TO RM IT!!!
 
 clean:
 	$(RM) $(OBJS)

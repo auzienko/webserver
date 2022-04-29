@@ -142,9 +142,18 @@ void	Config::_locationArgs(std::string &line)
 	}
 	else if (line.substr(0, 5) == "redir")
 	{
+		std::string	spaces = WHITE_SPACES "#";
+		size_t len = 0;
 		line = line.c_str() + 5;
 		ws::stringSkipWS(line);
-		_savePath(line, cur.redir);
+		cur.redir.code = atoi(line.c_str());
+		while (line[len] && spaces.find(line[len]) == std::string::npos)
+			len++;
+		if (!len)
+			throw std::logic_error("End of line in config file when waiting an argument line " + std::to_string(_debugLine));
+		line.erase(0, len);
+		ws::stringSkipWS(line);
+		_savePath(line, cur.redir.target);
 	}
 	else if (line.substr(0, 9) == "autoindex")
 	{

@@ -1,4 +1,4 @@
-#return path(index, autoindex)
+#return path(autoindex) cgi(methods)
 server test {
   127.0.0.1:8081
   error_page 404 ../../some.html
@@ -7,8 +7,8 @@ server test {
     root ./www-static-site/
     index index.html
   }
-  location /redir/ {
-    redir /
+  location /my/test/redir/1/ {
+    redir 307 https://www.google.com/
   }
   cgi .test /Users/wgaunt/Desktop/webserver/cgi/my_cgi.test
 }

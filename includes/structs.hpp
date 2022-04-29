@@ -3,6 +3,13 @@
 
 #include "main.hpp"
 
+typedef struct s_redir {
+  int code;
+  std::string target;
+
+  s_redir(void) : code(0) {}
+} t_redir;
+
 typedef struct tag_location {
   std::string path;
   std::string root;
@@ -10,7 +17,7 @@ typedef struct tag_location {
   std::string index;
   size_t client_max_body_size;
   std::string uploads_path;
-  std::string redir;
+  t_redir redir;
   bool autoindex;
   bool file_uploads;
 

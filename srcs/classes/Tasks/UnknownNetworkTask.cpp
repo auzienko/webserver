@@ -1,6 +1,7 @@
 #include "../../../includes/classes/Tasks/UnknownNetworkTask.hpp"
 #include "../../../includes/classes/Tasks/AutoindexTask.hpp"
 #include "../../../includes/classes/Tasks/GetTask.hpp"
+#include "../../../includes/classes/Tasks/RedirTask.hpp"
 #include "../../../includes/classes/Tasks/CgiParentTask.hpp"
 #include "../../../includes/classes/Tasks/CgiInputTask.hpp"
 #include "../../../includes/classes/Tasks/CgiOutputTask.hpp"
@@ -48,7 +49,13 @@ int UnknownNetworkTask::sendResult(void) {
 }
 
 int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
-  if (cur.isCgi) {
+  if (cur.loc->redir.code != 0) {
+    std::cout << "~~~~~~~~~~~~~~~> CREATE REDIR TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
+    RedirTask* tmp = new RedirTask(_connection, getFd(), cur);
+    tmp->setStatus(READY_TO_HANDLE);
+    _connection->replaceTask(tmp);
+    return 42;
+  } else if (cur.isCgi) {
     _MakeCgiTasks(_server_config, cur);
     return 42;
   } else {
@@ -102,7 +109,8 @@ void UnknownNetworkTask::getChunked(string& body){
         status = END;
         return;
     }
-    int k = -1, j = -1;
+    std::string::size_type k = -1;
+    int j = -1;
     while (++k < body.length() && ++j < _chunkSize){
         _body.push_back(body[j]);
         _chunkSize--;
