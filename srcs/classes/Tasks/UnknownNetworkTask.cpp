@@ -64,14 +64,17 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       tmp->setStatus(READY_TO_HANDLE);
       _connection->replaceTask(tmp);
       return 42;
-    } else if (cur.loc->autoindex && ws::filesIsDir(cur.uri)) {
+    } else if (cur.loc->autoindex) {
       // start autoindex flow
       std::cout << "~~~~~~~~~~~~~~~> CREATE AUTOINDEX TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
-      AutoindexTask* tmp =
-          new AutoindexTask(_connection, getFd(), cur.loc->root, cur.loc->path);
-      tmp->setStatus(READY_TO_HANDLE);
-      _connection->replaceTask(tmp);
-      return 42;
+      if (cur.loc->root == cur.uri && ws::filesIsDir(cur.uri)) {
+        AutoindexTask* tmp =
+            new AutoindexTask(_connection, getFd(), cur.loc->root, cur.loc->path);
+        tmp->setStatus(READY_TO_HANDLE);
+        _connection->replaceTask(tmp);
+        return 42;
+      } else
+        throw std::logic_error("404");                        //Добавить нормальный обработчик ошибок (сега деструкторов)
     } else if (_method == "GET") {
       // GET flow
       std::cout << "~~~~~~~~~~~~~~~> CREATE GET TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
@@ -81,6 +84,7 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       return 42;
     }
   }
+  throw std::logic_error("Wrong method (mb 404)");             //Добавить нормальный обработчик ошибок (сега деструкторов)
   return 0;
 }
 

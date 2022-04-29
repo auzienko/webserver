@@ -1,4 +1,4 @@
-#path(autoindex) cgi(methods)
+#
 server test {
   127.0.0.1:8081
   error_page 404 ../../some.html
