@@ -12,7 +12,7 @@ class LocalConnection : public AConnection {
   LocalConnection& operator=(LocalConnection const& rhs);
 
  public:
-  LocalConnection(ConnectionManager* cm, int fd);
+  LocalConnection(ConnectionManager* cm, int fd, const std::map<int, std::string>* error_pages);
   virtual ~LocalConnection();
   int hasDataToReadEvent(void);
   int readyToAcceptDataEvent(void);

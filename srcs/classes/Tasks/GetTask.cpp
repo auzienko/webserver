@@ -39,34 +39,34 @@ int GetTask::_MakeHeader(int status) {
 int GetTask::_MakeBody() {
   _Body.clear();
   std::ifstream tmp;
-    struct stat  file;
-    if (stat(_parsedURI.uri.c_str(), &file)) {
-      if (errno == ENOENT) {
-        std::cout << "Can't GET file " << _parsedURI.uri << std::endl;
-        return 404;
-      }
-      else {
-        std::cout << "Inprog error" << std::endl;
-        return (111);                                     // Внутренняя ошибка
-      }
+  struct stat  file;
+  if (stat(_parsedURI.uri.c_str(), &file)) {
+    if (errno == ENOENT) {
+      std::cout << "Can't GET file " << _parsedURI.uri << std::endl;
+      throw std::logic_error("404");
     }
-    if (S_ISDIR(file.st_mode) && (!_parsedURI.loc->index.empty() && _parsedURI.loc->index != _parsedURI.uri)) {
-      tmp.open(_parsedURI.loc->root + _parsedURI.loc->index, std::ifstream::binary);
-      if (!tmp.is_open()) {
-        std::cout << "Can't GET file " << _parsedURI.loc->root + _parsedURI.loc->index << std::endl;
-        return 404;
-      }
-      _resBodyType = MimeTypes::getMimeType(_parsedURI.loc->root + _parsedURI.loc->index);
-    } else {
-      tmp.open(_parsedURI.uri, std::ifstream::binary);
-      if (!tmp.is_open()) {
-        std::cout << "Can't GET file " << _parsedURI.uri << std::endl;
-        return 404;
-      }
-      _resBodyType = MimeTypes::getMimeType(_parsedURI.uri);
+    else {
+      std::cout << "Inprog error" << std::endl;
+      return (111);                                     // Внутренняя ошибка
     }
-    _Body << tmp.rdbuf();
-    tmp.close();
+  }
+  if (S_ISDIR(file.st_mode) && (!_parsedURI.loc->index.empty() && _parsedURI.loc->index != _parsedURI.uri)) {
+    tmp.open(_parsedURI.loc->root + _parsedURI.loc->index, std::ifstream::binary);
+    if (!tmp.is_open()) {
+      std::cout << "Can't GET file " << _parsedURI.loc->root + _parsedURI.loc->index << std::endl;
+      throw std::logic_error("404");
+    }
+    _resBodyType = MimeTypes::getMimeType(_parsedURI.loc->root + _parsedURI.loc->index);
+  } else {
+    tmp.open(_parsedURI.uri, std::ifstream::binary);
+    if (!tmp.is_open()) {
+      std::cout << "Can't GET file " << _parsedURI.uri << std::endl;
+      throw std::logic_error("404");
+    }
+    _resBodyType = MimeTypes::getMimeType(_parsedURI.uri);
+  }
+  _Body << tmp.rdbuf();
+  tmp.close();
   return 200;
 }
 

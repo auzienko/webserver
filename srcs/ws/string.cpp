@@ -80,3 +80,11 @@ void	ws::stringSkipWS(std::string &line)
 	}
 	line = ptr;
 }
+
+int ws::stringTakeErrCode(const std::string &msg)
+{
+  int code = atoi(msg.c_str());
+  if (code == 0)
+    return -1;
+  return code;
+}

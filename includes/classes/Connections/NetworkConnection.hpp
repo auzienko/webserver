@@ -12,7 +12,7 @@ class NetworkConnection : public AConnection {
   NetworkConnection& operator=(NetworkConnection const& rhs);
 
  public:
-  NetworkConnection(ConnectionManager* cm, int inputFd);
+  NetworkConnection(ConnectionManager* cm, int inputFd, const std::map<int, std::string>* error_pages);
   virtual ~NetworkConnection();
   int hasDataToReadEvent(void);
   int readyToAcceptDataEvent(void);

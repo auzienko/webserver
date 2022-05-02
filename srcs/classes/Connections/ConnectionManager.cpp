@@ -34,13 +34,21 @@ AConnection* ConnectionManager::at(int fd) const {
 
 int ConnectionManager::hasDataToReadEvent(int fd) {
   AConnection* tmp = at(fd);
-  if (tmp != nullptr) return tmp->hasDataToReadEvent();
+  try {
+    if (tmp != nullptr) return tmp->hasDataToReadEvent();
+  } catch (const std::exception &ex) {
+    tmp->error(ex);
+  }
   return 0;
 }
 
 int ConnectionManager::readyToAcceptDataEvent(int fd) {
   AConnection* tmp = at(fd);
-  if (tmp != nullptr) return tmp->readyToAcceptDataEvent();
+  try {
+    if (tmp != nullptr) return tmp->readyToAcceptDataEvent();
+  } catch (const std::exception &ex) {
+    tmp->error(ex);
+  }
   return 0;
 }
 
