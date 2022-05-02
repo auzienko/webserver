@@ -51,12 +51,13 @@ void AConnection::error(const std::exception &ex) {
       _output << "\r\n";
       _output << body.str();
     } else {
-      _output << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(404) << "\r\n";
+      _output << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(code) << "\r\n";
       _output << "Connection: keep-alive\r\n";
       _output << "Content-type: " << MimeTypes::getMimeType("smth.html") << "\r\n";
-      _output << "Content-lenght: " << 13 << "\r\n";
+      std::string text(HTTPCodes::getHTTPCodeString(code));
+      _output << "Content-lenght: " << text.length() << "\r\n";
       _output << "\r\n";
-      _output << "It's my text";
+      _output << text;
     }
     _task->setStatus(SENDING);
     delete (tmp);

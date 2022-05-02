@@ -1,6 +1,6 @@
 server test {
   127.0.0.1:8081
-  error_page 404 ../../some.html
+  error_page 405 /Users/wgaunt/Desktop/ws/errorTest.html
   limit_size 1000
   location / {
     root ./www-static-site/
