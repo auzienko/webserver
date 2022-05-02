@@ -50,10 +50,12 @@ void printE(std::string const& msg, std::string const& divider);
 void print(std::string const& msg, std::string const& divider);
 std::pair<bool, std::vector<std::string> > filesReadDirectory(std::string const& path);
 bool filesIsDir(std::string const &file);
+std::pair<std::ifstream, std::string>* filesErrors(int code, const std::map<int, std::string>* error_pages);
 std::string intToStr(int i);
 std::string stringTail(std::string const& str, char c);
 std::string stringReverse(std::string& str);
 std::string stringUrlDecode(std::string const& str);
+int stringTakeErrCode(const std::string &msg);
 std::vector<std::string> stringTrim(std::string line);
 std::string socketGetIP(int const& fd);
 std::string stringFromMap(std::map<std::string, std::string>::const_iterator it,

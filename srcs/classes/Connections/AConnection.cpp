@@ -1,4 +1,6 @@
 #include "../../../includes/classes/Connections/AConnection.hpp"
+#include "../../../includes/classes/MimeTypes.hpp"
+#include "../../../includes/classes/HTTPCodes.hpp"
 
 AConnection::AConnection()
     : _connectionManager(nullptr),
@@ -12,10 +14,11 @@ AConnection::~AConnection() {
             << _idFd << std::endl;
 }
 
-AConnection::AConnection(ConnectionManager* cm, int fd)
+AConnection::AConnection(ConnectionManager* cm, int fd, const std::map<int, std::string>* error_pages)
     : _connectionManager(cm),
       _idFd(fd),
-      _task(nullptr) {
+      _task(nullptr),
+      _error_pages(error_pages) {
   setLastActivity();
   std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🐣 NEW FD : "
             << _idFd << std::endl;
@@ -30,6 +33,36 @@ ConnectionManager* AConnection::getConnectionManager(void) const {
 }
 
 void AConnection::setTask(ATask* task) { _task = task; }
+
+void AConnection::error(const std::exception &ex) {
+  int code = ws::stringTakeErrCode(ex.what());
+  if (code == -1)
+    throw ex;
+  else {
+    std::pair<std::ifstream, std::string> *tmp = ws::filesErrors(code, _error_pages);
+    if (!tmp->second.empty()) {
+      _output << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(code) << "\r\n";
+      _output << "Connection: keep-alive\r\n";
+      _output << "Content-type: " << tmp->second << "\r\n";
+      std::stringstream body;
+      body << tmp->first.rdbuf();
+      tmp->first.close();
+      _output << "Content-lenght: " << body.str().length() << "\r\n";
+      _output << "\r\n";
+      _output << body.str();
+    } else {
+      _output << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(code) << "\r\n";
+      _output << "Connection: keep-alive\r\n";
+      _output << "Content-type: " << MimeTypes::getMimeType("smth.html") << "\r\n";
+      std::string text(HTTPCodes::getHTTPCodeString(code));
+      _output << "Content-lenght: " << text.length() << "\r\n";
+      _output << "\r\n";
+      _output << text;
+    }
+    _task->setStatus(SENDING);
+    delete (tmp);
+  }
+}
 
 ATask* AConnection::getTask(void) const { return _task; }
 

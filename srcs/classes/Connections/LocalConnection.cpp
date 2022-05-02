@@ -1,14 +1,14 @@
 #include "../../../includes/classes/Connections/LocalConnection.hpp"
 
-LocalConnection::LocalConnection(ConnectionManager* cm, int fd)
-    : AConnection(cm, fd) {
+LocalConnection::LocalConnection(ConnectionManager* cm, int fd, const std::map<int, std::string>* error_pages)
+    : AConnection(cm, fd, error_pages) {
   _type = LOCAL_CONNECTION;
 }
 
 LocalConnection::~LocalConnection(){}
 
 int LocalConnection::hasDataToReadEvent(void) {
-if (!_task) return 0;
+  if (!_task) return 0;
   //тут подумать еще.
   if (_task->getStatus() >= READY_TO_HANDLE) return 0;
   int nbytes;

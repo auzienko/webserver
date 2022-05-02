@@ -5,7 +5,7 @@ server {
   }
   location /put_test/ {
     methods PUT
-	upload Downloads
+	  upload Downloads
   }
   location /post_body {
     methods POST
@@ -16,5 +16,5 @@ server {
 	  root ./YoupiBanane/
 	  index youpi.bad_extension
   }
-  cgi .bla cgi_tester
+  cgi .bla /Users/wgaunt/Desktop/ws/cgi/my_cgi.test POST
 }

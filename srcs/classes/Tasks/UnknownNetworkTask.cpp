@@ -53,7 +53,7 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
     if (cur.cgi_methods.find(_method) != cur.cgi_methods.end() || cur.cgi_methods.empty())
       _MakeCgiTasks(_server_config, cur);
     else
-      throw std::logic_error("CGI wrong method");             //Добавить нормальный обработчик ошибок (сега деструкторов)
+      throw std::logic_error("405");             //Добавить нормальный обработчик ошибок (сега деструкторов)
     return 42;
   } else {
     if (!cur.loc)
@@ -326,9 +326,9 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
 
   std::cout << "~~~ CREATE CGI TASKs\n";
 
-  LocalConnection* tmpConnectionInput = new LocalConnection(_connection->getConnectionManager(), fd_input[1]);
+  LocalConnection* tmpConnectionInput = new LocalConnection(_connection->getConnectionManager(), fd_input[1], &_server_config.error_pages);
   tmpConnectionInput->addToOutput(_body);
-  LocalConnection* tmpConnectionOutput = new LocalConnection(_connection->getConnectionManager(), fd_output[0]);
+  LocalConnection* tmpConnectionOutput = new LocalConnection(_connection->getConnectionManager(), fd_output[0], &_server_config.error_pages);
   CgiParentTask* tmpParent = new CgiParentTask(_connection, getFd(), fd_input[1], fd_output[0]);
   CgiInputTask* tmpInput = new CgiInputTask(tmpConnectionInput, fd_input[1], getFd());
   CgiOutputTask* tmpOutput = new CgiOutputTask(tmpConnectionOutput, fd_output[0], getFd());

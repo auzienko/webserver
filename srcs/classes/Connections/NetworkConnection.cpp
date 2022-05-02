@@ -1,7 +1,7 @@
 #include "../../../includes/classes/Connections/NetworkConnection.hpp"
 
-NetworkConnection::NetworkConnection(ConnectionManager* cm, int fd)
-    : AConnection(cm, fd) {
+NetworkConnection::NetworkConnection(ConnectionManager* cm, int fd, const std::map<int, std::string>* error_pages)
+    : AConnection(cm, fd, error_pages) {
   _type = NETWORK_CONNECTION;
 }
 

@@ -12,7 +12,7 @@ Webserver::~Webserver() { delete _connectionManager; }
 int Webserver::getClientsCount(void) const { return _connectionManager->getConnectionCount(); }
 
 void Webserver::addConnection(int fd) {
-  NetworkConnection* tmp = new NetworkConnection(_connectionManager, fd);
+  NetworkConnection* tmp = new NetworkConnection(_connectionManager, fd, &_serverConfig.error_pages);
   tmp->setTask(new UnknownNetworkTask(tmp, _serverConfig, fd));
   _connectionManager->add(tmp);
 }

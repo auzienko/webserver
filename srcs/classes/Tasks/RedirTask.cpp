@@ -18,7 +18,6 @@ int RedirTask::_MakeHeader(int status) {
   _response.clear();
   _response << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(status) << "\r\n";
   _response << "Location: " << _parsedURI.loc->redir.target << "\r\n";
-  std::cout << "WHAT?!" << std::endl;
   return 0;
 }
 
