@@ -10,7 +10,6 @@ bool ws::uriIsCGI(std::vector<std::string> dirs, std::map<std::string, std::stri
 
   if (dirs.empty() || dirs.back().empty())
     return (false);
-  std::cout << "Here " << dirs.size() << " " << dirs.back().empty() << std::endl;
   file = dirs.back();
   while (!dirs.empty() && file.find('.') == std::string::npos)
   {
@@ -52,6 +51,7 @@ static std::string  setLine(std::vector<std::string> dirs, size_t nLast)
 void ws::uriFill(std::string const &line, t_server const& server_config, t_uriInfo &res, std::string method)
 {
   bool  isFind = false;
+  bool  isMethodErr = false;
   std::vector<t_location>::const_iterator it;
   std::vector<t_location>::const_iterator end = server_config.locations.cend();
   std::string checkLine;
@@ -65,40 +65,25 @@ void ws::uriFill(std::string const &line, t_server const& server_config, t_uriIn
     it = server_config.locations.cbegin();
     while (!isFind && it != end)
     {
-      if ((checkLine == it->path || checkLine + '/' == it->path) && (!it->methods.size() || it->methods.find(method) != it->methods.end()))
-      {
-        isFind = true;
-        res.loc = it.base();
-    		// if (!res.loc->redir.empty())
-    		// {
-    		// 	t_uriInfo	tRes;
-    		// 	std::string	tLine(res.loc->redir);
-    		// 	std::vector<std::string>::iterator	end = dirs.end();
-    		// 	std::vector<std::string>::iterator it = dirs.begin();
-
-    		// 	for (size_t j = dirs.size() - i; j > 0; j--)
-    		// 		++it;
-    		// 	if (it != end) {
-    		// 		for ( ; it != end; it++) {
-    		// 			tLine += *it + "/";
-    		// 		}
-    		// 		tLine.pop_back();
-    		// 	}
-    		// 	uriFill(tLine, server_config, tRes, checkLine);
-    		// 	res = tRes;
-    		// 	std::cout << res.loc->path << std::endl;
-    		// 	return ;
-    		// }
-        res.uri = it->root;
-        while (dirs.size() > i)
-          dirs.erase(dirs.begin());
-        while (!dirs.empty())
-        {
-          res.uri = res.uri + dirs.front() + (dirs.size() > 1 ? "/" : "");
-          dirs.erase(dirs.begin());
+      if ((checkLine == it->path || checkLine + '/' == it->path)) {
+        if ((!it->methods.size() || it->methods.find(method) != it->methods.end())) {
+          isFind = true;
+          res.loc = it.base();
+          res.uri = it->root;
+          while (dirs.size() > i)
+            dirs.erase(dirs.begin());
+          while (!dirs.empty())
+          {
+            res.uri = res.uri + dirs.front() + (dirs.size() > 1 ? "/" : "");
+            dirs.erase(dirs.begin());
+          }
+        } else {
+          isMethodErr = true;
         }
       }
       ++it;
     }
   }
+  if (!isFind && isMethodErr)
+    throw std::logic_error("405");
 }

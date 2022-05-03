@@ -39,6 +39,7 @@ void AConnection::error(const std::exception &ex) {
   if (code == -1)
     throw ex;
   else {
+    std::cout << "ERROR! " << ex.what() << std::endl;
     std::pair<std::ifstream, std::string> *tmp = ws::filesErrors(code, _error_pages);
     if (!tmp->second.empty()) {
       _output << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(code) << "\r\n";
@@ -47,7 +48,7 @@ void AConnection::error(const std::exception &ex) {
       std::stringstream body;
       body << tmp->first.rdbuf();
       tmp->first.close();
-      _output << "Content-lenght: " << body.str().length() << "\r\n";
+      _output << "Content-length: " << body.str().length() << "\r\n";
       _output << "\r\n";
       _output << body.str();
     } else {
@@ -55,7 +56,7 @@ void AConnection::error(const std::exception &ex) {
       _output << "Connection: keep-alive\r\n";
       _output << "Content-type: " << MimeTypes::getMimeType("smth.html") << "\r\n";
       std::string text(HTTPCodes::getHTTPCodeString(code));
-      _output << "Content-lenght: " << text.length() << "\r\n";
+      _output << "Content-length: " << text.length() << "\r\n";
       _output << "\r\n";
       _output << text;
     }

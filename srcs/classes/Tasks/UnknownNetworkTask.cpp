@@ -36,11 +36,7 @@ int UnknownNetworkTask::collectData(void) {
 int UnknownNetworkTask::executeTask(void) {
   t_uriInfo cur;
 
-  try {
-    cur = ConfigUtils::parseURI(_UnknownNetworkTask_uri, _server_config, _method);
-  } catch (std::exception& ex) {
-    std::cerr << ex.what() << std::endl;
-  }
+  cur = ConfigUtils::parseURI(_UnknownNetworkTask_uri, _server_config, _method);
   return _MakeKnownTask(cur);
 }
 
@@ -52,12 +48,14 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
   if (cur.isCgi) {
     if (cur.cgi_methods.find(_method) != cur.cgi_methods.end() || cur.cgi_methods.empty())
       _MakeCgiTasks(_server_config, cur);
+    else if (_method != "GET" && _method != "POST" && _method != "DELETE")
+      throw std::logic_error("501");
     else
-      throw std::logic_error("405");             //Добавить нормальный обработчик ошибок (сега деструкторов)
+      throw std::logic_error("405");
     return 42;
   } else {
     if (!cur.loc)
-      throw std::logic_error("Cannt find location");
+      throw std::logic_error("404");        //?
     else if (cur.loc->redir.code != 0) {
       std::cout << "~~~~~~~~~~~~~~~> CREATE REDIR TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
       RedirTask* tmp = new RedirTask(_connection, getFd(), cur);
@@ -74,7 +72,7 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
         _connection->replaceTask(tmp);
         return 42;
       } else
-        throw std::logic_error("404");                        //Добавить нормальный обработчик ошибок (сега деструкторов)
+        throw std::logic_error("404");
     } else if (_method == "GET") {
       // GET flow
       std::cout << "~~~~~~~~~~~~~~~> CREATE GET TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
@@ -84,15 +82,15 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       return 42;
     }
   }
-  throw std::logic_error("Wrong method (mb 404)");             //Добавить нормальный обработчик ошибок (сега деструкторов)
+  throw std::logic_error("501");
   return 0;
 }
 
 void UnknownNetworkTask::getSimple(string& body) {
-  if (_content_len < 0) throw logic_error(CODE_400);
+  if (_content_len < 0) throw logic_error("400");
   if (_content_len > _client_max_body_size ||
       _body.size() + body.size() > _client_max_body_size)
-    throw logic_error(CODE_413);
+    throw logic_error("413");
   _body.append(body);
   body.clear();
   if (_body.length() == _content_len) status = END;
@@ -129,20 +127,20 @@ void UnknownNetworkTask::getChunked(string& body){
 
 void UnknownNetworkTask::parseFirstLine(string& firstLine) {
   size_t j = firstLine.find(CRLF);
-  if (j == strnpos) throw logic_error(CODE_400);
-  if (firstLine.size() < 1) throw logic_error(CODE_400);
+  if (j == strnpos) throw logic_error("400");
+  if (firstLine.size() < 1) throw logic_error("400");
   size_t i = firstLine.find_first_of(" ");
-  if (i == strnpos) throw logic_error(CODE_400);
+  if (i == strnpos) throw logic_error("400");
   _method = firstLine.substr(0, i);
   firstLine.erase(0, i + 1);
   j = j - i - 1;
   i = firstLine.find(" ");
-  if (i == strnpos) throw logic_error(CODE_400);
+  if (i == strnpos) throw logic_error("400");
   _UnknownNetworkTask_uri = firstLine.substr(0, i);
   _http_version = firstLine.substr(i + 1, j - i - 1);
   if (_method != GET && _method != POST && _method != DELETE)
-    throw logic_error(CODE_501);
-  if (_http_version != "HTTP/1.1") throw logic_error(CODE_505);
+    throw logic_error("501");
+  if (_http_version != "HTTP/1.1") throw logic_error("505");
   firstLine.erase(0, j + 2);
   if (firstLine[0] == '\r' && firstLine[1] == '\n' && firstLine[2] == '\0')
     status = END;
@@ -155,8 +153,8 @@ void UnknownNetworkTask::parseHeaders(string head) {
   string value;
 
   if (head.empty()) {
-    if (_content_len > 0 && _chunked) throw logic_error(CODE_400);
-    if (_headers.find("Host") == std::end(_headers)) throw logic_error(CODE_400);
+    if (_content_len > 0 && _chunked) throw logic_error("400");
+    if (_headers.find("Host") == std::end(_headers)) throw logic_error("400");
     if (_chunked || _content_len)
       status = BODY;
     else
@@ -164,7 +162,7 @@ void UnknownNetworkTask::parseHeaders(string head) {
     return;
   }
   size_t i = head.find(":");
-  if (i == strnpos) throw logic_error(CODE_400);
+  if (i == strnpos) throw logic_error("400");
   key = head.substr(0, i);
   value = head.substr(i + 1);
   _headers.insert(make_pair(key, value));
@@ -173,7 +171,7 @@ void UnknownNetworkTask::parseHeaders(string head) {
     if (value == " chunked")
       _chunked = true;
     else 
-      throw logic_error(CODE_400);
+      throw logic_error("400");
   }
 }
 
