@@ -3,7 +3,7 @@
 ConnectionManager::ConnectionManager() {}
 
 ConnectionManager::~ConnectionManager() {
-  std::map<int, AConnection*>::iterator it;
+  std::map<int, AConnection*>::iterator it = _list.begin();
   if (it != _list.end()) {
     delete (*it).second;
     _list.erase(it);

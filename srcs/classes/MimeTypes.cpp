@@ -22,7 +22,6 @@ std::string MimeTypes::getMimeType(std::string const &ext)
   return "*/*";
 }
 
-// Source: https://raw.githubusercontent.com/broofa/node-mime/master/types/standard.json
 MimeTypes::pair MimeTypes::_types[MIMETYPESCOUNT] =  {
   {"*3gpp", "audio/3gpp"},
   {"*jpm", "video/jpm"},

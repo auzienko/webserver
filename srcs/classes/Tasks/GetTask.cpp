@@ -16,20 +16,6 @@ int GetTask::executeTask(void) {
 
 int GetTask::_MakeHeader(int status) {
   _Header.clear();
-  // switch (status) {
-  //   case 404:
-  //     _Header << "HTTP/1.1 404 Not Found\r\n";
-  //     _Header << "Connection: keep-alive\r\n";
-  //     _Header << "Content-type: "
-  //             << "text/html"
-  //             << "\r\n";
-  //     break;
-  //   default:
-  //     _Header << "HTTP/1.1 200 OK\r\n";
-  //     _Header << "Connection: keep-alive\r\n";
-  //     _Header << "Content-type: " << MimeTypes::getMimeType(_path) << "\r\n";
-  //     break;
-  //}
   _Header << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(status) << "\r\n";
   _Header << "Connection: keep-alive\r\n";
   _Header << "Content-type: " << _resBodyType << "\r\n";

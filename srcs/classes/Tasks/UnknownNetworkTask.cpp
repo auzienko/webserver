@@ -254,7 +254,6 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
     ++it;
   }
 
-  //make env char**
   t_z_array zc_env;
   z_array_init(&zc_env);
   std::map<std::string, std::string>::iterator i = env.begin();
@@ -274,7 +273,6 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
   z_array_append(&zc_cgi_path, (char*)env["SCRIPT_NAME"].c_str());
   z_array_null_terminate(&zc_cgi_path);
 
-  // RUN cgi
   std::cout << "~~~ CGI REQUEST\n";
 
   pid_t pid;

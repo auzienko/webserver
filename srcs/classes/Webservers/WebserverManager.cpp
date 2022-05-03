@@ -37,11 +37,6 @@ int WebserverManager::start(void) {
   FD_ZERO(&read_fds);
   FD_ZERO(&write_fds);
 
-  // timeout брать из конфига наверно, но это не точно...
-  // struct timeval tv;
-  // tv.tv_sec = 2;
-  // tv.tv_usec = 0;
-
   while (1) {
     all_fds = _GetAllSocketsFds();
     read_fds = all_fds;

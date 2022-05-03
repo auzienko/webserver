@@ -54,10 +54,7 @@ class UnknownNetworkTask : public ATask {
   int _chunkSize;
 
  public:
-  // void modifyUri();
-  // void parseBody(string& body);
   void parseHeaders(string headers);
-  // void parseUnknownNetworkTask(string& buf);
   void parseFirstLine(string& firstLine);
   void getChunked(string& str);
   void getSimple(string& str);
