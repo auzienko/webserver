@@ -3,6 +3,7 @@
 
 #define GET "GET"
 #define POST "POST"
+#define HEAD "HEAD"
 #define DELETE "DELETE"
 #define CRLF "\r\n"
 #define strnpos std::string::npos

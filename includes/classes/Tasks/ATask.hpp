@@ -10,6 +10,7 @@ class ATask
 {
 protected:
 	std::string _resBodyType;
+	bool _isKeepAlive;
 private:
   	int _fd;
 	int _status;
@@ -23,6 +24,7 @@ public:
 	int getStatus(void) const;
 	void setStatus(int status);
 	int getType(void) const;
+	bool getIsKeepAlive(void) const;
 	int getFd(void) const;
 	int doTask(void);
 	virtual int collectData(void) = 0;

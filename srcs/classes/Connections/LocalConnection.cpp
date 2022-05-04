@@ -21,6 +21,9 @@ int LocalConnection::hasDataToReadEvent(void) {
     return -1;
   } else if (nbytes == 0) {
     std::cout << "fd (LocalConnection): " << _idFd << " reading no data\n";
+  
+    getConnectionManager()->remove(_idFd); //?
+  
     return 0;
   } else {
     _input << buf;

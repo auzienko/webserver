@@ -1,6 +1,7 @@
 #include "../../../includes/classes/Tasks/UnknownNetworkTask.hpp"
 #include "../../../includes/classes/Tasks/AutoindexTask.hpp"
 #include "../../../includes/classes/Tasks/GetTask.hpp"
+#include "../../../includes/classes/Tasks/HeadTask.hpp"
 #include "../../../includes/classes/Tasks/RedirTask.hpp"
 #include "../../../includes/classes/Tasks/CgiParentTask.hpp"
 #include "../../../includes/classes/Tasks/CgiInputTask.hpp"
@@ -48,10 +49,10 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
   if (cur.isCgi) {
     if (cur.cgi_methods.find(_method) != cur.cgi_methods.end() || cur.cgi_methods.empty())
       _MakeCgiTasks(_server_config, cur);
-    else if (_method != "GET" && _method != "POST" && _method != "DELETE")
+    else if (_method != "GET" && _method != "POST" && _method != "DELETE" && _method != "HEAD")
       throw std::logic_error("501");
     else
-      throw std::logic_error("405");
+      throw std::logic_error(_method == "HEAD" ? "405h" : "405");
     return 42;
   } else {
     if (!cur.loc)
@@ -77,6 +78,13 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       // GET flow
       std::cout << "~~~~~~~~~~~~~~~> CREATE GET TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
       GetTask* tmp = new GetTask(_connection, getFd(), cur);
+      tmp->setStatus(READY_TO_HANDLE);
+      _connection->replaceTask(tmp);
+      return 42;
+    } else if (_method == "HEAD") {
+      // HEAD flow
+      std::cout << "~~~~~~~~~~~~~~~> CREATE HEAD TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
+      HeadTask* tmp = new HeadTask(_connection, getFd(), cur);
       tmp->setStatus(READY_TO_HANDLE);
       _connection->replaceTask(tmp);
       return 42;
@@ -138,7 +146,7 @@ void UnknownNetworkTask::parseFirstLine(string& firstLine) {
   if (i == strnpos) throw logic_error("400");
   _UnknownNetworkTask_uri = firstLine.substr(0, i);
   _http_version = firstLine.substr(i + 1, j - i - 1);
-  if (_method != GET && _method != POST && _method != DELETE)
+  if (_method != GET && _method != POST && _method != DELETE && _method != HEAD)
     throw logic_error("501");
   if (_http_version != "HTTP/1.1") throw logic_error("505");
   firstLine.erase(0, j + 2);
@@ -164,7 +172,7 @@ void UnknownNetworkTask::parseHeaders(string head) {
   size_t i = head.find(":");
   if (i == strnpos) throw logic_error("400");
   key = head.substr(0, i);
-  value = head.substr(i + 1);
+  value = head.substr(i + 2);                 // TRIM?
   _headers.insert(make_pair(key, value));
   if (key == "Content-Length") _content_len = stoi(value);
   if (key == "Transfer-Encoding"){
@@ -268,7 +276,9 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
   z_array_null_terminate(&zc_env);
   t_z_array zc_cgi_path;
   z_array_init(&zc_cgi_path);
-  z_array_append(&zc_cgi_path, (char*)env["SCRIPT_NAME"].c_str());
+  char *tmpURI = strdup(uriBlocks.uri.c_str());
+  z_array_append(&zc_cgi_path, tmpURI);
+  free(tmpURI);
   z_array_null_terminate(&zc_cgi_path);
 
   std::cout << "~~~ CGI REQUEST\n";
@@ -304,6 +314,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
     close(fd_output[0]);
     close(fd_output[1]);
     status = execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
+    std::cerr << zc_cgi_path.elem[0] << std::endl << "HERE" << std::endl;
     ws::printE(ERROR_CGI_EXECVE, "\n");
     std::cerr << zc_cgi_path.elem[0] << std::endl;
     exit(status);
@@ -318,7 +329,9 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
   // if you need to read something from cgi - use fd_output[0]
 
   //удалить это тестовое боди по готовности парсера
-  _body = "foo=bar";
+  // _body = "foo=bar";
+  // write(fd_input[1], "Hello", 5);
+  // close(fd_input[1]);
 
   std::cout << "~~~ CREATE CGI TASKs\n";
 
@@ -329,7 +342,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
   CgiInputTask* tmpInput = new CgiInputTask(tmpConnectionInput, fd_input[1], getFd());
   CgiOutputTask* tmpOutput = new CgiOutputTask(tmpConnectionOutput, fd_output[0], getFd());
   tmpParent->setStatus(READY_TO_HANDLE);
-  tmpInput->setStatus(READY_TO_SEND);
+  tmpInput->setStatus(SENDING);
   tmpOutput->setStatus(NEW);
   tmpConnectionInput->setTask(tmpInput);
   tmpConnectionOutput->setTask(tmpOutput);

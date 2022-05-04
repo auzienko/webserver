@@ -21,9 +21,9 @@ int NetworkConnection::hasDataToReadEvent(void) {
     return -1;
   } else if (nbytes == 0) {
     std::cout << "fd (NetworkConnection): " << _idFd << " reading no data\n";
-//
-//    getConnectionManager()->remove(_idFd);
-//  
+
+   getConnectionManager()->remove(_idFd); // См. 48
+
     return 0;
   } else {
     _input << buf;
@@ -45,7 +45,8 @@ int NetworkConnection::readyToAcceptDataEvent(void) {
 
     //когда закрывать коннекшены??? ориентироваться на статусы и кипэлайф
     //наверно.
-    getConnectionManager()->remove(_idFd);
+    if (!_task->getIsKeepAlive())
+      getConnectionManager()->remove(_idFd);
     //остался еще фд. не забудь про аутпут
 
   } else if (_task->getStatus() >= READY_TO_HANDLE) {

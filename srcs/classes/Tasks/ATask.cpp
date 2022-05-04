@@ -1,6 +1,6 @@
 #include "../../../includes/classes/Tasks/ATask.hpp"
 
-ATask::ATask(int type, int fd) : _fd(fd), _status(NEW) {
+ATask::ATask(int type, int fd) : _isKeepAlive(true), _fd(fd), _status(NEW) {
   switch (type) {
     case UNKNOWN_NETWORK:
     case NETWORK_AUTOINDEX:
@@ -22,6 +22,7 @@ int ATask::getStatus(void) const { return _status; }
 
 int ATask::getType(void) const { return _type; }
 int ATask::getFd(void) const { return _fd; }
+bool ATask::getIsKeepAlive(void) const { return _isKeepAlive; }
 
 void ATask::setStatus(int status) {
   if (status > NEW && status <= DONE) _status = status;

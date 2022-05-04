@@ -85,5 +85,5 @@ void ws::uriFill(std::string const &line, t_server const& server_config, t_uriIn
     }
   }
   if (!isFind && isMethodErr)
-    throw std::logic_error("405");
+    throw std::logic_error(method == "HEAD" ? "405h" : "405");
 }

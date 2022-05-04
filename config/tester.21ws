@@ -20,5 +20,29 @@ server {
     root ./YoupiBanane/
     index youpi.bad_extension
   }
-  cgi .bla /Users/wgaunt/Desktop/ws/cgi/my_cgi.test POST
+  cgi .bla /Users/wgaunt/Desktop/ws/cgi/cgi_test POST GET
+}
+server {
+  127.0.0.1:8082
+  error_page 405 /Users/wgaunt/Desktop/ws/errorTest.html
+  location / {
+    methods GET
+    autoindex on
+    root /Users/wgaunt
+  }
+  location /put_test/ {
+    methods PUT
+    upload Downloads
+  }
+  location /post_body {
+    methods POST
+    limit_size 100
+    root /Users/wgaunt
+  }
+  location /directory/ {
+    methods GET
+    root ./YoupiBanane/
+    index youpi.bad_extension
+  }
+  cgi .bla /Users/wgaunt/Desktop/ws/cgi/my_cgi.test POST GET
 }

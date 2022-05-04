@@ -6,11 +6,12 @@
 class AConnection;
 
 class GetTask : public ATask {
- private:
-  AConnection* _connection;
+ protected:
   std::stringstream _Header;
   std::stringstream _Body;
   std::stringstream _response;
+ private:
+  AConnection* _connection;
   t_uriInfo _parsedURI;
 
   GetTask(void);

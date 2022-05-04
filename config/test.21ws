@@ -1,6 +1,6 @@
 server test {
   127.0.0.1:8081
-  error_page 405 /Users/wgaunt/Desktop/ws/errorTest.html
+  error_page 404 /Users/wgaunt/Desktop/ws/errorTest.html
   limit_size 1000
   location / {
     root ./www-static-site/
@@ -12,7 +12,7 @@ server test {
   location /my/test/redir/ {
     redir 307 https://www.google.com/
   }
-  cgi .test /Users/wgaunt/Desktop/ws/cgi/my_cgi.test PUT
+  cgi .test /Users/wgaunt/Desktop/ws/cgi/my_cgi.test
 }
 server test2 {
   127.0.0.1:4242
