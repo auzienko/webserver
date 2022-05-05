@@ -342,7 +342,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
   CgiInputTask* tmpInput = new CgiInputTask(tmpConnectionInput, fd_input[1], getFd());
   CgiOutputTask* tmpOutput = new CgiOutputTask(tmpConnectionOutput, fd_output[0], getFd());
   tmpParent->setStatus(READY_TO_HANDLE);
-  tmpInput->setStatus(SENDING);
+  tmpInput->setStatus(READY_TO_SEND);
   tmpOutput->setStatus(NEW);
   tmpConnectionInput->setTask(tmpInput);
   tmpConnectionOutput->setTask(tmpOutput);

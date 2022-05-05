@@ -18,7 +18,7 @@ int CgiOutputTask::collectData(void) {
 
 int CgiOutputTask::executeTask(void) {
   setStatus(EXECUTION);
-  std::cout << "~~~ CgiOutputTask::executeTask\n";
+  std::cout << "\n~~~ CgiOutputTask::executeTask\n";
   //status hardcode
   int status = 200;
   std::stringstream result;
@@ -34,6 +34,6 @@ int CgiOutputTask::executeTask(void) {
 }
 
 int CgiOutputTask::sendResult(void) {
-  std::cout << "~~~ CgiOutputTask::sendResult\n";
+  std::cout << "\n~~~ CgiOutputTask::sendResult\n";
   return 0;
 }
