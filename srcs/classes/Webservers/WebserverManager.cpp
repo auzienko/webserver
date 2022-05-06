@@ -53,7 +53,7 @@ int WebserverManager::start(void) {
         _ReadHandler(i);
         --select_result;
       }
-      if (FD_ISSET(i, &write_fds)) {
+      else if (FD_ISSET(i, &write_fds)) {
         _OtherHandler(i);
         --select_result;
       }
