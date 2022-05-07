@@ -50,6 +50,7 @@ int WebserverManager::start(void) {
     int max_fd = _maxFd;
     for (int i = 0; i <= max_fd && select_result > 0; ++i) {
       if (FD_ISSET(i, &read_fds)) {
+        sleep(1);
         _ReadHandler(i);
         --select_result;
       }

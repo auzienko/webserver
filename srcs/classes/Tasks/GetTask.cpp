@@ -36,14 +36,20 @@ int GetTask::_MakeBody() {
       return (111);                                     // Внутренняя ошибка
     }
   }
-  if (S_ISDIR(file.st_mode) && (!_parsedURI.loc->index.empty() && _parsedURI.loc->index != _parsedURI.uri)) {
-    tmp.open(_parsedURI.loc->root + _parsedURI.loc->index, std::ifstream::binary);
+  // Если ищется папка, есть индекс, попробует открыть индекс-файл
+  if (S_ISDIR(file.st_mode) && !_parsedURI.loc->index.empty()) {
+    if (*(--_parsedURI.uri.end()) != '/')
+      _parsedURI.uri.push_back('/');
+    tmp.open(_parsedURI.uri + _parsedURI.loc->index, std::ifstream::binary);
     if (!tmp.is_open()) {
-      std::cout << "Can't GET file " << _parsedURI.loc->root + _parsedURI.loc->index << std::endl;
+      std::cout << "Can't GET file " << _parsedURI.uri + _parsedURI.loc->index << std::endl;
       throw std::logic_error("404");
     }
-    _resBodyType = MimeTypes::getMimeType(_parsedURI.loc->root + _parsedURI.loc->index);
+    _resBodyType = MimeTypes::getMimeType(_parsedURI.uri + _parsedURI.loc->index);
   } else {
+    if (ws::filesIsDir(_parsedURI.uri)) {
+      throw std::logic_error("404");
+    }
     tmp.open(_parsedURI.uri, std::ifstream::binary);
     if (!tmp.is_open()) {
       std::cout << "Can't GET file " << _parsedURI.uri << std::endl;

@@ -29,6 +29,8 @@ int UnknownNetworkTask::collectData(void) {
   parse(_connection->getInputData());
   print();
   //проставить этот статус после успешного парсинга
+  if (!_done)
+    return 0;
   setStatus(READY_TO_HANDLE);
   executeTask();
   return 0;
@@ -146,6 +148,8 @@ void UnknownNetworkTask::parseFirstLine(string& firstLine) {
   if (i == strnpos) throw logic_error("400");
   _UnknownNetworkTask_uri = firstLine.substr(0, i);
   _http_version = firstLine.substr(i + 1, j - i - 1);
+  if (_method == "PUT")
+    _method = POST;
   if (_method != GET && _method != POST && _method != DELETE && _method != HEAD)
     throw logic_error("501");
   if (_http_version != "HTTP/1.1") throw logic_error("505");
@@ -225,6 +229,7 @@ void UnknownNetworkTask::parse(std::stringstream& str) {
   }
   _read = tmp;
   if (status == END) _done = true;
+  std::cout << "STATUS: " << status << std::endl;
 }
 
 void UnknownNetworkTask::print() {
