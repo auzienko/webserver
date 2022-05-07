@@ -13,7 +13,7 @@ int LocalConnection::hasDataToReadEvent(void) {
   int nbytes;
   char buf[DEFAULT_BUFLEN];
   memset(buf, 0, DEFAULT_BUFLEN);
-  nbytes = read(_idFd, &buf, DEFAULT_BUFLEN);
+  nbytes = read(_idFd, &buf, DEFAULT_BUFLEN - 1);
   if (nbytes == -1) return 0;
   if (nbytes < 0) {
     ws::printE("~~ 😞 Server: read failture", "\n");
