@@ -172,11 +172,16 @@ void UnknownNetworkTask::parseHeaders(string head) {
   size_t i = head.find(":");
   if (i == strnpos) throw logic_error("400");
   key = head.substr(0, i);
-  value = head.substr(i + 2);                 // TRIM?
+  try {
+    head.at(i + 2);
+    value = head.substr(i + 2);                 // TRIM?
+  } catch (...){
+    value = "";
+  }
   _headers.insert(make_pair(key, value));
   if (key == "Content-Length") _content_len = stoi(value);
   if (key == "Transfer-Encoding"){
-    if (value == " chunked")
+    if (value == "chunked")
       _chunked = true;
     else 
       throw logic_error("400");
@@ -233,6 +238,11 @@ void UnknownNetworkTask::print() {
   cout << _body << endl;
 }
 
+// "HTTP_REFERER="
+// "REQUEST_URI="
+// "SCRIPT_FILENAME="
+
+
 int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo uriBlocks){
   std::map<std::string, std::string> env;
   env["PATH_INFO"] = uriBlocks.pathInfo;
@@ -244,7 +254,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
   env["CONTENT_TYPE"] =  ws::stringFromMap(_headers.find("Content-Type"), _headers.end());
   env["QUERY_STRING"] = _query;
   env["REMOTE_ADDR"] = ws::socketGetIP(getFd());
-  //env["REMOTE_HOST"] = "empty";
+  // //env["REMOTE_HOST"] = "empty";
   // env["REMOTE_IDENT"] =  remote_ident_pwd;
   // env["REMOTE_USER"] = remote_username;
   env["REQUEST_METHOD"] = _method;

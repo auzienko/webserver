@@ -20,13 +20,13 @@ int LocalConnection::hasDataToReadEvent(void) {
     return -1;
   } else if (nbytes == 0) {
     std::cout << "fd (LocalConnection): " << _idFd << " reading no data\n";
+    _task->doTask();
     getConnectionManager()->remove(_idFd);
     return 0;
   } else {
     _input << buf;
     std::cout << "\n⬇ ⬇ ⬇ fd (LocalConnection): " << _idFd << " READ " << nbytes / 1024. << "Kb data\n";
   }
-  _task->doTask();
   return 0;
 }
 

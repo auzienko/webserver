@@ -16,7 +16,7 @@ int NetworkConnection::hasDataToReadEvent(void) {
   int nbytes;
   char buf[DEFAULT_BUFLEN];
   memset(buf, 0, DEFAULT_BUFLEN);
-  nbytes = recv(_idFd, &buf, DEFAULT_BUFLEN, 0);
+  nbytes = read(_idFd, &buf, DEFAULT_BUFLEN);
   if (nbytes == -1) return 0;
   if (nbytes < 0) {
     ws::printE("~~ 😞 Server: read failture", "\n");
@@ -24,14 +24,18 @@ int NetworkConnection::hasDataToReadEvent(void) {
   } else if (nbytes == 0) {
     std::cout << "fd (NetworkConnection): " << _idFd << " reading no data\n";
 
+    _task->doTask();
     getConnectionManager()->remove(_idFd);  // См. 48
 
     return 0;
   } else {
     _input << buf;
+    for (int i = 0; buf[i] != 0; i++){
+      std::cout << (int)buf[i];
+    }
+    std::cout << std::endl;
     std::cout << "\n⬇ ⬇ ⬇ fd (NetworkConnection): " << _idFd << " READ " << nbytes / 1024. << "Kb data\n";
   }
-  _task->doTask();
   return 0;
 }
 
