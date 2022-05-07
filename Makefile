@@ -15,6 +15,7 @@ classes/Tasks/ATask.cpp \
 classes/Tasks/UnknownNetworkTask.cpp \
 classes/Tasks/AutoindexTask.cpp \
 classes/Tasks/GetTask.cpp \
+classes/Tasks/PostTask.cpp \
 classes/Tasks/HeadTask.cpp \
 classes/Tasks/RedirTask.cpp \
 classes/Tasks/CgiParentTask.cpp \
@@ -45,6 +46,7 @@ classes/Tasks/ATask.hpp \
 classes/Tasks/UnknownNetworkTask.hpp \
 classes/Tasks/AutoindexTask.hpp \
 classes/Tasks/GetTask.hpp \
+classes/Tasks/PostTask.hpp \
 classes/Tasks/HeadTask.hpp \
 classes/Tasks/RedirTask.hpp \
 classes/Tasks/CgiParentTask.hpp \

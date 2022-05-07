@@ -32,8 +32,7 @@ int GetTask::_MakeBody() {
       throw std::logic_error("404");
     }
     else {
-      std::cout << "Inprog error" << std::endl;
-      return (111);                                     // Внутренняя ошибка
+      return (500);
     }
   }
   // Если ищется папка, есть индекс, попробует открыть индекс-файл

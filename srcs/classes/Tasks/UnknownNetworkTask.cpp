@@ -1,6 +1,7 @@
 #include "../../../includes/classes/Tasks/UnknownNetworkTask.hpp"
 #include "../../../includes/classes/Tasks/AutoindexTask.hpp"
 #include "../../../includes/classes/Tasks/GetTask.hpp"
+#include "../../../includes/classes/Tasks/PostTask.hpp"
 #include "../../../includes/classes/Tasks/HeadTask.hpp"
 #include "../../../includes/classes/Tasks/RedirTask.hpp"
 #include "../../../includes/classes/Tasks/CgiParentTask.hpp"
@@ -66,7 +67,9 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       _connection->replaceTask(tmp);
       return 42;
     } else if (cur.loc->autoindex) {
-      // start autoindex flow
+
+      // Autoindex flow
+
       std::cout << "~~~~~~~~~~~~~~~> CREATE AUTOINDEX TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
       if (cur.loc->root == cur.uri && ws::filesIsDir(cur.uri)) {
         AutoindexTask* tmp =
@@ -77,16 +80,29 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       } else
         throw std::logic_error("404");
     } else if (_method == "GET") {
+
       // GET flow
+
       std::cout << "~~~~~~~~~~~~~~~> CREATE GET TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
       GetTask* tmp = new GetTask(_connection, getFd(), cur);
       tmp->setStatus(READY_TO_HANDLE);
       _connection->replaceTask(tmp);
       return 42;
     } else if (_method == "HEAD") {
+
       // HEAD flow
+
       std::cout << "~~~~~~~~~~~~~~~> CREATE HEAD TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
       HeadTask* tmp = new HeadTask(_connection, getFd(), cur);
+      tmp->setStatus(READY_TO_HANDLE);
+      _connection->replaceTask(tmp);
+      return 42;
+    } else if (_method == "POST") {
+
+      // POST flow
+
+      std::cout << "~~~~~~~~~~~~~~~> CREATE POST TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
+      PostTask* tmp = new PostTask(_connection, getFd(), cur, _body);
       tmp->setStatus(READY_TO_HANDLE);
       _connection->replaceTask(tmp);
       return 42;
@@ -98,8 +114,8 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
 
 void UnknownNetworkTask::getSimple(string& body) {
   if (_content_len < 0) throw logic_error("400");
-  if (_content_len > _client_max_body_size ||
-      _body.size() + body.size() > _client_max_body_size)
+  if (_client_max_body_size && (_content_len > _client_max_body_size ||
+      _body.size() + body.size() > _client_max_body_size))
     throw logic_error("413");
   _body.append(body);
   body.clear();
@@ -111,27 +127,29 @@ void UnknownNetworkTask::getChunked(string& body){
 
   while (status != END)
   {
-     size_t i = body.find(CRLF);
-     if (!_chunkSize){
-        if (i != strnpos) {
-          stringstream ss;
-          ss << std::hex << body.substr(0, i);
-          ss >> _chunkSize;
-          body.erase(0, i + 2);
-        }
+    size_t i = body.find(CRLF);
+    if (!_chunkSize){
+      if (i != strnpos) {
+        stringstream ss;
+        ss << std::hex << body.substr(0, i);
+        ss >> _chunkSize;
+        body.erase(0, i + 2);
+      }
     }
     if (!_chunkSize){
-        status = END;
-        return;
+      status = END;
+      return;
     }
-    std::string::size_type k = -1;
-    int j = -1;
-    while (++k < body.length() && ++j < _chunkSize){
-        _body.push_back(body[j]);
-        _chunkSize--;
+    int k = -1;
+        std::cout << "chunk length: " << _chunkSize << "\nbody: " << body << std::endl;
+    while (++k < _chunkSize && k < (int)body.length()) {
+      _body.push_back(body[k]);
     }
-    body.erase(0, j + 2);
+    if (k < _chunkSize) body.length();        //  Добавить отправку на дочитывание данных
+    body.erase(0, k + 2);
     if (!body.size()) return;
+    if (k == _chunkSize)
+      _chunkSize = 0;
   }
 }
 
@@ -299,7 +317,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
   std::cout << "~~~ CGI REQUEST\n";
 
   pid_t pid;
-  int status;
+  int stat;
   int fd_input[2];
   int fd_output[2];
 
@@ -328,7 +346,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
     close(fd_input[1]);
     close(fd_output[0]);
     close(fd_output[1]);
-    status = execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
+    stat = execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
     std::cerr << zc_cgi_path.elem[0] << std::endl << "HERE" << std::endl;
     ws::printE(ERROR_CGI_EXECVE, "\n");
     std::cerr << zc_cgi_path.elem[0] << std::endl;

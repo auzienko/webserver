@@ -4,16 +4,16 @@ server {
   location / {
     methods GET
     autoindex on
-    root /Users/wgaunt
+    root /Users/wgaunt/
   }
   location /put_test/ {
-    methods PUT
+    methods POST
     upload Downloads
   }
   location /post_body {
     methods POST
     limit_size 100
-    root /Users/wgaunt
+    root /Users/wgaunt/post/
   }
   location /directory/ {
     methods GET
@@ -28,7 +28,7 @@ server {
   location / {
     methods GET
     autoindex on
-    root /Users/wgaunt
+    root /Users/wgaunt/
   }
   location /put_test/ {
     methods PUT
@@ -37,7 +37,7 @@ server {
   location /post_body {
     methods POST
     limit_size 100
-    root /Users/wgaunt
+    root /Users/wgaunt/
   }
   location /directory/ {
     methods GET
