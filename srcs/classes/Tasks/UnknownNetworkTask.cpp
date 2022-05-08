@@ -135,7 +135,6 @@ void UnknownNetworkTask::getChunked(string& body){
 
 void UnknownNetworkTask::parseFirstLine(string& firstLine) {
   size_t j = firstLine.find(CRLF);
-  if (j == strnpos) throw logic_error("400");
   if (firstLine.size() < 1) throw logic_error("400");
   size_t i = firstLine.find_first_of(" ");
   if (i == strnpos) throw logic_error("400");
@@ -205,7 +204,8 @@ void UnknownNetworkTask::parse(std::stringstream& str) {
   
   if (status == END) reset();
   _client_max_body_size = _server_config.client_max_body_size;
-  if (status == START) parseFirstLine(tmp);
+  size_t j = tmp.find(CRLF);
+  if (status == START && j != strnpos) parseFirstLine(tmp);
   if (status == HEADERS) {
     size_t i = tmp.find(CRLF);
     while (status == HEADERS && i != strnpos) {

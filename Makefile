@@ -1,93 +1,57 @@
-NAME	= 	webserver
+NAME = webserver
 
-SRC_FOLDER = ./srcs/
-HEADER_FOLDER = ./includes/
+SRCS =  srcs/main.cpp srcs/ws/print.cpp srcs/ws/files.cpp srcs/ws/int.cpp \
+		srcs/ws/string.cpp srcs/ws/uri.cpp srcs/ws/socket.cpp \
+		srcs/classes/Tasks/ATask.cpp srcs/classes/Tasks/UnknownNetworkTask.cpp \
+		srcs/classes/Tasks/AutoindexTask.cpp srcs/classes/Tasks/GetTask.cpp \
+		srcs/classes/Tasks/HeadTask.cpp srcs/classes/Tasks/RedirTask.cpp \
+		srcs/classes/Tasks/CgiParentTask.cpp srcs/classes/Tasks/CgiInputTask.cpp \
+		srcs/classes/Tasks/CgiOutputTask.cpp srcs/classes/Connections/AConnection.cpp \
+		srcs/classes/Connections/NetworkConnection.cpp srcs/classes/Connections/LocalConnection.cpp \
+		srcs/classes/Connections/ConnectionManager.cpp srcs/classes/Webservers/Webserver.cpp \
+		srcs/classes/Webservers/WebserverManager.cpp srcs/classes/Config.cpp srcs/classes/MimeTypes.cpp \
+		srcs/classes/HTTPCodes.cpp srcs/classes/ConfigUtils.cpp srcs/z_array/z_array_utils.cpp srcs/z_array/z_array.cpp
 
-SRC_LIST = \
-main.cpp \
-ws/print.cpp \
-ws/files.cpp \
-ws/int.cpp \
-ws/string.cpp \
-ws/uri.cpp \
-ws/socket.cpp \
-classes/Tasks/ATask.cpp \
-classes/Tasks/UnknownNetworkTask.cpp \
-classes/Tasks/AutoindexTask.cpp \
-classes/Tasks/GetTask.cpp \
-classes/Tasks/HeadTask.cpp \
-classes/Tasks/RedirTask.cpp \
-classes/Tasks/CgiParentTask.cpp \
-classes/Tasks/CgiInputTask.cpp \
-classes/Tasks/CgiOutputTask.cpp \
-classes/Connections/AConnection.cpp \
-classes/Connections/NetworkConnection.cpp \
-classes/Connections/LocalConnection.cpp \
-classes/Connections/ConnectionManager.cpp \
-classes/Webservers/Webserver.cpp \
-classes/Webservers/WebserverManager.cpp \
-classes/Config.cpp \
-classes/MimeTypes.cpp \
-classes/HTTPCodes.cpp \
-classes/ConfigUtils.cpp \
-z_array/z_array_utils.cpp \
-z_array/z_array.cpp
+OBJS = $(addprefix $(DIR_OBJS)/,$(SRCS:.cpp=.o))
 
-HEADER_LIST = \
-main.hpp \
-http_status_codes.hpp \
-default_settings.hpp \
-structs.hpp \
-errors.hpp \
-messages.hpp \
-z_array.hpp \
-classes/Tasks/ATask.hpp \
-classes/Tasks/UnknownNetworkTask.hpp \
-classes/Tasks/AutoindexTask.hpp \
-classes/Tasks/GetTask.hpp \
-classes/Tasks/HeadTask.hpp \
-classes/Tasks/RedirTask.hpp \
-classes/Tasks/CgiParentTask.hpp \
-classes/Tasks/CgiInputTask.hpp \
-classes/Tasks/CgiOutputTask.hpp \
-classes/Connections/AConnection.hpp \
-classes/Connections/NetworkConnection.hpp \
-classes/Connections/LocalConnection.hpp \
-classes/Connections/ConnectionManager.hpp \
-classes/Webservers/Webserver.hpp \
-classes/Webservers/WebserverManager.hpp \
-classes/Config.hpp \
-classes/MimeTypes.hpp \
-classes/HTTPCodes.hpp \
-classes/ConfigUtils.hpp \
+DEPS = $(OBJS:%.o=%.d)
 
-SRCS = $(addprefix $(SRC_FOLDER), $(SRC_LIST))
-HEADERS = $(addprefix $(HEADER_FOLDER), $(HEADER_LIST))
+DIR_OBJS = objs
 
-OBJS	=	$(SRCS:.cpp=.o)
-CC		=	c++ -g -fsanitize=address
-CFLAGS	=	-Wall -Wextra -Werror -std=c++98 -pedantic-errors
-RM		=	rm -f
-ALL_HEADERS = $(addprefix -I$(HEADER_FOLDER), $(HEADER_LIST))
+OBJECTS = $(sort $(dir $(OBJS)))
 
-OTHER_DEPEND = \
-Makefile
+CC = c++ -g -fsanitize=address
 
-%.o	:	%.cpp $(HEADERS)
-	@$(CC) $(CFLAGS) $(ALL_HEADERS) -o $@ -c $<
+FLAGS = -Wall -Wextra -Werror -std=c++98 -pedantic-errors
+
+RM = rm -Rf
 
 all: $(NAME)
-	$(CC) cgi.cpp -o cgi/my_cgi.test #DONT FORGET TO RM IT!!!
 
-$(NAME):	$(OTHER_DEPEND) $(OBJS) $(HEADERS) 
-	$(CC) $(CFLAGS) $(ALL_HEADERS) $(OBJS) -o $(NAME)
+$(NAME): $(OBJECTS) $(OBJS) Makefile
+	@$(CC) $(FLAGS) -o $(NAME) $(OBJS)
+	@$(CC) cgi.cpp -o cgi/my_cgi.test
+	@printf "\e[37;5;44m             Webserver is ready🤗               \e[0m\n"
+
+$(OBJECTS): $(DIR_OBJS)
+	@mkdir -p $@
+
+$(DIR_OBJS):
+	@mkdir -p $(DIR_OBJS)
+
+$(DIR_OBJS)/%.o:%.cpp
+	@$(CC) $(FLAGS) -MMD -o $@ -c $<
+
+-include $(DEPS)
 
 clean:
-	$(RM) $(OBJS)
+	@$(RM) $(DIR_OBJS) cgi/my_cgi.test
+	@printf "\e[30;5;47m                 Clean done.🧹                  \e[0m\n"
+	
+fclean: clean
+	@$(RM) $(NAME)
+	@printf "\e[30;5;42m                 Fclean done.🧹                 \e[0m\n"
 
-fclean:	clean
-	$(RM) $(NAME)
-
-re:	fclean $(NAME)
+re: fclean all
 
 .PHONY:	all clean fclean re
