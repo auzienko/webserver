@@ -1,4 +1,4 @@
-#include "../../../includes/classes/Tasks/HeadTask.hpp"
+#include "classes/Tasks/HeadTask.hpp"
 
 HeadTask::HeadTask(AConnection* connection, int const& fd, t_uriInfo parsedURI)
     : GetTask(connection, fd, parsedURI) {}

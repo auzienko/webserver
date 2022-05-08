@@ -1,8 +1,8 @@
 #ifndef CGIPARENTTASK_HPP
 #define CGIPARENTTASK_HPP
 
-#include "../Connections/AConnection.hpp"
-#include "ATask.hpp"
+#include "classes/Connections/AConnection.hpp"
+#include "classes/Tasks/ATask.hpp"
 class AConnection;
 
 class CgiParentTask : public ATask {

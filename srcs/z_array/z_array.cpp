@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   z_array.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
+/*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/27 10:20:40 by zcris             #+#    #+#             */
-/*   Updated: 2022/03/23 12:58:18 by zcris            ###   ########.fr       */
+/*   Updated: 2022/05/08 15:34:22 by wgaunt           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/z_array.hpp"
+#include "z_array.hpp"
 
 int	z_array_init(t_z_array *a)
 {

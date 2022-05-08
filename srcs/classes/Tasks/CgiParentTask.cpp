@@ -1,6 +1,6 @@
-#include "../../../includes/classes/Tasks/CgiParentTask.hpp"
+#include "classes/Tasks/CgiParentTask.hpp"
 
-#include "../../../includes/classes/MimeTypes.hpp"
+#include "classes/MimeTypes.hpp"
 
 CgiParentTask::CgiParentTask(AConnection* connection, int const& fd,
                              int const& childInputFd, int const& childOutputFd)

@@ -1,6 +1,6 @@
-#include "../../../includes/classes/Tasks/GetTask.hpp"
-#include "../../../includes/classes/MimeTypes.hpp"
-#include "../../../includes/classes/HTTPCodes.hpp"
+#include "classes/Tasks/GetTask.hpp"
+#include "classes/MimeTypes.hpp"
+#include "classes/HTTPCodes.hpp"
 
 GetTask::GetTask(AConnection* connection, int const& fd, t_uriInfo parsedURI)
     : ATask(NETWORK_GET, fd), _connection(connection), _parsedURI(parsedURI) {}

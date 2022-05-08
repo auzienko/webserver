@@ -1,4 +1,4 @@
-#include "../../../includes/classes/Tasks/ATask.hpp"
+#include "classes/Tasks/ATask.hpp"
 
 ATask::ATask(int type, int fd) : _isKeepAlive(true), _fd(fd), _status(NEW) {
   switch (type) {

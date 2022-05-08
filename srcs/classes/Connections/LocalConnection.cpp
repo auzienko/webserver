@@ -1,4 +1,4 @@
-#include "../../../includes/classes/Connections/LocalConnection.hpp"
+#include "classes/Connections/LocalConnection.hpp"
 
 LocalConnection::LocalConnection(ConnectionManager* cm, int fd,
                                  const std::map<int, std::string>* error_pages)

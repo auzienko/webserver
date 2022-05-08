@@ -1,7 +1,7 @@
 #ifndef LOCALCONNECTION_HPP
 #define LOCALCONNECTION_HPP
 
-#include "ConnectionManager.hpp"
+#include "classes/Connections/ConnectionManager.hpp"
 
 class ConnectionManager;
 

@@ -1,4 +1,4 @@
-#include "../../includes/main.hpp"
+#include "main.hpp"
 
 std::string ws::stringTail(std::string const& str, char c) {
   size_t len = str.length() - 1;

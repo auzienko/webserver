@@ -1,4 +1,4 @@
-#include "../../includes/main.hpp"
+#include "main.hpp"
 
 bool ws::uriIsCGI(std::vector<std::string> dirs, std::map<std::string, std::string> const& cgi, t_uriInfo &res, std::map<std::string, std::set<std::string> > cgi_methods)
 {

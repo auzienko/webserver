@@ -28,7 +28,7 @@
 #include "z_array.hpp"
 #include "http_status_codes.hpp"
 #include "structs.hpp"
-#include "./classes/Config.hpp"
+#include "classes/Config.hpp"
 
 #define PROGRAMM_NAME "21_WEBSERVER"
 #define PROGRAMM_VERSION "0.01"

@@ -1,8 +1,8 @@
 #ifndef HEADTASK_HPP
 #define HEADTASK_HPP
 
-#include "../Connections/AConnection.hpp"
-#include "GetTask.hpp"
+#include "classes/Connections/AConnection.hpp"
+#include "classes/Tasks/GetTask.hpp"
 class AConnection;
 
 class HeadTask : public GetTask {

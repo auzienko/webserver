@@ -4,7 +4,7 @@
 enum Status { NEW, READING, READY_TO_HANDLE, EXECUTION, READY_TO_SEND, SENDING, DONE };
 enum Type { UNKNOWN_NETWORK, NETWORK_AUTOINDEX, NETWORK_GET, NETWORK_CGI_PARENT, LOCAL_CGI_INPUT, LOCAL_CGI_OUTPUT };
 
-#include "../../main.hpp"
+#include "main.hpp"
 
 class ATask
 {
