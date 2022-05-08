@@ -123,6 +123,7 @@ void UnknownNetworkTask::getSimple(string& body) {
 }
 
 void UnknownNetworkTask::getChunked(string& body){
+  static int k = 0;
   if (!body.size()) status = END;
 
   while (status != END)
@@ -140,17 +141,22 @@ void UnknownNetworkTask::getChunked(string& body){
       status = END;
       return;
     }
-    int k = -1;
-        std::cout << "chunk length: " << _chunkSize << "\nbody: " << body << std::endl;
-    while (++k < _chunkSize && k < (int)body.length()) {
+    while (k < _chunkSize && k < (int)body.length()) {
       _body.push_back(body[k]);
+      k++;
     }
-    if (k < _chunkSize) body.length();        //  Добавить отправку на дочитывание данных
+    if (k < _chunkSize) {
+      body.erase(0, k);
+      return;        //  Возврат, чтобы читались дальше данные
+    }
     body.erase(0, k + 2);
     if (!body.size()) return;
-    if (k == _chunkSize)
+    if (k == _chunkSize) {
       _chunkSize = 0;
+      k = 0;
+    }
   }
+  return;
 }
 
 void UnknownNetworkTask::parseFirstLine(string& firstLine) {

@@ -50,7 +50,7 @@ int WebserverManager::start(void) {
     int max_fd = _maxFd;
     for (int i = 0; i <= max_fd && select_result > 0; ++i) {
       if (FD_ISSET(i, &read_fds)) {
-        sleep(1);
+        // sleep(1);
         _ReadHandler(i);
         --select_result;
       }
@@ -63,7 +63,7 @@ int WebserverManager::start(void) {
     std::vector<Webserver*>::iterator it = _webservers.begin();
     std::vector<Webserver*>::iterator en = _webservers.end();
     while (it != en) {
-      (*it)->closeConnectionIfTimout(4);
+      (*it)->closeConnectionIfTimout(10);
       ++it;
     }
   }

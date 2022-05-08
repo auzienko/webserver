@@ -24,22 +24,23 @@ int NetworkConnection::hasDataToReadEvent(void) {
   } else if (nbytes == 0) {
     std::cout << "fd (NetworkConnection): " << _idFd << " reading no data\n";
     _task->doTask();
-
-    getConnectionManager()->remove(_idFd);  // См. 48
+    _input.str(std::string());
+    getConnectionManager()->remove(_idFd);
 
     return 0;
   } else {
     _input << buf;
     std::cout << "\n⬇ ⬇ ⬇ fd (NetworkConnection): " << _idFd << " READ " << nbytes / 1024. << "Kb data\n";
     std::cout << _input.str() << std::endl;
+    _task->doTask();
+    _input.str(std::string());
   }
-  _input << buf;
-  std::cout << "\n⬇ ⬇ ⬇ fd (NetworkConnection): " << _idFd << " READ "
-            << nbytes / 1024. << "Kb data\n";
   return 0;
 }
 
 int NetworkConnection::readyToAcceptDataEvent(void) {
+  if (_task->getStatus() >= READY_TO_HANDLE && _task->getStatus() < SENDING)
+    _task->doTask();
   if (!_task || _task->getStatus() == NEW) return 0;
   int ret = 0;
   if (_task->getStatus() == SENDING) {
@@ -50,14 +51,10 @@ int NetworkConnection::readyToAcceptDataEvent(void) {
     _task->setStatus(DONE);
     setLastActivity();
 
-    //когда закрывать коннекшены??? ориентироваться на статусы и кипэлайф
-    //наверно.
-    if (!_task->getIsKeepAlive()) getConnectionManager()->remove(_idFd);
+    /* Временный фикс (работает как close тип соединения)
+    if (!_task->getIsKeepAlive())*/ getConnectionManager()->remove(_idFd);
     //остался еще фд. не забудь про аутпут
 
-  } else if (_task->getStatus() <= READY_TO_SEND) {
-    std::cout << "END OF READ" << std::endl;
-    _task->doTask();
   }
   return ret;
 }
