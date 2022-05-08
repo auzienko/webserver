@@ -1,7 +1,7 @@
 #ifndef CONFIGUTILS_HPP
 #define CONFIGUTILS_HPP
 
-#include "../main.hpp"
+#include "main.hpp"
 
 class ConfigUtils {
  private:

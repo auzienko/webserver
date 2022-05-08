@@ -1,6 +1,6 @@
-#include "../../../includes/classes/Tasks/PostTask.hpp"
-#include "../../../includes/classes/MimeTypes.hpp"
-#include "../../../includes/classes/HTTPCodes.hpp"
+#include "classes/Tasks/PostTask.hpp"
+#include "classes/MimeTypes.hpp"
+#include "classes/HTTPCodes.hpp"
 
 PostTask::PostTask(AConnection* connection, int const& fd, t_uriInfo parsedURI, std::string &inputBody)
     : ATask(NETWORK_GET, fd), _connection(connection), _parsedURI(parsedURI), _inputBody(inputBody) {}

@@ -1,5 +1,5 @@
-#include "../../includes/main.hpp"
-#include "../../includes/classes/MimeTypes.hpp"
+#include "main.hpp"
+#include "classes/MimeTypes.hpp"
 
 std::pair<bool, std::vector<std::string> > ws::filesReadDirectory(
     std::string const& path) {

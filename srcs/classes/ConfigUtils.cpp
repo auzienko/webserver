@@ -1,4 +1,4 @@
-#include "../../includes/classes/ConfigUtils.hpp"
+#include "classes/ConfigUtils.hpp"
 
 ConfigUtils::~ConfigUtils(void){}
 

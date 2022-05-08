@@ -1,7 +1,7 @@
 #ifndef NETWORKCONNECTION_HPP
 #define NETWORKCONNECTION_HPP
 
-#include "ConnectionManager.hpp"
+#include "classes/Connections/ConnectionManager.hpp"
 
 class ConnectionManager;
 

@@ -1,8 +1,8 @@
-#ifndef POSTTask_HPP
-#define POSTTask_HPP
+#ifndef POSTTASK_HPP
+#define POSTTASK_HPP
 
-#include "../Connections/AConnection.hpp"
-#include "ATask.hpp"
+#include "classes/Connections/AConnection.hpp"
+#include "classes/Tasks/ATask.hpp"
 class AConnection;
 
 class PostTask : public ATask {

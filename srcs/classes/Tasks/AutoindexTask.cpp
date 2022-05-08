@@ -1,4 +1,4 @@
-#include "../../../includes/classes/Tasks/AutoindexTask.hpp"
+#include "classes/Tasks/AutoindexTask.hpp"
 
 AutoindexTask::AutoindexTask(AConnection* connection, int const& fd,
                              std::string realPath, std::string publicPath)

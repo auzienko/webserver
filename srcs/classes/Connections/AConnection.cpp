@@ -1,6 +1,6 @@
-#include "../../../includes/classes/Connections/AConnection.hpp"
-#include "../../../includes/classes/MimeTypes.hpp"
-#include "../../../includes/classes/HTTPCodes.hpp"
+#include "classes/Connections/AConnection.hpp"
+#include "classes/MimeTypes.hpp"
+#include "classes/HTTPCodes.hpp"
 
 AConnection::AConnection()
     : _connectionManager(nullptr),
