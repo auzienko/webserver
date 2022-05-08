@@ -46,6 +46,7 @@ class UnknownNetworkTask : public ATask {
   map<string, string> _headers;
   unsigned int _content_len;
   unsigned int _client_max_body_size;  // from config
+  unsigned long int k;
   bool _chunked;
   string _body;
   int status;

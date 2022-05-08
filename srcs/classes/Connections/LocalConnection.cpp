@@ -20,6 +20,7 @@ int LocalConnection::hasDataToReadEvent(void) {
     return -1;
   } else if (nbytes == 0) {
     std::cout << "fd (LocalConnection): " << _idFd << " reading no data\n";
+    setLastActivity();
     _task->doTask();
     getConnectionManager()->remove(_idFd);
     return 0;
@@ -32,9 +33,17 @@ int LocalConnection::hasDataToReadEvent(void) {
 
 int LocalConnection::readyToAcceptDataEvent(void) {
   if (!_task) return 0;
-  int nbytes, ret = 0;
+  int nbytes = 1, ret = 0;
+  std::string str(_output.str());
   if (_task->getStatus() == SENDING) {
-    nbytes = write(_idFd, _output.str().c_str(), _output.str().length());
+    for (int i = 1; str.length() && nbytes > 0; i = str.length() > DEFAULT_BUFLEN ? DEFAULT_BUFLEN : str.length()) {
+      std::cout << "sending..." << std::endl;
+      if (i) {
+        nbytes = write(_idFd, str.c_str(), i);
+        str.erase(0, i);
+      }
+      std::cout << "Send " << nbytes << " need " << str.length() << " more" << std::endl;
+    }
     if (nbytes < 0) ret = -1;
     std::cout << "\n⬆ ⬆ ⬆ fd (LocalConnection): " << _idFd << " WROTE " << nbytes / 1024. << "Kb data result code: " << ret << std::endl;
     _task->setStatus(DONE);

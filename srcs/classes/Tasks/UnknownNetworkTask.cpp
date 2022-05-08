@@ -21,6 +21,7 @@ UnknownNetworkTask::UnknownNetworkTask(AConnection* connection,
     : ATask(UNKNOWN_NETWORK, fd),
       _connection(connection),
       _server_config(server_config) {
+  k = 0;
   reset();
 }
 
@@ -28,7 +29,7 @@ int UnknownNetworkTask::collectData(void) {
   if (getStatus() < READY_TO_HANDLE) setStatus(READING);
 
   parse(_connection->getInputData());
-  print();
+  // print();
   //проставить этот статус после успешного парсинга
   if (!_done)
     return 0;
@@ -123,38 +124,46 @@ void UnknownNetworkTask::getSimple(string& body) {
 }
 
 void UnknownNetworkTask::getChunked(string& body){
-  static int k = 0;
-  if (!body.size()) status = END;
+  if (!body.size()) return;       // Если боди нет, возврат на чтение
 
   while (status != END)
   {
-    size_t i = body.find(CRLF);
+    if (body[0] == '\r' || body[0] == '\n')
+    {
+      body.erase(0, 1);
+      if (body.length() && body[1] == '\n')
+        body.erase(0, 1);
+    }
+    size_t l = body.find(CRLF);
     if (!_chunkSize){
-      if (i != strnpos) {
+      if (l != strnpos) {
         stringstream ss;
-        ss << std::hex << body.substr(0, i);
+        ss << std::hex << body.substr(0, l);
         ss >> _chunkSize;
-        body.erase(0, i + 2);
+        body.erase(0, l + 2);
+      } else
+        return;                 // Дочитываем, если чанксайз 0 (дефолтное значение) и рн не найден
+      if (!_chunkSize && l != strnpos){   // Чанксайз все еще 0 и рн был, значит чанксайз пришел 0
+        status = END;
+        return;
       }
     }
-    if (!_chunkSize){
-      status = END;
-      return;
-    }
-    while (k < _chunkSize && k < (int)body.length()) {
-      _body.push_back(body[k]);
+    std::string::size_type i = 0;
+    while (k < static_cast<unsigned long int>(_chunkSize) && i < static_cast<unsigned long int>(body.length())) {
+      _body.push_back(body[i]);
+      i++;
       k++;
     }
-    if (k < _chunkSize) {
-      body.erase(0, k);
+    if (k < static_cast<unsigned long int>(_chunkSize)) {
+      body.erase(0, i);
       return;        //  Возврат, чтобы читались дальше данные
     }
-    body.erase(0, k + 2);
-    if (!body.size()) return;
-    if (k == _chunkSize) {
+    body.erase(0, i + 2);
+    if (k == static_cast<unsigned long int>(_chunkSize)) {
       _chunkSize = 0;
       k = 0;
     }
+    if (!body.size()) return;
   }
   return;
 }
@@ -190,10 +199,6 @@ void UnknownNetworkTask::parseHeaders(string head) {
   if (head.empty()) {
     if (_content_len > 0 && _chunked) throw logic_error("400");
     if (_headers.find("Host") == std::end(_headers)) throw logic_error("400");
-    if (_chunked || _content_len)
-      status = BODY;
-    else
-      status = END;
     return;
   }
   size_t i = head.find(":");
@@ -242,9 +247,17 @@ void UnknownNetworkTask::parse(std::stringstream& str) {
   if (status == HEADERS) {
     size_t i = tmp.find(CRLF);
     while (status == HEADERS && i != strnpos) {
-      parseHeaders(tmp.substr(0, i));
-      tmp.erase(0, i + 2);
-      i = tmp.find(CRLF);
+      if (i == 0) {
+        if (_chunked || _content_len)
+          status = BODY;
+        else
+          status = END;
+        tmp.erase(i, i + 2);
+      } else {
+        parseHeaders(tmp.substr(0, i));
+        tmp.erase(0, i + 2);
+        i = tmp.find(CRLF);
+      }
     }
   }
   if (status == BODY) {
@@ -253,7 +266,6 @@ void UnknownNetworkTask::parse(std::stringstream& str) {
   }
   _read = tmp;
   if (status == END) _done = true;
-  std::cout << "STATUS: " << status << std::endl;
 }
 
 void UnknownNetworkTask::print() {
@@ -274,7 +286,7 @@ void UnknownNetworkTask::print() {
 
 int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo uriBlocks){
   std::map<std::string, std::string> env;
-  env["PATH_INFO"] = uriBlocks.pathInfo;
+  env["PATH_INFO"] = "/path/info";
   env["SERVER_NAME"] = server_config.listen;
   env["AUTH_TYPE"] = ws::stringFromMap(_headers.find("Authorization"), _headers.end());
   env["CONTENT_LENGTH"] = ws::intToStr(_content_len);
@@ -353,9 +365,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
     close(fd_output[0]);
     close(fd_output[1]);
     stat = execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
-    std::cerr << zc_cgi_path.elem[0] << std::endl << "HERE" << std::endl;
     ws::printE(ERROR_CGI_EXECVE, "\n");
-    std::cerr << zc_cgi_path.elem[0] << std::endl;
     exit(status);
   }
 

@@ -39,7 +39,6 @@ void AConnection::error(const std::exception &ex) {
   if (code == -1)
     throw ex;
   else {
-    std::cout << "ERROR! " << ex.what() << std::endl;
     std::pair<std::ifstream, std::string> *tmp = ws::filesErrors(code, _error_pages);
     if (!tmp->second.empty()) {
       _output << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(code) << "\r\n";
