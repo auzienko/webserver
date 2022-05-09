@@ -17,6 +17,9 @@ class NetworkConnection : public AConnection {
   virtual ~NetworkConnection();
   int hasDataToReadEvent(void);
   int readyToAcceptDataEvent(void);
+  void _io(void);
+  int _reading(void);
+  int _writing(void);
 };
 
 #endif
