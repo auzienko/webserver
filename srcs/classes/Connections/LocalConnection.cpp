@@ -40,7 +40,7 @@ int LocalConnection::readyToAcceptDataEvent(void) {
   if (_task->getStatus() == SENDING) {
     if (_output.rdbuf()->in_avail()) {
       char buf[DEFAULT_BUFLEN];
-      _output.get(buf, DEFAULT_BUFLEN);
+      _output.read(buf, DEFAULT_BUFLEN);
       nbytes = write(_idFd, buf, strlen(buf));
       if (nbytes < 0) ret = -1;
       if (nbytes <= 0) std::cout << "\n⬆ ⬆ ⬆ fd (LocalConnection): " << _idFd << " WROTE " << nbytes / 1024. << "Kb data result code: " << ret << std::endl;

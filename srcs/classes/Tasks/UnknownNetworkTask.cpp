@@ -50,8 +50,10 @@ int UnknownNetworkTask::sendResult(void) {
 
 int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
   if (cur.isCgi) {
-    if (cur.cgi_methods.find(_method) != cur.cgi_methods.end() || cur.cgi_methods.empty())
+    if (cur.cgi_methods.find(_method) != cur.cgi_methods.end() || cur.cgi_methods.empty()){
+      std::cout << "~~~~~~~~~~~~~~~> CREATE CGI TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
       _MakeCgiTasks(_server_config, cur);
+    }
     else if (_method != "GET" && _method != "POST" && _method != "DELETE" && _method != "HEAD")
       throw std::logic_error("501");
     else

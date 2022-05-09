@@ -76,7 +76,7 @@ int NetworkConnection::_writing(void) {
   if (!_len) _len = _output.str().length();
   if (static_cast<std::string::size_type>(_wrote) < _len) {
     char buf[DEFAULT_BUFLEN];
-    _output.get(buf, DEFAULT_BUFLEN, 0);
+    _output.read(buf, ((_len - _wrote) > DEFAULT_BUFLEN ? DEFAULT_BUFLEN : _len - _wrote));
     nbytes = send(_idFd, buf, strlen(buf), 0);
     if (nbytes)
       std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection): " << _idFd << " WROTE "
