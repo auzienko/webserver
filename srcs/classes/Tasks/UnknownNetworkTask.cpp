@@ -29,7 +29,6 @@ int UnknownNetworkTask::collectData(void) {
   if (getStatus() < READY_TO_HANDLE) setStatus(READING);
 
   parse(_connection->getInputData());
-  //проставить этот статус после успешного парсинга
   if (!_done)
     return 0;
   print();
@@ -154,9 +153,9 @@ void UnknownNetworkTask::getChunked(string& body){
       i++;
       k++;
     }
-    if (k < static_cast<unsigned long int>(_chunkSize)) {
+    if (k < static_cast<unsigned long int>(_chunkSize)) { // Прочитано меньше размера чанка
       body.erase(0, i);
-      return;        //  Возврат, чтобы читались дальше данные
+      return;
     }
     body.erase(0, i + 2);
     if (k == static_cast<unsigned long int>(_chunkSize)) {
@@ -196,11 +195,6 @@ void UnknownNetworkTask::parseHeaders(string head) {
   string key;
   string value;
 
-  if (head.empty()) {
-    if (_content_len > 0 && _chunked) throw logic_error("400");
-    if (_headers.find("Host") == std::end(_headers)) throw logic_error("400");
-    return;
-  }
   size_t i = head.find(":");
   if (i == strnpos) throw logic_error("400");
   key = head.substr(0, i);
@@ -240,18 +234,20 @@ void UnknownNetworkTask::parse(std::stringstream& str) {
   std::string tmp = _read;
   tmp.append(tmp1);
   
-  if (status == END) reset();
+  if (status == END && _done) reset();
   _client_max_body_size = _server_config.client_max_body_size;
   size_t j = tmp.find(CRLF);
   if (status == START && j != strnpos) parseFirstLine(tmp);
   if (status == HEADERS) {
     size_t i = tmp.find(CRLF);
     while (status == HEADERS && i != strnpos) {
-      if (i == 0) {
+      if (i == 0) {                             // true когда пустая строка с /r/n
         if (_chunked || _content_len)
           status = BODY;
         else
           status = END;
+        if (_content_len > 0 && _chunked) throw logic_error("400");
+        if (_headers.find("Host") == std::end(_headers)) throw logic_error("400");
         tmp.erase(i, i + 2);
       } else {
         parseHeaders(tmp.substr(0, i));
@@ -264,8 +260,16 @@ void UnknownNetworkTask::parse(std::stringstream& str) {
     if (_chunked) getChunked(tmp);
     if (_content_len) getSimple(tmp);
   }
+  if (status == END) {
+    if (_chunked) {
+      if (tmp == CRLF) {
+        _done = true;
+        tmp.clear();
+      }
+    } else
+      _done = true;
+  }
   _read = tmp;
-  if (status == END) _done = true;
 }
 
 void UnknownNetworkTask::print() {

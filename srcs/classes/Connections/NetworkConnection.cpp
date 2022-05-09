@@ -56,7 +56,7 @@ int NetworkConnection::readyToAcceptDataEvent(void) {
       _output.get(buf, DEFAULT_BUFLEN, 0);
       nbytes = send(_idFd, buf, strlen(buf), 0);
       if (nbytes) std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection): " << _idFd << " WROTE "
-                << nbytes /* / 1024. */ << "Kb data result code: " << ret << std::endl;
+                << nbytes / 1024.  << "Kb data result code: " << ret << std::endl;
       _wrote += nbytes;
       setLastActivity();
       return 0;
