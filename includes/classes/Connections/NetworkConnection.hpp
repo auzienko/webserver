@@ -8,6 +8,7 @@ class ConnectionManager;
 class NetworkConnection : public AConnection {
  private:
   ssize_t _wrote;
+  std::string::size_type _len;
   NetworkConnection(void);
   NetworkConnection(NetworkConnection const& src);
   NetworkConnection& operator=(NetworkConnection const& rhs);

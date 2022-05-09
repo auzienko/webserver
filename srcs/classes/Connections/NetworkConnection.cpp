@@ -6,6 +6,7 @@ NetworkConnection::NetworkConnection(
     : AConnection(cm, fd, error_pages) {
   _type = NETWORK_CONNECTION;
   _wrote = 0;
+  _len = 0;
 }
 
 NetworkConnection::~NetworkConnection() {}
@@ -71,22 +72,22 @@ int NetworkConnection::_reading(void) {
 
 int NetworkConnection::_writing(void) {
   setLastActivity();
-  int ret = 0;
   int nbytes = 0;
-  if (static_cast<std::string::size_type>(_wrote) < _output.str().length()) {
+  if (!_len) _len = _output.str().length();
+  if (static_cast<std::string::size_type>(_wrote) < _len) {
     char buf[DEFAULT_BUFLEN];
     _output.get(buf, DEFAULT_BUFLEN, 0);
     nbytes = send(_idFd, buf, strlen(buf), 0);
     if (nbytes)
       std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection): " << _idFd << " WROTE "
-                << nbytes /* / 1024. */ << "B data result code: " << ret
+                << nbytes /* / 1024. */ << "B data result code: " << _len
                 << std::endl;
     _wrote += nbytes;
     return 0;
   }
   _task->setStatus(DONE);
-  if (_output.str().length() < 100) std::cout << _output.str() << std::endl;
-  std::cout << _wrote << " bytes wrote totaly of " << _output.str().length()
+  if (_len < 100) std::cout << _output.str() << std::endl;
+  std::cout << _wrote << " bytes wrote totaly of " << _len
             << std::endl;
-  return ret;
+  return 0;
 }
