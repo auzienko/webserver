@@ -29,10 +29,10 @@ int UnknownNetworkTask::collectData(void) {
   if (getStatus() < READY_TO_HANDLE) setStatus(READING);
 
   parse(_connection->getInputData());
-  // print();
   //проставить этот статус после успешного парсинга
   if (!_done)
     return 0;
+  print();
   setStatus(READY_TO_HANDLE);
   executeTask();
   return 0;
@@ -276,7 +276,7 @@ void UnknownNetworkTask::print() {
        it != _headers.end(); ++it) {
     cout << (*it).first << ":" << (*it).second << endl;
   }
-  cout << _body << endl;
+  // cout << _body << endl;
 }
 
 // "HTTP_REFERER="
@@ -293,7 +293,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
   env["GATEWAY_INTERFACE"] = "CGI/1.1";
   env["PATH_TRANSLATED"] = uriBlocks.uri;
   env["CONTENT_TYPE"] =  ws::stringFromMap(_headers.find("Content-Type"), _headers.end());
-  env["QUERY_STRING"] = _query;
+  env["QUERY_STRING"] = uriBlocks.args;                                                   // Проверить
   env["REMOTE_ADDR"] = ws::socketGetIP(getFd());
   // //env["REMOTE_HOST"] = "empty";
   // env["REMOTE_IDENT"] =  remote_ident_pwd;
@@ -347,6 +347,38 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
     ws::printE(ERROR_CGI_PIPE, "\n");
     close(fd_input[0]);
     close(fd_input[1]);
+    return -1;
+  }
+  if (fcntl(fd_input[0], F_SETFL, O_NONBLOCK) < 0) {
+    ws::printE(ERROR_CGI_PIPE, "\n");
+    close(fd_input[0]);
+    close(fd_input[1]);
+    close(fd_output[0]);
+    close(fd_output[1]);
+    return -1;
+  }
+  if (fcntl(fd_input[1], F_SETFL, O_NONBLOCK) < 0) {
+    ws::printE(ERROR_CGI_PIPE, "\n");
+    close(fd_input[0]);
+    close(fd_input[1]);
+    close(fd_output[0]);
+    close(fd_output[1]);
+    return -1;
+  }
+  if (fcntl(fd_output[0], F_SETFL, O_NONBLOCK) < 0) {
+    ws::printE(ERROR_CGI_PIPE, "\n");
+    close(fd_input[0]);
+    close(fd_input[1]);
+    close(fd_output[0]);
+    close(fd_output[1]);
+    return -1;
+  }
+  if (fcntl(fd_output[1], F_SETFL, O_NONBLOCK) < 0) {
+    ws::printE(ERROR_CGI_PIPE, "\n");
+    close(fd_input[0]);
+    close(fd_input[1]);
+    close(fd_output[0]);
+    close(fd_output[1]);
     return -1;
   }
   pid = fork();

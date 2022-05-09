@@ -7,6 +7,7 @@ class ConnectionManager;
 
 class NetworkConnection : public AConnection {
  private:
+  ssize_t _wrote;
   NetworkConnection(void);
   NetworkConnection(NetworkConnection const& src);
   NetworkConnection& operator=(NetworkConnection const& rhs);

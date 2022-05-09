@@ -7,6 +7,7 @@ class ConnectionManager;
 
 class LocalConnection : public AConnection {
  private:
+  ssize_t readed;
   LocalConnection(void);
   LocalConnection(LocalConnection const& src);
   LocalConnection& operator=(LocalConnection const& rhs);
