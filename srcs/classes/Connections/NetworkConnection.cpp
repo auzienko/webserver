@@ -75,9 +75,9 @@ int NetworkConnection::_writing(void) {
   int nbytes = 0;
   if (!_len) _len = _output.str().length();
   if (static_cast<std::string::size_type>(_wrote) < _len) {
-    char buf[DEFAULT_BUFLEN];
-    _output.read(buf, ((_len - _wrote) > DEFAULT_BUFLEN ? DEFAULT_BUFLEN : _len - _wrote));
-    nbytes = send(_idFd, buf, strlen(buf), 0);
+    nbytes = send(
+        _idFd, _output.str().c_str() + _wrote,
+        ((_len - _wrote) > DEFAULT_BUFLEN ? DEFAULT_BUFLEN : _len - _wrote), 0);
     if (nbytes)
       std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection): " << _idFd << " WROTE "
                 << nbytes /* / 1024. */ << "B data result code: " << _len
@@ -87,7 +87,6 @@ int NetworkConnection::_writing(void) {
   }
   _task->setStatus(DONE);
   if (_len < 100) std::cout << _output.str() << std::endl;
-  std::cout << _wrote << " bytes wrote totaly of " << _len
-            << std::endl;
+  std::cout << _wrote << " bytes wrote totaly of " << _len << std::endl;
   return 0;
 }
