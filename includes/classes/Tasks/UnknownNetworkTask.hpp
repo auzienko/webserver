@@ -63,6 +63,7 @@ class UnknownNetworkTask : public ATask {
   void print();
   void reset();
   void parse(std::stringstream& str);
+  t_server const& getServerConfig() const;
 };
 
 #endif

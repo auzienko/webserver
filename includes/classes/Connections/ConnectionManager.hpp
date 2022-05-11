@@ -3,15 +3,18 @@
 
 #include "main.hpp"
 #include "classes/Connections/AConnection.hpp"
+#include "classes/Webservers/Webserver.hpp"
 
 class AConnection;
+class Webserver;
 
 class ConnectionManager {
  private:
   std::map<int, AConnection*> _list;
+  Webserver* _webserver;
 
  public:
-  ConnectionManager();
+  ConnectionManager(Webserver* webserver);
   ~ConnectionManager();
 
   int isExist(int const fd) const;
@@ -22,6 +25,7 @@ class ConnectionManager {
   int readyToAcceptDataEvent(int fd);
   std::vector<int> getAllConnectionsFds(void) const;
   int getConnectionCount(void) const;
+  Webserver const* getWebserver(void) const;
 
   void closeConnectionIfTimout(int seconds);
 };

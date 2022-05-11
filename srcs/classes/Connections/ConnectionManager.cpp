@@ -1,6 +1,7 @@
 #include "classes/Connections/ConnectionManager.hpp"
 
-ConnectionManager::ConnectionManager() {}
+ConnectionManager::ConnectionManager(Webserver* webserver)
+    : _webserver(webserver) {}
 
 ConnectionManager::~ConnectionManager() {
   std::map<int, AConnection*>::iterator it = _list.begin();
@@ -36,7 +37,7 @@ int ConnectionManager::hasDataToReadEvent(int fd) {
   AConnection* tmp = at(fd);
   try {
     if (tmp != nullptr) return (tmp->hasDataToReadEvent() == 1 ? fd : 0);
-  } catch (const std::exception &ex) {
+  } catch (const std::exception& ex) {
     tmp->error(ex);
   }
   return 0;
@@ -46,7 +47,7 @@ int ConnectionManager::readyToAcceptDataEvent(int fd) {
   AConnection* tmp = at(fd);
   try {
     if (tmp != nullptr) return tmp->readyToAcceptDataEvent();
-  } catch (const std::exception &ex) {
+  } catch (const std::exception& ex) {
     tmp->error(ex);
   }
   return 0;
@@ -80,4 +81,8 @@ void ConnectionManager::closeConnectionIfTimout(int seconds) {
     } else
       ++i;
   }
+}
+
+Webserver const* ConnectionManager::getWebserver(void) const {
+  return _webserver;
 }

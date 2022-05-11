@@ -341,7 +341,6 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
   std::cout << "~~~ CGI REQUEST\n";
 
   pid_t pid;
-  int stat;
   int fd_input[2];
   int fd_output[2];
 
@@ -402,7 +401,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
     close(fd_input[1]);
     close(fd_output[0]);
     close(fd_output[1]);
-    stat = execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
+    execve(zc_cgi_path.elem[0], zc_cgi_path.elem, zc_env.elem);
     ws::printE(ERROR_CGI_EXECVE, "\n");
     exit(status);
   }
