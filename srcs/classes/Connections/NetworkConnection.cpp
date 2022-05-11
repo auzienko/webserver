@@ -5,45 +5,9 @@ NetworkConnection::NetworkConnection(
     const std::map<int, std::string>* error_pages)
     : AConnection(cm, fd, error_pages) {
   _type = NETWORK_CONNECTION;
-  _wrote = 0;
-  _len = 0;
 }
 
 NetworkConnection::~NetworkConnection() {}
-
-int NetworkConnection::hasDataToReadEvent(void) {
-  if (_task) _io();
-  return 0;
-}
-
-int NetworkConnection::readyToAcceptDataEvent(void) {
-  if (_task) _io();
-  return 0;
-}
-
-void NetworkConnection::_io() {
-  int taskStatus = _task->getStatus();
-  switch (taskStatus) {
-    case NEW:
-      _task->setStatus(READING);
-    case READING:
-      _reading();
-      break;
-    case READY_TO_HANDLE:
-    case EXECUTION:
-      _task->doTask();
-      break;
-    case READY_TO_SEND:
-    case SENDING:
-      _writing();
-      break;
-    case DONE:
-      getConnectionManager()->remove(_idFd);
-      break;
-    default:
-      break;
-  }
-}
 
 int NetworkConnection::_reading(void) {
   setLastActivity();
@@ -63,7 +27,7 @@ int NetworkConnection::_reading(void) {
   } else {
     _input << buf;
     std::cout << "\n⬇ ⬇ ⬇ fd (NetworkConnection): " << _idFd << " READ "
-              << nbytes / 1024. << "Kb data\n";
+              << nbytes << "B data\n";
     _task->doTask();
     _input.str(std::string());
   }
@@ -75,18 +39,22 @@ int NetworkConnection::_writing(void) {
   int nbytes = 0;
   if (!_len) _len = _output.str().length();
   if (static_cast<std::string::size_type>(_wrote) < _len) {
-    nbytes = send(
-        _idFd, _output.str().c_str() + _wrote,
-        ((_len - _wrote) > DEFAULT_BUFLEN ? DEFAULT_BUFLEN : _len - _wrote), 0);
-    if (nbytes)
-      std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection): " << _idFd << " WROTE "
-                << nbytes /* / 1024. */ << "B data result code: " << _len
-                << std::endl;
+    int size = (_len - _wrote) > DEFAULT_BUFLEN ? DEFAULT_BUFLEN : _len - _wrote;
+    _output.rdbuf()->sgetn(_buf, size);
+    nbytes = send(_idFd, _buf, size, 0);
     _wrote += nbytes;
+    if (nbytes == -1) {
+      std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection): " << _idFd << " Error";
+    }
+    // if (nbytes)
+    //   std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection): " << _idFd << " WROTE "
+    //             << nbytes << "B data. Progress: " << _wrote
+    //             << "/" << _len << std::endl;
+    if (static_cast<std::string::size_type>(_wrote) == _len)
+      getConnectionManager()->remove(_idFd);
     return 0;
   }
   _task->setStatus(DONE);
-  if (_len < 100) std::cout << _output.str() << std::endl;
-  std::cout << _wrote << " bytes wrote totaly of " << _len << std::endl;
+  // std::cout << _wrote << " bytes wrote totaly of " << _len << std::endl;
   return 0;
 }

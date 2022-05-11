@@ -26,7 +26,7 @@ int CgiOutputTask::executeTask(void) {
   result << "Connection: keep-alive\r\n";
   int i = _connection->getInputData().str().find("\r\n\r\n");
   result << "Content-length: " << _connection->getInputData().str().substr(i + 4).length() << "\r\n\r\n";
-  result << _connection->getInputData().str().substr(i + 4) << "\r\n";
+  result << _connection->getInputData().str().substr(i + 4);
 
   _connection->getConnectionManager()->at(_parentFd)->addToOutput(result.str());
   _connection->getConnectionManager()->at(_parentFd)->getTask()->setStatus(

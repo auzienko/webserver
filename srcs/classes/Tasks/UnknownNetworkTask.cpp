@@ -299,7 +299,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
   env["GATEWAY_INTERFACE"] = "CGI/1.1";
   env["PATH_TRANSLATED"] = uriBlocks.uri;
   env["CONTENT_TYPE"] =  ws::stringFromMap(_headers.find("Content-Type"), _headers.end());
-  env["QUERY_STRING"] = uriBlocks.args;                                                   // Проверить
+  env["QUERY_STRING"] = uriBlocks.args;
   env["REMOTE_ADDR"] = ws::socketGetIP(getFd());
   // //env["REMOTE_HOST"] = "empty";
   // env["REMOTE_IDENT"] =  remote_ident_pwd;
