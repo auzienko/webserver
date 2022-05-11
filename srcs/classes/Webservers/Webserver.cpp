@@ -4,7 +4,7 @@
 
 Webserver::Webserver(t_server &src, int maxConnection)
     : _maxConnection(maxConnection), _serverConfig(src) {
-  _connectionManager = new ConnectionManager();
+  _connectionManager = new ConnectionManager(this);
 }
 
 Webserver::~Webserver() { delete _connectionManager; }
