@@ -31,8 +31,7 @@ class UnknownNetworkTask : public ATask {
                                  t_uriInfo uriBlocks);
 
  public:
-  UnknownNetworkTask(AConnection* connection, t_server const& server_config,
-                     int const& fd);
+  UnknownNetworkTask(AConnection* connection, int const& fd);
   ~UnknownNetworkTask();
   int collectData(void);
   int executeTask(void);

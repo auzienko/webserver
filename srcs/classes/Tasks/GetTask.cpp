@@ -17,7 +17,6 @@ int GetTask::executeTask(void) {
 int GetTask::_MakeHeader(int status) {
   _Header.clear();
   _Header << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(status) << "\r\n";
-  _Header << "Connection: keep-alive\r\n";
   _Header << "Content-type: " << _resBodyType << "\r\n";
   return 0;
 }

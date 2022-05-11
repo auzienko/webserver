@@ -48,7 +48,6 @@ int PostTask::_MakeHeader() {
     _resBodyType = "";
   }
   _response << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(201) << "\r\n";
-  _response << "Connection: keep-alive\r\n";
   _response << "\r\n";
   return 0;
 }

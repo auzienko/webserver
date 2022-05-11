@@ -1,19 +1,23 @@
 #include "classes/Webservers/Webserver.hpp"
+
 #include "classes/Connections/NetworkConnection.hpp"
 #include "classes/Tasks/UnknownNetworkTask.hpp"
 
-Webserver::Webserver(t_server &src, int maxConnection)
+Webserver::Webserver(t_server& src, int maxConnection)
     : _maxConnection(maxConnection), _serverConfig(src) {
   _connectionManager = new ConnectionManager(this);
 }
 
 Webserver::~Webserver() { delete _connectionManager; }
 
-int Webserver::getClientsCount(void) const { return _connectionManager->getConnectionCount(); }
+int Webserver::getClientsCount(void) const {
+  return _connectionManager->getConnectionCount();
+}
 
 void Webserver::addConnection(int fd) {
-  NetworkConnection* tmp = new NetworkConnection(_connectionManager, fd, &_serverConfig.error_pages);
-  tmp->setTask(new UnknownNetworkTask(tmp, _serverConfig, fd));
+  NetworkConnection* tmp =
+      new NetworkConnection(_connectionManager, fd, &_serverConfig.error_pages);
+  tmp->setTask(new UnknownNetworkTask(tmp, fd));
   _connectionManager->add(tmp);
 }
 
@@ -63,7 +67,7 @@ int Webserver::createServerListenSocket(void) {
     close(_listenSocket);
     return -1;
   }
-  //addConnection(_listenSocket);
+  // addConnection(_listenSocket);
 
   char str[sizeof(addr)];
   inet_ntop(AF_INET, &(addr.sin_addr), str, sizeof(addr));
@@ -73,10 +77,8 @@ int Webserver::createServerListenSocket(void) {
 }
 
 int Webserver::readHandler(int fd) {
-  if (fd != _listenSocket && _connectionManager->isExist(fd) == 0)
-    return -1;
+  if (fd != _listenSocket && _connectionManager->isExist(fd) == 0) return -1;
   if (fd == _listenSocket) {
-  
     struct sockaddr_in client;
     socklen_t size = sizeof(client);
     int new_sock = accept(_listenSocket, (struct sockaddr*)&client, &size);
@@ -108,12 +110,12 @@ int Webserver::otherHandler(int fd) {
       _connectionManager->at(fd)->getTask() == nullptr)
     return 0;
   if (_connectionManager->readyToAcceptDataEvent(fd) < 0) {
-  //надо другой оброботчик ошибок. сейчас только про отправку.
+    //надо другой оброботчик ошибок. сейчас только про отправку.
     ws::print(MESSAGE_FAIL, "\n");
     ws::printE(ERROR_SEND_TO_CLIENT, "\n");
   }
   //понять когда закрывать коннекшены корректно
-  //closeConnection(fd);
+  // closeConnection(fd);
   return 0;
 }
 
@@ -142,6 +144,8 @@ void Webserver::makeActiveFdsSet(fd_set* fds, int* max_fd) const {
   }
 }
 
-void Webserver::closeConnectionIfTimout(int seconds){
+void Webserver::closeConnectionIfTimout(int seconds) {
   _connectionManager->closeConnectionIfTimout(seconds);
 }
+
+t_server const& Webserver::getServerConfig(void) const { return _serverConfig; }

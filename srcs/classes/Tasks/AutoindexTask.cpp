@@ -19,10 +19,7 @@ int AutoindexTask::executeTask(void) {
 int AutoindexTask::_MakeHeader(void) {
   _Header.clear();
   _Header << "HTTP/1.1 200 OK\r\n";
-  _Header << "Connection: keep-alive\r\n";
-  _Header << "Content-type: "
-          << "text/html"
-          << "\r\n";
+  _Header << "Content-type: text/html\r\n";
   return 0;
 }
 

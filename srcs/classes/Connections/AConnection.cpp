@@ -74,22 +74,20 @@ void AConnection::error(const std::exception &ex) {
     std::pair<std::ifstream, std::string> *tmp = ws::filesErrors(code, _error_pages);
     if (!tmp->second.empty()) {
       _output << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(code) << "\r\n";
-      // _output << "Connection: keep-alive\r\n";
       _output << "Content-type: " << tmp->second << "\r\n";
       std::stringstream body;
       body << tmp->first.rdbuf();
       tmp->first.close();
       _output << "Content-length: " << body.str().length() << "\r\n";
-      _output << "\r\n";
+      _output << "Connection: close\r\n\r\n";
       if (strlen(ex.what()) == 3)
         _output << body.str();
     } else {
       _output << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(code) << "\r\n";
-      _output << "Connection: keep-alive\r\n";
       _output << "Content-type: " << MimeTypes::getMimeType("smth.html") << "\r\n";
       std::string text(HTTPCodes::getHTTPCodeString(code));
       _output << "Content-length: " << text.length() << "\r\n";
-      _output << "\r\n";
+      _output << "Connection: close\r\n\r\n";
       _output << text;
     }
     _task->setStatus(SENDING);
