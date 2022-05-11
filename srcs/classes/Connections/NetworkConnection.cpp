@@ -20,13 +20,13 @@ int NetworkConnection::_reading(void) {
     ws::printE("~~ 😞 Server: read failture", "\n");
     return -1;
   } else if (nbytes == 0) {
-    std::cout << "fd (NetworkConnection): " << _idFd << " reading no data\n";
+    std::cout << "fd (NetworkConnection) #" << _idFd << ": reading no data\n";
     _task->doTask();
     _input.str(std::string());
     return 0;
   } else {
     _input << buf;
-    std::cout << "\n⬇ ⬇ ⬇ fd (NetworkConnection): " << _idFd << " READ "
+    std::cout << "\n⬇ ⬇ ⬇ fd (NetworkConnection) #" << _idFd << ": READ "
               << nbytes << "B data\n";
     _task->doTask();
     _input.str(std::string());
@@ -44,7 +44,7 @@ int NetworkConnection::_writing(void) {
     nbytes = send(_idFd, _buf, size, 0);
     _wrote += nbytes;
     if (nbytes == -1) {
-      std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection): " << _idFd << " Error";
+      std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection) #" << _idFd << ": Error";
     }
     // if (nbytes)
     //   std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection): " << _idFd << " WROTE "

@@ -19,12 +19,12 @@ int LocalConnection::_reading(void) {
     ws::printE("~~ 😞 Server: read failture", "\n");
     return -1;
   } else if (nbytes == 0) {
-    std::cout << "fd (LocalConnection): " << _idFd << " reading no data\n";
+    std::cout << "fd (LocalConnection) #" << _idFd << ": reading no data\n";
     _task->doTask();
     return 0;
   } else {
     _input << buf;
-    std::cout << "\n⬇ ⬇ ⬇ fd (LocalConnection): " << _idFd << " READ "
+    std::cout << "\n⬇ ⬇ ⬇ fd (LocalConnection) #" << _idFd << ": READ "
               << nbytes << "B data\n";
   }
   return 0;
@@ -40,7 +40,7 @@ int LocalConnection::_writing(void) {
     nbytes = write(_idFd, _buf, size);
     _wrote += nbytes;
     if (nbytes)
-      std::cout << "\n⬆ ⬆ ⬆ fd (LocalConnection): " << _idFd << " WROTE "
+      std::cout << "\n⬆ ⬆ ⬆ fd (LocalConnection) #" << _idFd << ": WROTE "
                 << nbytes << "B data. Progress: " << _wrote
                 << "/" << _len << std::endl;
     return 0;
