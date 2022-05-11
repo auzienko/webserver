@@ -12,6 +12,9 @@ class ConnectionManager;
 
 class AConnection {
  protected:
+  ssize_t _wrote;
+  std::string::size_type _len;
+  char _buf[DEFAULT_BUFLEN];
   ConnectionManager* _connectionManager;
   int _idFd;
   int _type;
@@ -20,6 +23,9 @@ class AConnection {
   std::stringstream _input;
   std::stringstream _output;
   const std::map<int, std::string>* _error_pages;
+
+  virtual int _reading(void) = 0;
+  virtual int _writing(void) = 0;
 
  private:
   AConnection(AConnection const& src);
@@ -32,6 +38,7 @@ class AConnection {
   void setLastActivity(void);
   std::time_t getLastActivity(void) const;
 
+  int io();
   void error(const std::exception &ex);
   int getFd(void);
   void setTask(ATask* task);
@@ -42,8 +49,6 @@ class AConnection {
 
   std::stringstream& getInputData(void);
   void addToOutput(std::string str);
-  virtual int hasDataToReadEvent(void) = 0;
-  virtual int readyToAcceptDataEvent(void) = 0;
 };
 
 #endif

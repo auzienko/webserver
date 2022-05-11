@@ -61,7 +61,9 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
     return 42;
   } else {
     if (!cur.loc)
-      throw std::logic_error("404");        //?
+      throw std::logic_error("404");
+    else if (cur.loc->client_max_body_size && _body.length() > cur.loc->client_max_body_size)
+      throw std::logic_error("413");
     else if (cur.loc->redir.code != 0) {
       std::cout << "~~~~~~~~~~~~~~~> CREATE REDIR TASK uri '" << _UnknownNetworkTask_uri << "' \n\n";
       RedirTask* tmp = new RedirTask(_connection, getFd(), cur);
@@ -126,6 +128,8 @@ void UnknownNetworkTask::getSimple(string& body) {
 
 void UnknownNetworkTask::getChunked(string& body){
   if (!body.size()) return;       // Если боди нет, возврат на чтение
+  if (_client_max_body_size && _body.length() + body.length() > _client_max_body_size)
+    throw logic_error("413");
 
   while (status != END)
   {
@@ -222,7 +226,7 @@ void UnknownNetworkTask::reset() {
   _http_version.clear();
   _headers.clear();
   _content_len = 0;
-  _client_max_body_size = 0;
+  _client_max_body_size = _server_config.client_max_body_size;
   _chunked = false;
   _body.clear();
   status = START;
@@ -299,7 +303,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config, t_uriInfo u
   env["GATEWAY_INTERFACE"] = "CGI/1.1";
   env["PATH_TRANSLATED"] = uriBlocks.uri;
   env["CONTENT_TYPE"] =  ws::stringFromMap(_headers.find("Content-Type"), _headers.end());
-  env["QUERY_STRING"] = uriBlocks.args;                                                   // Проверить
+  env["QUERY_STRING"] = uriBlocks.args;
   env["REMOTE_ADDR"] = ws::socketGetIP(getFd());
   // //env["REMOTE_HOST"] = "empty";
   // env["REMOTE_IDENT"] =  remote_ident_pwd;

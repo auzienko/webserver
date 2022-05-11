@@ -7,20 +7,16 @@ class ConnectionManager;
 
 class NetworkConnection : public AConnection {
  private:
-  ssize_t _wrote;
-  std::string::size_type _len;
   NetworkConnection(void);
   NetworkConnection(NetworkConnection const& src);
   NetworkConnection& operator=(NetworkConnection const& rhs);
 
+  int _reading(void);
+  int _writing(void);
+
  public:
   NetworkConnection(ConnectionManager* cm, int inputFd, const std::map<int, std::string>* error_pages);
   virtual ~NetworkConnection();
-  int hasDataToReadEvent(void);
-  int readyToAcceptDataEvent(void);
-  void _io(void);
-  int _reading(void);
-  int _writing(void);
 };
 
 #endif

@@ -7,16 +7,16 @@ class ConnectionManager;
 
 class LocalConnection : public AConnection {
  private:
-  ssize_t readed;
   LocalConnection(void);
   LocalConnection(LocalConnection const& src);
   LocalConnection& operator=(LocalConnection const& rhs);
 
+  int _reading(void);
+  int _writing(void);
+
  public:
   LocalConnection(ConnectionManager* cm, int fd, const std::map<int, std::string>* error_pages);
   virtual ~LocalConnection();
-  int hasDataToReadEvent(void);
-  int readyToAcceptDataEvent(void);
 };
 
 #endif

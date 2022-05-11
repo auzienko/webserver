@@ -3,7 +3,9 @@
 #include "classes/HTTPCodes.hpp"
 
 AConnection::AConnection()
-    : _connectionManager(nullptr),
+    : _wrote(0),
+      _len(0),
+      _connectionManager(nullptr),
       _idFd(-1),
       _task(nullptr) {}
 
@@ -15,7 +17,9 @@ AConnection::~AConnection() {
 }
 
 AConnection::AConnection(ConnectionManager* cm, int fd, const std::map<int, std::string>* error_pages)
-    : _connectionManager(cm),
+    : _wrote(0),
+      _len(0),
+      _connectionManager(cm),
       _idFd(fd),
       _task(nullptr),
       _error_pages(error_pages) {
@@ -30,6 +34,33 @@ std::time_t AConnection::getLastActivity(void) const { return _lastActivity; }
 
 ConnectionManager* AConnection::getConnectionManager(void) const {
   return _connectionManager;
+}
+
+int AConnection::io() {
+  if (!_task)
+    return 0;
+  int taskStatus = _task->getStatus();
+  switch (taskStatus) {
+    case NEW:
+      _task->setStatus(READING);
+    case READING:
+      _reading();
+      break;
+    case READY_TO_HANDLE:
+    case EXECUTION:
+      _task->doTask();
+      break;
+    case READY_TO_SEND:
+    case SENDING:
+      _writing();
+      break;
+    case DONE:
+      getConnectionManager()->remove(_idFd);
+      break;
+    default:
+      break;
+  }
+  return (0);
 }
 
 void AConnection::setTask(ATask* task) { _task = task; }
