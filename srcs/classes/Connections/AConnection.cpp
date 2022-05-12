@@ -1,6 +1,7 @@
 #include "classes/Connections/AConnection.hpp"
-#include "classes/MimeTypes.hpp"
+
 #include "classes/HTTPCodes.hpp"
+#include "classes/MimeTypes.hpp"
 
 AConnection::AConnection()
     : _wrote(0),
@@ -16,7 +17,8 @@ AConnection::~AConnection() {
             << _idFd << std::endl;
 }
 
-AConnection::AConnection(ConnectionManager* cm, int fd, const std::map<int, std::string>* error_pages)
+AConnection::AConnection(ConnectionManager* cm, int fd,
+                         const std::map<int, std::string>* error_pages)
     : _wrote(0),
       _len(0),
       _connectionManager(cm),
@@ -37,8 +39,7 @@ ConnectionManager* AConnection::getConnectionManager(void) const {
 }
 
 int AConnection::io() {
-  if (!_task)
-    return 0;
+  if (!_task) return 0;
   int taskStatus = _task->getStatus();
   switch (taskStatus) {
     case NEW:
@@ -65,13 +66,14 @@ int AConnection::io() {
 
 void AConnection::setTask(ATask* task) { _task = task; }
 
-void AConnection::error(const std::exception &ex) {
+void AConnection::error(const std::exception& ex) {
   int code = ws::stringTakeErrCode(ex.what());
   if (code == -1)
     throw ex;
   else {
     std::cout << "Error " << ex.what() << std::endl;
-    std::pair<std::ifstream, std::string> *tmp = ws::filesErrors(code, _error_pages);
+    std::pair<std::ifstream, std::string>* tmp =
+        ws::filesErrors(code, _error_pages);
     if (!tmp->second.empty()) {
       _output << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(code) << "\r\n";
       _output << "Content-type: " << tmp->second << "\r\n";
@@ -80,11 +82,11 @@ void AConnection::error(const std::exception &ex) {
       tmp->first.close();
       _output << "Content-length: " << body.str().length() << "\r\n";
       _output << "Connection: close\r\n\r\n";
-      if (strlen(ex.what()) == 3)
-        _output << body.str();
+      if (strlen(ex.what()) == 3) _output << body.str();
     } else {
       _output << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(code) << "\r\n";
-      _output << "Content-type: " << MimeTypes::getMimeType("smth.html") << "\r\n";
+      _output << "Content-type: " << MimeTypes::getMimeType("smth.html")
+              << "\r\n";
       std::string text(HTTPCodes::getHTTPCodeString(code));
       _output << "Content-length: " << text.length() << "\r\n";
       _output << "Connection: close\r\n\r\n";

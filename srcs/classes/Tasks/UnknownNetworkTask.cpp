@@ -31,6 +31,10 @@ int UnknownNetworkTask::collectData(void) {
 
   parse(_connection->getInputData());
   if (!_done) return 0;
+
+  shutdown(this->getFd(), SHUT_RD);
+  std::cout << "● ● ● fd #" << this->getFd() << ": 💫 INPUT shoutdown\n";
+
   print();
   setStatus(READY_TO_HANDLE);
   executeTask();
@@ -39,7 +43,7 @@ int UnknownNetworkTask::collectData(void) {
 
 int UnknownNetworkTask::executeTask(void) {
   t_uriInfo cur;
-
+  
   cur = ConfigUtils::parseURI(_UnknownNetworkTask_uri, _server_config, _method);
   return _MakeKnownTask(cur);
 }
