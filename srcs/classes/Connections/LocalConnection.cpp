@@ -15,18 +15,25 @@ int LocalConnection::_reading(void) {
   memset(buf, 0, DEFAULT_BUFLEN);
   nbytes = read(_idFd, &buf, DEFAULT_BUFLEN - 1);
   if (nbytes == -1) return 0;
-  if (nbytes < 0) {
-    ws::printE("~~ 😞 Server: read failture", "\n");
-    return -1;
-  } else if (nbytes == 0) {
-    std::cout << "fd (LocalConnection) #" << _idFd << ": reading no data\n";
-    _task->doTask();
-    return 0;
-  } else {
+  if (nbytes > 0) {
     _input << buf;
-    std::cout << "\n⬇ ⬇ ⬇ fd (LocalConnection) #" << _idFd << ": READ "
-              << nbytes << "B data\n";
+    return 0;
   }
+  if (nbytes == 0)
+  _task->doTask();
+  // if (nbytes == -1) return 0;
+  // if (nbytes < 0) {
+  //   ws::printE("~~ 😞 Server: read failture", "\n");
+  //   return -1;
+  // } else if (nbytes == 0) {
+  //   std::cout << "fd (LocalConnection) #" << _idFd << ": reading no data\n";
+  //   _task->doTask();
+  //   return 0;
+  // } else {
+  //   _input << buf;
+  //   std::cout << "\n⬇ ⬇ ⬇ fd (LocalConnection) #" << _idFd << ": READ "
+  //             << nbytes << "B data\n";
+  // }
   return 0;
 }
 
@@ -39,10 +46,10 @@ int LocalConnection::_writing(void) {
     _output.rdbuf()->sgetn(_buf, size);
     nbytes = write(_idFd, _buf, size);
     _wrote += nbytes;
-    if (nbytes)
-      std::cout << "\n⬆ ⬆ ⬆ fd (LocalConnection) #" << _idFd << ": WROTE "
-                << nbytes << "B data. Progress: " << _wrote
-                << "/" << _len << std::endl;
+    // if (nbytes)
+    //   std::cout << "\n⬆ ⬆ ⬆ fd (LocalConnection) #" << _idFd << ": WROTE "
+    //             << nbytes << "B data. Progress: " << _wrote
+    //             << "/" << _len << std::endl;
     return 0;
   }
   _task->setStatus(DONE);

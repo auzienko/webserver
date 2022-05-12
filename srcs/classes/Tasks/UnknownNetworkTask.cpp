@@ -32,8 +32,8 @@ int UnknownNetworkTask::collectData(void) {
   parse(_connection->getInputData());
   if (!_done) return 0;
 
-  shutdown(this->getFd(), SHUT_RD);
-  std::cout << "● ● ● fd #" << this->getFd() << ": 💫 INPUT shoutdown\n";
+  // shutdown(this->getFd(), SHUT_RD);
+  // std::cout << "● ● ● fd #" << this->getFd() << ": 💫 INPUT shoutdown\n";
 
   print();
   setStatus(READY_TO_HANDLE);

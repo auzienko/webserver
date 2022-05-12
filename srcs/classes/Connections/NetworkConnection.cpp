@@ -15,22 +15,33 @@ int NetworkConnection::_reading(void) {
   char buf[DEFAULT_BUFLEN];
   memset(buf, 0, DEFAULT_BUFLEN);
   nbytes = recv(_idFd, &buf, DEFAULT_BUFLEN - 1, 0);
-  if (nbytes == -1) return 0;
-  if (nbytes < 0) {
-    ws::printE("~~ 😞 Server: read failture", "\n");
+  // if (nbytes == -1) {
+  //    std::cerr << "fd (NetworkConnection) #" << _idFd << ": recv failture\n";
+  //   getConnectionManager()->remove(_idFd);
+  //   return 0;
+  // }
+  if (nbytes == 0 || (nbytes == 1 && buf[0] == 4)){
+     std::cout << "fd (NetworkConnection) #" << _idFd << ": reading no data\n";
+    getConnectionManager()->remove(_idFd);
     return -1;
-  } else if (nbytes == 0) {
-    std::cout << "fd (NetworkConnection) #" << _idFd << ": reading no data\n";
-    _task->doTask();
-    _input.str(std::string());
-    return 0;
-  } else {
-    _input << buf;
-    std::cout << "\n⬇ ⬇ ⬇ fd (NetworkConnection) #" << _idFd << ": READ "
-              << nbytes << "B data\n";
-    _task->doTask();
-    _input.str(std::string());
   }
+  _input << buf;
+  _task->doTask();
+  _input.str(std::string());
+
+  // } else if (nbytes == 0) {
+  //   std::cout << "fd (NetworkConnection) #" << _idFd << ": reading no data\n";
+  //    _task->doTask();
+  //   _input.str(std::string());
+  //   getConnectionManager()->remove(_idFd);
+  //   return 0;
+  // } else {
+  //   _input << buf;
+  //   // std::cout << "\n⬇ ⬇ ⬇ fd (NetworkConnection) #" << _idFd << ": READ "
+  //   //           << nbytes << "B data\n";
+  //   //_task->doTask();
+  //   //_input.str(std::string());
+  //}
   return 0;
 }
 
@@ -55,6 +66,7 @@ int NetworkConnection::_writing(void) {
     return 0;
   }
   _task->setStatus(DONE);
+  //getConnectionManager()->remove(_idFd);
   // std::cout << _wrote << " bytes wrote totaly of " << _len << std::endl;
   return 0;
 }
