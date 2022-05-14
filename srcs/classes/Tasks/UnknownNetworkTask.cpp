@@ -35,7 +35,7 @@ int UnknownNetworkTask::collectData(void) {
   // shutdown(this->getFd(), SHUT_RD);
   // std::cout << "● ● ● fd #" << this->getFd() << ": 💫 INPUT shoutdown\n";
 
-  print();
+  // print();
   setStatus(READY_TO_HANDLE);
   executeTask();
   return 0;
@@ -57,10 +57,7 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       std::cout << "~~~~~~~~~~~~~~~> CREATE CGI TASK uri '"
                 << _UnknownNetworkTask_uri << "' \n\n";
       _MakeCgiTasks(_server_config, cur);
-    } else if (_method != "GET" && _method != "POST" && _method != "DELETE" &&
-               _method != "HEAD")
-      throw std::logic_error("501");
-    else
+    } else
       throw std::logic_error(_method == "HEAD" ? "405h" : "405");
     return 42;
   } else {
@@ -78,9 +75,11 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       return 42;
     } else if (cur.loc->autoindex) {
       // Autoindex flow
+      static int count = 0;
+      std::cout << ++count << std::endl;
 
-      std::cout << "~~~~~~~~~~~~~~~> CREATE AUTOINDEX TASK uri '"
-                << _UnknownNetworkTask_uri << "' \n\n";
+      // std::cout << "~~~~~~~~~~~~~~~> CREATE AUTOINDEX TASK uri '"
+      //           << _UnknownNetworkTask_uri << "' \n\n";
       if (cur.loc->root == cur.uri && ws::filesIsDir(cur.uri)) {
         AutoindexTask* tmp = new AutoindexTask(_connection, getFd(),
                                                cur.loc->root, cur.loc->path);
@@ -115,6 +114,16 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       PostTask* tmp = new PostTask(_connection, getFd(), cur, _body);
       tmp->setStatus(READY_TO_HANDLE);
       _connection->replaceTask(tmp);
+      return 42;
+    } else if (_method == "PUT") {
+      // PUT only for tester flow
+
+      std::cout << "~~~~~~~~~~~~~~~> CREATE PUT TASK uri '"
+                << _UnknownNetworkTask_uri << "' \n\n";
+      
+      std::string response("HTTP/1.1 201 Created\r\n\r\n");
+      _connection->addToOutput(response);
+      setStatus(SENDING);
       return 42;
     }
   }
@@ -194,8 +203,7 @@ void UnknownNetworkTask::parseFirstLine(string& firstLine) {
   if (i == strnpos) throw logic_error("400");
   _UnknownNetworkTask_uri = firstLine.substr(0, i);
   _http_version = firstLine.substr(i + 1, j - i - 1);
-  if (_method == "PUT") _method = POST;
-  if (_method != GET && _method != POST && _method != DELETE && _method != HEAD)
+  if (_method != GET && _method != POST && _method != "PUT" && _method != DELETE && _method != HEAD)
     throw logic_error("501");
   if (_http_version != "HTTP/1.1") throw logic_error("505");
   firstLine.erase(0, j + 2);
