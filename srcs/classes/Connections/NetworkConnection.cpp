@@ -10,7 +10,7 @@ NetworkConnection::NetworkConnection(
 NetworkConnection::~NetworkConnection() {}
 
 int NetworkConnection::_reading(void) {
-  setLastActivity();
+  _task->setLastActivity();
   int nbytes;
   char buf[DEFAULT_BUFLEN];
   memset(buf, 0, DEFAULT_BUFLEN);
@@ -20,8 +20,9 @@ int NetworkConnection::_reading(void) {
   //   getConnectionManager()->remove(_idFd);
   //   return 0;
   // }
-  if (nbytes == 0 || (nbytes == 1 && buf[0] == 4)){
-     std::cout << "fd (NetworkConnection) #" << _idFd << ": reading no data\n";
+  if (nbytes == 0 || (nbytes == 1 && buf[0] == 4)){   // Close on error
+    std::cout << "fd (NetworkConnection) #" << _idFd << ": reading no data\n";
+    std::cout << " network close ERROR" << std::endl;
     getConnectionManager()->remove(_idFd);
     return -1;
   }
@@ -46,7 +47,7 @@ int NetworkConnection::_reading(void) {
 }
 
 int NetworkConnection::_writing(void) {
-  setLastActivity();
+  _task->setLastActivity();
   int nbytes = 0;
   if (!_len) _len = _output.str().length();
   if (static_cast<std::string::size_type>(_wrote) < _len) {
@@ -61,8 +62,12 @@ int NetworkConnection::_writing(void) {
     //   std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection): " << _idFd << " WROTE "
     //             << nbytes << "B data. Progress: " << _wrote
     //             << "/" << _len << std::endl;
-    if (static_cast<std::string::size_type>(_wrote) == _len)
-      getConnectionManager()->remove(_idFd);
+
+    // if (static_cast<std::string::size_type>(_wrote) == _len)
+    // {
+    //   std::cout << " network close WRITE" << std::endl;
+    //   getConnectionManager()->remove(_idFd);
+    // }
     return 0;
   }
   _task->setStatus(DONE);

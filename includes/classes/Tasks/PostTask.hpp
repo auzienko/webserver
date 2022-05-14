@@ -8,7 +8,6 @@ class AConnection;
 class PostTask : public ATask {
  private:
   std::stringstream _response;
-  AConnection* _connection;
   t_uriInfo _parsedURI;
   std::string _inputBody;
 

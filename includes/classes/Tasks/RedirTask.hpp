@@ -7,7 +7,6 @@ class AConnection;
 
 class RedirTask : public ATask {
  private:
-  AConnection* _connection;
   std::stringstream _response;
   t_uriInfo _parsedURI;
 

@@ -17,8 +17,7 @@ using namespace std;
 UnknownNetworkTask::~UnknownNetworkTask(void) {}
 
 UnknownNetworkTask::UnknownNetworkTask(AConnection* connection, int const& fd)
-    : ATask(UNKNOWN_NETWORK, fd),
-      _connection(connection),
+    : ATask(UNKNOWN_NETWORK, fd, connection),
       _server_config(connection->getConnectionManager()
                          ->getWebserver()
                          ->getServerConfig()) {
@@ -31,9 +30,6 @@ int UnknownNetworkTask::collectData(void) {
 
   parse(_connection->getInputData());
   if (!_done) return 0;
-
-  // shutdown(this->getFd(), SHUT_RD);
-  // std::cout << "● ● ● fd #" << this->getFd() << ": 💫 INPUT shoutdown\n";
 
   // print();
   setStatus(READY_TO_HANDLE);
@@ -76,10 +72,10 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
     } else if (cur.loc->autoindex) {
       // Autoindex flow
       static int count = 0;
-      std::cout << ++count << std::endl;
+      std::cout << ++count << " " << getFd();
 
-      // std::cout << "~~~~~~~~~~~~~~~> CREATE AUTOINDEX TASK uri '"
-      //           << _UnknownNetworkTask_uri << "' \n\n";
+      std::cout << "~~~~~~~~~~~~~~~> CREATE AUTOINDEX TASK uri '"
+                << _UnknownNetworkTask_uri << "' \n\n";
       if (cur.loc->root == cur.uri && ws::filesIsDir(cur.uri)) {
         AutoindexTask* tmp = new AutoindexTask(_connection, getFd(),
                                                cur.loc->root, cur.loc->path);
@@ -121,7 +117,7 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       std::cout << "~~~~~~~~~~~~~~~> CREATE PUT TASK uri '"
                 << _UnknownNetworkTask_uri << "' \n\n";
       
-      std::string response("HTTP/1.1 201 Created\r\n\r\n");
+      std::string response("HTTP/1.1 201 Created\r\nConnection: Close\r\n\r\n");
       _connection->addToOutput(response);
       setStatus(SENDING);
       return 42;

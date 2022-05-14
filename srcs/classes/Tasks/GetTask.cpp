@@ -3,7 +3,7 @@
 #include "classes/HTTPCodes.hpp"
 
 GetTask::GetTask(AConnection* connection, int const& fd, t_uriInfo parsedURI)
-    : ATask(NETWORK_GET, fd), _connection(connection), _parsedURI(parsedURI) {}
+    : ATask(NETWORK_GET, fd, connection), _parsedURI(parsedURI) {}
 
 GetTask::~GetTask() {}
 
@@ -64,6 +64,7 @@ int GetTask::_AssembleResponse(void) {
   _response.clear();
   _response << _Header.str();
   _response << "Content-lenght: " << _Body.str().length() << "\r\n";
+  _response << "Connection: Close\r\n";
   _response << "\r\n";
   _response << _Body.str();
   setStatus(READY_TO_SEND);

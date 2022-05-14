@@ -6,9 +6,12 @@ enum Type { UNKNOWN_NETWORK, NETWORK_AUTOINDEX, NETWORK_GET, NETWORK_CGI_PARENT,
 
 #include "main.hpp"
 
+class AConnection;
+
 class ATask
 {
 protected:
+	AConnection* _connection;
 	std::string _resBodyType;
 	bool _isKeepAlive;
 private:
@@ -19,7 +22,7 @@ private:
 	ATask& operator=(ATask const& rhs);
 	ATask(void);
 public:
-	ATask(int type, int fd);
+	ATask(int type, int fd, AConnection* connection);
 	virtual ~ATask();
 	int getStatus(void) const;
 	void setStatus(int status);
@@ -27,6 +30,7 @@ public:
 	bool getIsKeepAlive(void) const;
 	int getFd(void) const;
 	int doTask(void);
+	virtual int setLastActivity(void);
 	virtual int collectData(void) = 0;
 	virtual int executeTask(void) = 0;
   	virtual int sendResult(void) = 0;

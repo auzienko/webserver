@@ -9,7 +9,7 @@ LocalConnection::LocalConnection(ConnectionManager* cm, int fd,
 LocalConnection::~LocalConnection() {}
 
 int LocalConnection::_reading(void) {
-  setLastActivity();
+  _task->setLastActivity();
   int nbytes;
   char buf[DEFAULT_BUFLEN];
   memset(buf, 0, DEFAULT_BUFLEN);
@@ -17,10 +17,13 @@ int LocalConnection::_reading(void) {
   if (nbytes == -1) return 0;
   if (nbytes > 0) {
     _input << buf;
+    std::cout << "Reading " << strlen(buf) << " from CGI" << std::endl;
     return 0;
   }
-  if (nbytes == 0)
-  _task->doTask();
+  if (nbytes == 0) {
+    std::cout << "Empty" << std::endl;
+    _task->doTask();
+  }
   // if (nbytes == -1) return 0;
   // if (nbytes < 0) {
   //   ws::printE("~~ 😞 Server: read failture", "\n");
@@ -38,13 +41,14 @@ int LocalConnection::_reading(void) {
 }
 
 int LocalConnection::_writing(void) {
-  setLastActivity();
+  _task->setLastActivity();
   int nbytes = 0;
   if (!_len) _len = _output.str().length();
   if (static_cast<std::string::size_type>(_wrote) < _len) {
     int size = (_len - _wrote) > DEFAULT_BUFLEN ? DEFAULT_BUFLEN : _len - _wrote;
     _output.rdbuf()->sgetn(_buf, size);
     nbytes = write(_idFd, _buf, size);
+    std::cout << "Write data to CGI" << std::endl;
     _wrote += nbytes;
     // if (nbytes)
     //   std::cout << "\n⬆ ⬆ ⬆ fd (LocalConnection) #" << _idFd << ": WROTE "
@@ -53,8 +57,7 @@ int LocalConnection::_writing(void) {
     return 0;
   }
   _task->setStatus(DONE);
-  if (_len < 100) std::cout << _output.str() << std::endl;
-  std::cout << _wrote << " bytes wrote totaly of " << _len << std::endl;
+  std::cout << _wrote << " bytes sended totaly of " << _len << std::endl;
   // getConnectionManager()->remove(_idFd);
   return 0;
 }

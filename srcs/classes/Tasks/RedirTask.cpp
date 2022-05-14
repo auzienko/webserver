@@ -3,7 +3,7 @@
 #include "classes/HTTPCodes.hpp"
 
 RedirTask::RedirTask(AConnection* connection, int const& fd, t_uriInfo parsedURI)
-    : ATask(NETWORK_GET, fd), _connection(connection), _parsedURI(parsedURI) {}
+    : ATask(NETWORK_GET, fd, connection), _parsedURI(parsedURI) {}
 
 RedirTask::~RedirTask() {}
 
@@ -18,6 +18,7 @@ int RedirTask::_MakeHeader(int status) {
   _response.clear();
   _response << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(status) << "\r\n";
   _response << "Location: " << _parsedURI.loc->redir.target << "\r\n";
+  _response << "Connection: Close\r\n";
   return 0;
 }
 

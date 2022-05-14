@@ -4,8 +4,7 @@
 
 CgiParentTask::CgiParentTask(AConnection* connection, int const& fd,
                              int const& childInputFd, int const& childOutputFd)
-    : ATask(NETWORK_CGI_PARENT, fd),
-      _connection(connection),
+    : ATask(NETWORK_CGI_PARENT, fd, connection),
       _childInputFd(childInputFd),
       _childOutputFd(childOutputFd) {}
 

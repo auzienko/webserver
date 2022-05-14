@@ -4,8 +4,7 @@
 
 CgiOutputTask::CgiOutputTask(AConnection* connection, int const& fd,
                              int const& parentFd)
-    : ATask(LOCAL_CGI_OUTPUT, fd),
-      _connection(connection),
+    : ATask(LOCAL_CGI_OUTPUT, fd, connection),
       _parentFd(parentFd) {}
 
 CgiOutputTask::~CgiOutputTask() {}
@@ -16,6 +15,12 @@ int CgiOutputTask::collectData(void) {
   return 0;
 }
 
+int CgiOutputTask::setLastActivity(void) {
+  _connection->setLastActivity();
+  _connection->getConnectionManager()->at(_parentFd)->getTask()->setLastActivity();
+  return 0;
+}
+
 int CgiOutputTask::executeTask(void) {
   setStatus(EXECUTION);
   std::cout << "\n~~~ CgiOutputTask::executeTask\n";
@@ -23,6 +28,7 @@ int CgiOutputTask::executeTask(void) {
   int status = 200;
   std::stringstream result;
   result << "HTTP/1.1 " + HTTPCodes::getHTTPCodeString(status) + "\r\n";
+  result << "Connection: Close\r\n";
   int i = _connection->getInputData().str().find("\r\n\r\n");
   result << "Content-length: " << _connection->getInputData().str().substr(i + 4).length() << "\r\n\r\n";
   result << _connection->getInputData().str().substr(i + 4);

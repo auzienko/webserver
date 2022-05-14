@@ -13,8 +13,8 @@ AConnection::AConnection()
 AConnection::~AConnection() {
   killTask();
   close(_idFd);
-  // std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🖖 CLOSE FD : "
-            // << _idFd << std::endl;
+  std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🖖 CLOSE FD : "
+            << _idFd << std::endl;
 }
 
 AConnection::AConnection(ConnectionManager* cm, int fd,
@@ -26,8 +26,8 @@ AConnection::AConnection(ConnectionManager* cm, int fd,
       _task(nullptr),
       _error_pages(error_pages) {
   setLastActivity();
-  // std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🐣 NEW FD : "
-  //           << _idFd << std::endl;
+  std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🐣 NEW FD : "
+            << _idFd << std::endl;
 }
 
 void AConnection::setLastActivity(void) { _lastActivity = std::time(0); }
@@ -56,6 +56,7 @@ int AConnection::io() {
       _writing();
       break;
     case DONE:
+      std::cout << " close DONE" << std::endl;
       getConnectionManager()->remove(_idFd);
       break;
     default:

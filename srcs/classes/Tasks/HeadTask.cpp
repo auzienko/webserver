@@ -9,6 +9,7 @@ int HeadTask::_AssembleResponse(void) {
   _response.clear();
   _response << _Header.str();
   _response << "Content-lenght: " << _Body.str().length() << "\r\n";
+  _response << "Connection: Close\r\n";
   _response << "\r\n";
   setStatus(READY_TO_SEND);
   sendResult();

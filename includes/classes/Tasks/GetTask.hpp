@@ -11,7 +11,6 @@ class GetTask : public ATask {
   std::stringstream _Body;
   std::stringstream _response;
  private:
-  AConnection* _connection;
   t_uriInfo _parsedURI;
 
   GetTask(void);

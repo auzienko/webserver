@@ -76,6 +76,7 @@ void ConnectionManager::closeConnectionIfTimout(int seconds) {
   std::map<int, AConnection*>::iterator e = _list.end();
   while (i != e) {
     if (std::time(0) - i->second->getLastActivity() > seconds) {
+      std::cout << " close timeout" << std::endl;
       delete i->second;
       _list.erase(i++);
     } else
