@@ -27,6 +27,7 @@ class Webserver {
   int readHandler(int fd);
   int otherHandler(int fd);
   void closeConnectionIfTimout(int seconds);
+  void closeConnectionIfDone();
   t_server const& getServerConfig(void) const;
 
  private:

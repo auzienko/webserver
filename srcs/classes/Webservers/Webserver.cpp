@@ -148,4 +148,8 @@ void Webserver::closeConnectionIfTimout(int seconds) {
   _connectionManager->closeConnectionIfTimout(seconds);
 }
 
+void Webserver::closeConnectionIfDone() {
+  _connectionManager->closeConnectionIfDone();
+}
+
 t_server const& Webserver::getServerConfig(void) const { return _serverConfig; }

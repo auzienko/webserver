@@ -65,6 +65,11 @@ int WebserverManager::start(void) {
       (*it)->closeConnectionIfTimout(15);
       ++it;
     }
+    it = _webservers.begin();
+    while (it != en) {
+      (*it)->closeConnectionIfDone();
+      ++it;
+    }
   }
   return 0;
 }

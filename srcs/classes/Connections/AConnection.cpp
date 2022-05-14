@@ -56,8 +56,7 @@ int AConnection::io() {
       _writing();
       break;
     case DONE:
-      std::cout << " close DONE" << std::endl;
-      getConnectionManager()->remove(_idFd);
+      // getConnectionManager()->remove(_idFd);
       break;
     default:
       break;

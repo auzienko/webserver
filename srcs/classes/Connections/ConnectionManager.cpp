@@ -84,6 +84,18 @@ void ConnectionManager::closeConnectionIfTimout(int seconds) {
   }
 }
 
+void ConnectionManager::closeConnectionIfDone() {
+  std::map<int, AConnection*>::iterator i = _list.begin();
+  std::map<int, AConnection*>::iterator e = _list.end();
+  while (i != e) {
+    if (i->second->getTask()->getStatus() == DONE) {
+      delete i->second;
+      _list.erase(i++);
+    } else
+      ++i;
+  }
+}
+
 Webserver const* ConnectionManager::getWebserver(void) const {
   return _webserver;
 }
