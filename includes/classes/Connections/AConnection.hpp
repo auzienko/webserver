@@ -19,7 +19,7 @@ class AConnection {
   int _idFd;
   int _type;
   ATask* _task;
-  std::time_t _lastActivity;
+  long int _lastActivity;
   std::stringstream _input;
   std::stringstream _output;
   const std::map<int, std::string>* _error_pages;
@@ -36,7 +36,7 @@ class AConnection {
   AConnection(ConnectionManager* cm, int fd, const std::map<int, std::string>* error_pages);
   virtual ~AConnection(void);
   void setLastActivity(void);
-  std::time_t getLastActivity(void) const;
+  long int getLastActivity(void) const;
 
   int io();
   void error(const std::exception &ex);

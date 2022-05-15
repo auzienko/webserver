@@ -7,8 +7,8 @@ class AConnection;
 
 class CgiOutputTask : public ATask {
  private:
-  AConnection* _connection;
   int const _parentFd;
+  int _length;
 
   CgiOutputTask(void);
   CgiOutputTask(CgiOutputTask const& src);
@@ -20,6 +20,8 @@ class CgiOutputTask : public ATask {
   int collectData(void);
   int executeTask(void);
   int sendResult(void);
+  void addLength(int addedLength);
+  int setLastActivity(void);
 };
 
 #endif

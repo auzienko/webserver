@@ -7,7 +7,6 @@ class AConnection;
 
 class CgiParentTask : public ATask {
  private:
-  AConnection* _connection;
   std::stringstream _Header;
   std::stringstream _Body;
   std::stringstream _response;

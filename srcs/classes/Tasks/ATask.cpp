@@ -1,6 +1,7 @@
 #include "classes/Tasks/ATask.hpp"
+#include "classes/Connections/AConnection.hpp"
 
-ATask::ATask(int type, int fd) : _isKeepAlive(true), _fd(fd), _status(NEW) {
+ATask::ATask(int type, int fd, AConnection* connection) : _connection(connection), _isKeepAlive(true), _fd(fd), _status(NEW) {
   switch (type) {
     case UNKNOWN_NETWORK:
     case NETWORK_AUTOINDEX:
@@ -26,6 +27,11 @@ bool ATask::getIsKeepAlive(void) const { return _isKeepAlive; }
 
 void ATask::setStatus(int status) {
   if (status > NEW && status <= DONE) _status = status;
+}
+
+int ATask::setLastActivity(void) {
+  _connection->setLastActivity();
+  return 0;
 }
 
 int ATask::doTask(void) {

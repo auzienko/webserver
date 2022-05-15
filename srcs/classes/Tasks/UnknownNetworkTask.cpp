@@ -10,6 +10,7 @@
 #include "classes/Tasks/GetTask.hpp"
 #include "classes/Tasks/HeadTask.hpp"
 #include "classes/Tasks/PostTask.hpp"
+#include "classes/Tasks/DeleteTask.hpp"
 #include "classes/Tasks/RedirTask.hpp"
 
 using namespace std;
@@ -17,8 +18,7 @@ using namespace std;
 UnknownNetworkTask::~UnknownNetworkTask(void) {}
 
 UnknownNetworkTask::UnknownNetworkTask(AConnection* connection, int const& fd)
-    : ATask(UNKNOWN_NETWORK, fd),
-      _connection(connection),
+    : ATask(UNKNOWN_NETWORK, fd, connection),
       _server_config(connection->getConnectionManager()
                          ->getWebserver()
                          ->getServerConfig()) {
@@ -31,9 +31,6 @@ int UnknownNetworkTask::collectData(void) {
 
   parse(_connection->getInputData());
   if (!_done) return 0;
-
-  shutdown(this->getFd(), SHUT_RD);
-  std::cout << "● ● ● fd #" << this->getFd() << ": 💫 INPUT shoutdown\n";
 
   print();
   setStatus(READY_TO_HANDLE);
@@ -57,10 +54,7 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       std::cout << "~~~~~~~~~~~~~~~> CREATE CGI TASK uri '"
                 << _UnknownNetworkTask_uri << "' \n\n";
       _MakeCgiTasks(_server_config, cur);
-    } else if (_method != "GET" && _method != "POST" && _method != "DELETE" &&
-               _method != "HEAD")
-      throw std::logic_error("501");
-    else
+    } else
       throw std::logic_error(_method == "HEAD" ? "405h" : "405");
     return 42;
   } else {
@@ -98,15 +92,6 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       tmp->setStatus(READY_TO_HANDLE);
       _connection->replaceTask(tmp);
       return 42;
-    } else if (_method == "HEAD") {
-      // HEAD flow
-
-      std::cout << "~~~~~~~~~~~~~~~> CREATE HEAD TASK uri '"
-                << _UnknownNetworkTask_uri << "' \n\n";
-      HeadTask* tmp = new HeadTask(_connection, getFd(), cur);
-      tmp->setStatus(READY_TO_HANDLE);
-      _connection->replaceTask(tmp);
-      return 42;
     } else if (_method == "POST") {
       // POST flow
 
@@ -115,6 +100,34 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       PostTask* tmp = new PostTask(_connection, getFd(), cur, _body);
       tmp->setStatus(READY_TO_HANDLE);
       _connection->replaceTask(tmp);
+      return 42;
+    } else if (_method == "DELETE") {
+      // DELETE flow
+
+      std::cout << "~~~~~~~~~~~~~~~> CREATE DELETE TASK uri '"
+                << _UnknownNetworkTask_uri << "' \n\n";
+      DeleteTask* tmp = new DeleteTask(_connection, getFd(), cur);
+      tmp->setStatus(READY_TO_HANDLE);
+      _connection->replaceTask(tmp);
+      return 42;
+    } else if (_method == "HEAD") {
+      // HEAD only for tester flow
+
+      std::cout << "~~~~~~~~~~~~~~~> CREATE HEAD TASK uri '"
+                << _UnknownNetworkTask_uri << "' \n\n";
+      HeadTask* tmp = new HeadTask(_connection, getFd(), cur);
+      tmp->setStatus(READY_TO_HANDLE);
+      _connection->replaceTask(tmp);
+      return 42;
+    } else if (_method == "PUT") {
+      // PUT only for tester flow
+
+      std::cout << "~~~~~~~~~~~~~~~> CREATE PUT TASK uri '"
+                << _UnknownNetworkTask_uri << "' \n\n";
+      
+      std::string response("HTTP/1.1 201 Created\r\nConnection: Close\r\n\r\n");
+      _connection->addToOutput(response);
+      setStatus(SENDING);
       return 42;
     }
   }
@@ -194,8 +207,7 @@ void UnknownNetworkTask::parseFirstLine(string& firstLine) {
   if (i == strnpos) throw logic_error("400");
   _UnknownNetworkTask_uri = firstLine.substr(0, i);
   _http_version = firstLine.substr(i + 1, j - i - 1);
-  if (_method == "PUT") _method = POST;
-  if (_method != GET && _method != POST && _method != DELETE && _method != HEAD)
+  if (_method != GET && _method != POST && _method != "PUT" && _method != DELETE && _method != HEAD)
     throw logic_error("501");
   if (_http_version != "HTTP/1.1") throw logic_error("505");
   firstLine.erase(0, j + 2);
@@ -355,8 +367,6 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
   free(tmpURI);
   z_array_null_terminate(&zc_cgi_path);
 
-  std::cout << "~~~ CGI REQUEST\n";
-
   pid_t pid;
   int fd_input[2];
   int fd_output[2];
@@ -431,12 +441,6 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
   // if you need to write something to cgi - use fd_input[1]
   // if you need to read something from cgi - use fd_output[0]
 
-  //удалить это тестовое боди по готовности парсера
-  // _body = "foo=bar";
-  // write(fd_input[1], "Hello", 5);
-  // close(fd_input[1]);
-
-  std::cout << "~~~ CREATE CGI TASKs\n";
 
   LocalConnection* tmpConnectionInput =
       new LocalConnection(_connection->getConnectionManager(), fd_input[1],

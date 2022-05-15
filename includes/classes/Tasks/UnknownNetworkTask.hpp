@@ -19,7 +19,6 @@ enum States { START, HEADERS, BODY, END };
 
 class UnknownNetworkTask : public ATask {
  private:
-  AConnection* _connection;
   t_server const& _server_config;
 
   UnknownNetworkTask(void);

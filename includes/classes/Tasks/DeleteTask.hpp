@@ -1,23 +1,22 @@
-#ifndef POSTTASK_HPP
-#define POSTTASK_HPP
+#ifndef DELETETASK_HPP
+#define DELETETASK_HPP
 
 #include "classes/Connections/AConnection.hpp"
 #include "classes/Tasks/ATask.hpp"
 class AConnection;
 
-class PostTask : public ATask {
+class DeleteTask : public ATask {
  private:
   std::stringstream _response;
   t_uriInfo _parsedURI;
-  std::string _inputBody;
 
-  PostTask(void);
-  PostTask(PostTask const& src);
-  PostTask& operator=(PostTask const& rhs);
+  DeleteTask(void);
+  DeleteTask(DeleteTask const& src);
+  DeleteTask& operator=(DeleteTask const& rhs);
 
  public:
-  PostTask(AConnection* connection, int const& fd, t_uriInfo parsedURI, std::string &inputBody);
-  virtual ~PostTask();
+  DeleteTask(AConnection* connection, int const& fd, t_uriInfo parsedURI);
+  virtual ~DeleteTask();
   int collectData(void);
   int executeTask(void);
   int sendResult(void);

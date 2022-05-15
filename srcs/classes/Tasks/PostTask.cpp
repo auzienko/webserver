@@ -3,7 +3,7 @@
 #include "classes/HTTPCodes.hpp"
 
 PostTask::PostTask(AConnection* connection, int const& fd, t_uriInfo parsedURI, std::string &inputBody)
-    : ATask(NETWORK_GET, fd), _connection(connection), _parsedURI(parsedURI), _inputBody(inputBody) {}
+    : ATask(NETWORK_GET, fd, connection), _parsedURI(parsedURI), _inputBody(inputBody) {}
 
 PostTask::~PostTask() {}
 
@@ -48,6 +48,7 @@ int PostTask::_MakeHeader() {
     _resBodyType = "";
   }
   _response << "HTTP/1.1 " << HTTPCodes::getHTTPCodeString(201) << "\r\n";
+  _response << "Connection: Close\r\n";
   _response << "\r\n";
   return 0;
 }

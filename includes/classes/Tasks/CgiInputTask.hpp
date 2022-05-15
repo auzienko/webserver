@@ -7,7 +7,6 @@ class AConnection;
 
 class CgiInputTask : public ATask {
  private:
-  AConnection* _connection;
   int const _parentFd;
 
   CgiInputTask(void);
@@ -20,6 +19,7 @@ class CgiInputTask : public ATask {
   int collectData(void);
   int executeTask(void);
   int sendResult(void);
+  int setLastActivity(void);
 };
 
 #endif

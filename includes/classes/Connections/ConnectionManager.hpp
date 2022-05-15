@@ -28,6 +28,7 @@ class ConnectionManager {
   Webserver const* getWebserver(void) const;
 
   void closeConnectionIfTimout(int seconds);
+  void closeConnectionIfDone();
 };
 
 #endif

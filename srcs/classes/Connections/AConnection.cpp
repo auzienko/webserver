@@ -13,8 +13,11 @@ AConnection::AConnection()
 AConnection::~AConnection() {
   killTask();
   close(_idFd);
+
+#ifdef DEBUG
   std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🖖 CLOSE FD : "
             << _idFd << std::endl;
+#endif
 }
 
 AConnection::AConnection(ConnectionManager* cm, int fd,
@@ -26,13 +29,21 @@ AConnection::AConnection(ConnectionManager* cm, int fd,
       _task(nullptr),
       _error_pages(error_pages) {
   setLastActivity();
+
+#ifdef DEBUG
   std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🐣 NEW FD : "
             << _idFd << std::endl;
+#endif
 }
 
-void AConnection::setLastActivity(void) { _lastActivity = std::time(0); }
+void AConnection::setLastActivity(void) {
+  struct timeval tp;
 
-std::time_t AConnection::getLastActivity(void) const { return _lastActivity; }
+  gettimeofday(&tp, NULL);
+  _lastActivity = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+}
+
+long int AConnection::getLastActivity(void) const { return _lastActivity; }
 
 ConnectionManager* AConnection::getConnectionManager(void) const {
   return _connectionManager;
@@ -56,7 +67,7 @@ int AConnection::io() {
       _writing();
       break;
     case DONE:
-      getConnectionManager()->remove(_idFd);
+      // getConnectionManager()->remove(_idFd);
       break;
     default:
       break;
@@ -71,7 +82,11 @@ void AConnection::error(const std::exception& ex) {
   if (code == -1)
     throw ex;
   else {
+
+#ifdef DEBUG
     std::cout << "Error " << ex.what() << std::endl;
+#endif
+
     std::pair<std::ifstream, std::string>* tmp =
         ws::filesErrors(code, _error_pages);
     if (!tmp->second.empty()) {
