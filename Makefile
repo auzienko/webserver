@@ -4,7 +4,7 @@ SRCS =  srcs/main.cpp srcs/ws/print.cpp srcs/ws/files.cpp srcs/ws/int.cpp \
 		srcs/ws/string.cpp srcs/ws/uri.cpp srcs/ws/socket.cpp \
 		srcs/classes/Tasks/ATask.cpp srcs/classes/Tasks/UnknownNetworkTask.cpp \
 		srcs/classes/Tasks/AutoindexTask.cpp srcs/classes/Tasks/GetTask.cpp srcs/classes/Tasks/PostTask.cpp \
-		srcs/classes/Tasks/HeadTask.cpp srcs/classes/Tasks/RedirTask.cpp \
+		srcs/classes/Tasks/HeadTask.cpp srcs/classes/Tasks/RedirTask.cpp srcs/classes/Tasks/DeleteTask.cpp\
 		srcs/classes/Tasks/CgiParentTask.cpp srcs/classes/Tasks/CgiInputTask.cpp \
 		srcs/classes/Tasks/CgiOutputTask.cpp srcs/classes/Connections/AConnection.cpp \
 		srcs/classes/Connections/NetworkConnection.cpp srcs/classes/Connections/LocalConnection.cpp \

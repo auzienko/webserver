@@ -10,6 +10,7 @@
 #include "classes/Tasks/GetTask.hpp"
 #include "classes/Tasks/HeadTask.hpp"
 #include "classes/Tasks/PostTask.hpp"
+#include "classes/Tasks/DeleteTask.hpp"
 #include "classes/Tasks/RedirTask.hpp"
 
 using namespace std;
@@ -31,7 +32,7 @@ int UnknownNetworkTask::collectData(void) {
   parse(_connection->getInputData());
   if (!_done) return 0;
 
-  // print();
+  print();
   setStatus(READY_TO_HANDLE);
   executeTask();
   return 0;
@@ -71,8 +72,6 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       return 42;
     } else if (cur.loc->autoindex) {
       // Autoindex flow
-      static int count = 0;
-      std::cout << ++count << " " << getFd();
 
       std::cout << "~~~~~~~~~~~~~~~> CREATE AUTOINDEX TASK uri '"
                 << _UnknownNetworkTask_uri << "' \n\n";
@@ -93,21 +92,30 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
       tmp->setStatus(READY_TO_HANDLE);
       _connection->replaceTask(tmp);
       return 42;
-    } else if (_method == "HEAD") {
-      // HEAD flow
-
-      std::cout << "~~~~~~~~~~~~~~~> CREATE HEAD TASK uri '"
-                << _UnknownNetworkTask_uri << "' \n\n";
-      HeadTask* tmp = new HeadTask(_connection, getFd(), cur);
-      tmp->setStatus(READY_TO_HANDLE);
-      _connection->replaceTask(tmp);
-      return 42;
     } else if (_method == "POST") {
       // POST flow
 
       std::cout << "~~~~~~~~~~~~~~~> CREATE POST TASK uri '"
                 << _UnknownNetworkTask_uri << "' \n\n";
       PostTask* tmp = new PostTask(_connection, getFd(), cur, _body);
+      tmp->setStatus(READY_TO_HANDLE);
+      _connection->replaceTask(tmp);
+      return 42;
+    } else if (_method == "DELETE") {
+      // DELETE flow
+
+      std::cout << "~~~~~~~~~~~~~~~> CREATE DELETE TASK uri '"
+                << _UnknownNetworkTask_uri << "' \n\n";
+      DeleteTask* tmp = new DeleteTask(_connection, getFd(), cur);
+      tmp->setStatus(READY_TO_HANDLE);
+      _connection->replaceTask(tmp);
+      return 42;
+    } else if (_method == "HEAD") {
+      // HEAD only for tester flow
+
+      std::cout << "~~~~~~~~~~~~~~~> CREATE HEAD TASK uri '"
+                << _UnknownNetworkTask_uri << "' \n\n";
+      HeadTask* tmp = new HeadTask(_connection, getFd(), cur);
       tmp->setStatus(READY_TO_HANDLE);
       _connection->replaceTask(tmp);
       return 42;
@@ -359,8 +367,6 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
   free(tmpURI);
   z_array_null_terminate(&zc_cgi_path);
 
-  std::cout << "~~~ CGI REQUEST\n";
-
   pid_t pid;
   int fd_input[2];
   int fd_output[2];
@@ -435,12 +441,6 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
   // if you need to write something to cgi - use fd_input[1]
   // if you need to read something from cgi - use fd_output[0]
 
-  //удалить это тестовое боди по готовности парсера
-  // _body = "foo=bar";
-  // write(fd_input[1], "Hello", 5);
-  // close(fd_input[1]);
-
-  std::cout << "~~~ CREATE CGI TASKs\n";
 
   LocalConnection* tmpConnectionInput =
       new LocalConnection(_connection->getConnectionManager(), fd_input[1],

@@ -74,9 +74,17 @@ int ConnectionManager::getConnectionCount(void) const { return _list.size(); }
 void ConnectionManager::closeConnectionIfTimout(int seconds) {
   std::map<int, AConnection*>::iterator i = _list.begin();
   std::map<int, AConnection*>::iterator e = _list.end();
+  long int msDelta = seconds * 1000;
+  struct timeval tp;                                              //
+  gettimeofday(&tp, NULL);                                        //  Получение текущего времени в ms
+  long int msNow = tp.tv_sec * 1000 + tp.tv_usec / 1000;          //
   while (i != e) {
-    if (std::time(0) - i->second->getLastActivity() > seconds) {
-      std::cout << " close timeout" << std::endl;
+    if (msNow - i->second->getLastActivity() > msDelta) {
+
+#ifdef DEBUG
+      std::cout << "Close on timeout:" << std::endl;
+#endif
+
       delete i->second;
       _list.erase(i++);
     } else
@@ -87,8 +95,12 @@ void ConnectionManager::closeConnectionIfTimout(int seconds) {
 void ConnectionManager::closeConnectionIfDone() {
   std::map<int, AConnection*>::iterator i = _list.begin();
   std::map<int, AConnection*>::iterator e = _list.end();
+  struct timeval tp;                                              //
+  gettimeofday(&tp, NULL);                                        //  Получение текущего времени в ms
+  long int msNow = tp.tv_sec * 1000 + tp.tv_usec / 1000;          //
   while (i != e) {
-    if (i->second->getTask()->getStatus() == DONE) {
+    if (i->second->getTask()->getStatus() == DONE &&
+        msNow - i->second->getLastActivity() > CLOSE_TIME) {
       delete i->second;
       _list.erase(i++);
     } else

@@ -62,7 +62,7 @@ int WebserverManager::start(void) {
     std::vector<Webserver*>::iterator it = _webservers.begin();
     std::vector<Webserver*>::iterator en = _webservers.end();
     while (it != en) {
-      (*it)->closeConnectionIfTimout(15);
+      (*it)->closeConnectionIfTimout(TIMEOUT);
       ++it;
     }
     it = _webservers.begin();

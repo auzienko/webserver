@@ -1,4 +1,9 @@
 #include "classes/Connections/LocalConnection.hpp"
+#include "classes/Tasks/CgiOutputTask.hpp"
+#include "classes/Tasks/ATask.hpp"
+
+class ATask;
+class CgiOutputTask;
 
 LocalConnection::LocalConnection(ConnectionManager* cm, int fd,
                                  const std::map<int, std::string>* error_pages)
@@ -17,26 +22,17 @@ int LocalConnection::_reading(void) {
   if (nbytes == -1) return 0;
   if (nbytes > 0) {
     _input << buf;
+    dynamic_cast<CgiOutputTask *>(_task)->addLength(strlen(buf));
+
+#ifdef DEBUG
     std::cout << "Reading " << strlen(buf) << " from CGI" << std::endl;
+#endif
+
     return 0;
   }
   if (nbytes == 0) {
-    std::cout << "Empty" << std::endl;
     _task->doTask();
   }
-  // if (nbytes == -1) return 0;
-  // if (nbytes < 0) {
-  //   ws::printE("~~ 😞 Server: read failture", "\n");
-  //   return -1;
-  // } else if (nbytes == 0) {
-  //   std::cout << "fd (LocalConnection) #" << _idFd << ": reading no data\n";
-  //   _task->doTask();
-  //   return 0;
-  // } else {
-  //   _input << buf;
-  //   std::cout << "\n⬇ ⬇ ⬇ fd (LocalConnection) #" << _idFd << ": READ "
-  //             << nbytes << "B data\n";
-  // }
   return 0;
 }
 
@@ -48,16 +44,22 @@ int LocalConnection::_writing(void) {
     int size = (_len - _wrote) > DEFAULT_BUFLEN ? DEFAULT_BUFLEN : _len - _wrote;
     _output.rdbuf()->sgetn(_buf, size);
     nbytes = write(_idFd, _buf, size);
-    std::cout << "Write data to CGI" << std::endl;
     _wrote += nbytes;
-    // if (nbytes)
-    //   std::cout << "\n⬆ ⬆ ⬆ fd (LocalConnection) #" << _idFd << ": WROTE "
-    //             << nbytes << "B data. Progress: " << _wrote
-    //             << "/" << _len << std::endl;
+
+#ifdef DEBUG
+    if (nbytes)
+      std::cout << "\n⬆ ⬆ ⬆ fd (LocalConnection) #" << _idFd << ": WROTE "
+                << nbytes << "B data. Progress: " << _wrote
+                << "/" << _len << std::endl;
+#endif
+
     return 0;
   }
   _task->setStatus(DONE);
-  std::cout << _wrote << " bytes sended totaly of " << _len << std::endl;
-  // getConnectionManager()->remove(_idFd);
+
+#ifdef DEBUG
+  std::cout << _wrote << " bytes sended to CGI totaly of " << _len << std::endl;
+#endif
+
   return 0;
 }

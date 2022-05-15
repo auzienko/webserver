@@ -14,11 +14,11 @@ int CgiInputTask::setLastActivity(void) {
   return 0;
 }
 
-int CgiInputTask::collectData(void) { 
+int CgiInputTask::collectData(void) {
 std::cout << "\n~~~collectData data to CGI script\n";
     return 0; }
 
-int CgiInputTask::executeTask(void) { 
+int CgiInputTask::executeTask(void) {
 std::cout << "\n~~~ executeTask data to CGI script\n";
     return 0; }
 

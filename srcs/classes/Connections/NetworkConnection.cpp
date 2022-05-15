@@ -14,35 +14,18 @@ int NetworkConnection::_reading(void) {
   char buf[DEFAULT_BUFLEN];
   memset(buf, 0, DEFAULT_BUFLEN);
   nbytes = recv(_idFd, &buf, DEFAULT_BUFLEN - 1, 0);
-  // if (nbytes == -1) {
-  //    std::cerr << "fd (NetworkConnection) #" << _idFd << ": recv failture\n";
-  //   getConnectionManager()->remove(_idFd);
-  //   return 0;
-  // }
-  if (nbytes == 0) {   // Close on error
+  if (nbytes == 0) {
+
+#ifdef DEBUG
     std::cout << "fd (NetworkConnection) #" << _idFd << ": reading no data\n";
-    std::cout << " network close ERROR" << std::endl;
-    // getConnectionManager()->remove(_idFd);
+#endif
+
     return -1;
   }
   _task->setLastActivity();
   _input << buf;
   _task->doTask();
   _input.str(std::string());
-
-  // } else if (nbytes == 0) {
-  //   std::cout << "fd (NetworkConnection) #" << _idFd << ": reading no data\n";
-  //    _task->doTask();
-  //   _input.str(std::string());
-  //   getConnectionManager()->remove(_idFd);
-  //   return 0;
-  // } else {
-  //   _input << buf;
-  //   // std::cout << "\n⬇ ⬇ ⬇ fd (NetworkConnection) #" << _idFd << ": READ "
-  //   //           << nbytes << "B data\n";
-  //   //_task->doTask();
-  //   //_input.str(std::string());
-  //}
   return 0;
 }
 
@@ -55,23 +38,24 @@ int NetworkConnection::_writing(void) {
     _output.rdbuf()->sgetn(_buf, size);
     nbytes = send(_idFd, _buf, size, 0);
     _wrote += nbytes;
+
+#ifdef DEBUG
     if (nbytes == -1) {
-      std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection) #" << _idFd << ": Error";
+      std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection) #" << _idFd << ": Error on sending response";
     }
     if (nbytes)
       std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection): " << _idFd << " WROTE "
                 << nbytes << "B data. Progress: " << _wrote
                 << "/" << _len << std::endl;
+#endif
 
-    // if (static_cast<std::string::size_type>(_wrote) == _len)
-    // {
-    //   std::cout << " network close WRITE" << std::endl;
-    //   getConnectionManager()->remove(_idFd);
-    // }
     return 0;
   }
   _task->setStatus(DONE);
-  //getConnectionManager()->remove(_idFd);
-  // std::cout << _wrote << " bytes wrote totaly of " << _len << std::endl;
+
+#ifdef DEBUG
+  std::cout << _wrote << " bytes wrote totaly of " << _len << std::endl;
+#endif
+
   return 0;
 }

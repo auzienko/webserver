@@ -27,7 +27,11 @@ int GetTask::_MakeBody() {
   struct stat  file;
   if (stat(_parsedURI.uri.c_str(), &file)) {
     if (errno == ENOENT) {
+
+#ifdef DEBUG
       std::cout << "Can't GET file " << _parsedURI.uri << std::endl;
+#endif
+
       throw std::logic_error("404");
     }
     else {
@@ -40,7 +44,11 @@ int GetTask::_MakeBody() {
       _parsedURI.uri.push_back('/');
     tmp.open(_parsedURI.uri + _parsedURI.loc->index, std::ifstream::binary);
     if (!tmp.is_open()) {
+
+#ifdef DEBUG
       std::cout << "Can't GET file " << _parsedURI.uri + _parsedURI.loc->index << std::endl;
+#endif
+
       throw std::logic_error("404");
     }
     _resBodyType = MimeTypes::getMimeType(_parsedURI.uri + _parsedURI.loc->index);
@@ -50,7 +58,11 @@ int GetTask::_MakeBody() {
     }
     tmp.open(_parsedURI.uri, std::ifstream::binary);
     if (!tmp.is_open()) {
+
+#ifdef DEBUG
       std::cout << "Can't GET file " << _parsedURI.uri << std::endl;
+#endif
+
       throw std::logic_error("404");
     }
     _resBodyType = MimeTypes::getMimeType(_parsedURI.uri);
