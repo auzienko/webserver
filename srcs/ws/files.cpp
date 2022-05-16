@@ -1,16 +1,15 @@
-#include "main.hpp"
-#include "classes/MimeTypes.hpp"
+#include "../../includes/main.hpp"
+#include "../../includes/classes/MimeTypes.hpp"
 
 std::pair<bool, std::vector<std::string> > ws::filesReadDirectory(
     std::string const& path) {
   std::vector<std::string> result;
-  dirent* de;
   DIR* dp;
   if (path.empty()) return std::make_pair(false, result);
   dp = opendir(path.c_str());
   if (dp) {
     while (true) {
-      de = readdir(dp);
+      dirent* de = readdir(dp);
       if (de == NULL) break;
       result.push_back(std::string(de->d_name));
     }
@@ -47,11 +46,11 @@ std::pair<std::ifstream, std::string>* ws::filesErrors(int code, const std::map<
     isNotFind = true;
   }
   if (!isNotFind && S_ISDIR(file.st_mode)) {
-    isNotFind = true;
+    isNotFind = true; // никогда не используется?
   } else {
     res->first.open(path, std::ifstream::binary);
     if (!res->first.is_open()) {
-      isNotFind = true;
+      isNotFind = true;  // никогда не используется?
     } else
       res->second = MimeTypes::getMimeType(path);
   }

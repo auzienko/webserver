@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   z_array.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
+/*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/27 10:20:40 by zcris             #+#    #+#             */
-/*   Updated: 2022/05/08 15:34:22 by wgaunt           ###   ########.fr       */
+/*   Updated: 2022/05/16 17:03:54 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "z_array.hpp"
+#include "../../includes/z_array.hpp"
 
 int	z_array_init(t_z_array *a)
 {
@@ -56,7 +56,6 @@ int	z_array_append(t_z_array *a, char *str)
 
 int	z_array_remove(t_z_array *a, size_t index)
 {
-	size_t	i;
 	char	*backup;
 
 	if ((*a).status != 0)
@@ -66,7 +65,7 @@ int	z_array_remove(t_z_array *a, size_t index)
 	backup = (*a).elem[index];
 	if (index + 1 != (*a).size)
 	{
-		i = index;
+		size_t i = index;
 		while (i < (*a).size - 1)
 		{
 			(*a).elem[i] = (*a).elem[i + 1];

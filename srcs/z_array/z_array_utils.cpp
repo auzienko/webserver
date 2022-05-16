@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   z_array_utils.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
+/*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/05 08:51:11 by zcris             #+#    #+#             */
-/*   Updated: 2022/05/08 15:34:22 by wgaunt           ###   ########.fr       */
+/*   Updated: 2022/05/16 16:58:39 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "z_array.hpp"
+#include "../../includes/z_array.hpp"
 
 void	*z_array_utls_ft_alloc(size_t size)
 {

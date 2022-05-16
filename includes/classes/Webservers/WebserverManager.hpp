@@ -14,7 +14,7 @@ class WebserverManager {
   int _maxFd;
 
  public:
-  WebserverManager(std::string const& config_path);
+  explicit WebserverManager(std::string const& config_path);
   ~WebserverManager();
   int start(void);
 

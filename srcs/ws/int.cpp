@@ -1,4 +1,4 @@
-#include "main.hpp"
+#include "../../includes/main.hpp"
 
 std::string ws::intToStr(int i){
     std::stringstream ss;

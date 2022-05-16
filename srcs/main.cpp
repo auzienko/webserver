@@ -1,5 +1,5 @@
-#include "main.hpp"
-#include "classes/Webservers/WebserverManager.hpp"
+#include "../includes/main.hpp"
+#include "../includes/classes/Webservers/WebserverManager.hpp"
 
 int main(int argc, char** argv) {
   if (argc != 2) {

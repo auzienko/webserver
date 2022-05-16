@@ -1,4 +1,5 @@
-#include "main.hpp"
+#include "../../includes/main.hpp"
+#include "../../includes/classes/Config.hpp"
 
 std::string ws::stringTail(std::string const& str, char c) {
   size_t len = str.length() - 1;
@@ -20,7 +21,7 @@ std::string ws::stringUrlDecode(std::string const& str) {
   std::string result;
   char ch;
   size_t len = str.length();
-  int ii;
+  unsigned int ii;
   size_t max = str.find('?');
 
   for (size_t i = 0; i < len && (i < max || max == std::string::npos); ++i) {

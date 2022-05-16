@@ -1,4 +1,4 @@
-#include "main.hpp"
+#include "../../includes/main.hpp"
 
 void ws::printE(std::string const& msg, std::string const& divider) {
   std::cerr << msg << divider;
