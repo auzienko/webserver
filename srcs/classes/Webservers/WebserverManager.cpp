@@ -44,7 +44,6 @@ int WebserverManager::start(void) {
     select_result = select(_maxFd + 1, &read_fds, &write_fds, 0, 0);
     if (select_result < 0) {
       ws::printE(ERROR_SELECT, "\n");
-      //добавить обработчик для < 0 + if select == 0 -> timeout;
       exit(EXIT_FAILURE);
     }
     int max_fd = _maxFd;
@@ -58,7 +57,6 @@ int WebserverManager::start(void) {
         --select_result;
       }
     }
-   // установить таймаут закрытия соединения
     std::vector<Webserver*>::iterator it = _webservers.begin();
     std::vector<Webserver*>::iterator en = _webservers.end();
     while (it != en) {

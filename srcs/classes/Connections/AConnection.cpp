@@ -67,7 +67,6 @@ int AConnection::io() {
       _writing();
       break;
     case DONE:
-      // getConnectionManager()->remove(_idFd);
       break;
     default:
       break;

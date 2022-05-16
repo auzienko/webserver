@@ -1,7 +1,9 @@
 #include "classes/Tasks/ATask.hpp"
+
 #include "classes/Connections/AConnection.hpp"
 
-ATask::ATask(int type, int fd, AConnection* connection) : _connection(connection), _isKeepAlive(true), _fd(fd), _status(NEW) {
+ATask::ATask(int type, int fd, AConnection* connection)
+    : _connection(connection), _isKeepAlive(true), _fd(fd), _status(NEW) {
   switch (type) {
     case UNKNOWN_NETWORK:
     case NETWORK_AUTOINDEX:
@@ -9,6 +11,10 @@ ATask::ATask(int type, int fd, AConnection* connection) : _connection(connection
     case NETWORK_CGI_PARENT:
     case LOCAL_CGI_INPUT:
     case LOCAL_CGI_OUTPUT:
+    case NETWORK_DELETE:
+    case NETWORK_POST:
+    case NETWORK_HEAD:
+    case NETWORK_REDIRECT:
       _type = type;
       break;
     default:

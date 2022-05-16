@@ -3,7 +3,7 @@
 #include "classes/HTTPCodes.hpp"
 
 RedirTask::RedirTask(AConnection* connection, int const& fd, t_uriInfo parsedURI)
-    : ATask(NETWORK_GET, fd, connection), _parsedURI(parsedURI) {}
+    : ATask(NETWORK_REDIRECT, fd, connection), _parsedURI(parsedURI) {}
 
 RedirTask::~RedirTask() {}
 

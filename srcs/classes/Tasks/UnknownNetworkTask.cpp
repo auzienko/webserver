@@ -7,10 +7,10 @@
 #include "classes/Tasks/CgiInputTask.hpp"
 #include "classes/Tasks/CgiOutputTask.hpp"
 #include "classes/Tasks/CgiParentTask.hpp"
+#include "classes/Tasks/DeleteTask.hpp"
 #include "classes/Tasks/GetTask.hpp"
 #include "classes/Tasks/HeadTask.hpp"
 #include "classes/Tasks/PostTask.hpp"
-#include "classes/Tasks/DeleteTask.hpp"
 #include "classes/Tasks/RedirTask.hpp"
 
 using namespace std;
@@ -40,7 +40,7 @@ int UnknownNetworkTask::collectData(void) {
 
 int UnknownNetworkTask::executeTask(void) {
   t_uriInfo cur;
-  
+
   cur = ConfigUtils::parseURI(_UnknownNetworkTask_uri, _server_config, _method);
   return _MakeKnownTask(cur);
 }
@@ -124,7 +124,7 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
 
       std::cout << "~~~~~~~~~~~~~~~> CREATE PUT TASK uri '"
                 << _UnknownNetworkTask_uri << "' \n\n";
-      
+
       std::string response("HTTP/1.1 201 Created\r\nConnection: Close\r\n\r\n");
       _connection->addToOutput(response);
       setStatus(SENDING);
@@ -207,7 +207,8 @@ void UnknownNetworkTask::parseFirstLine(string& firstLine) {
   if (i == strnpos) throw logic_error("400");
   _UnknownNetworkTask_uri = firstLine.substr(0, i);
   _http_version = firstLine.substr(i + 1, j - i - 1);
-  if (_method != GET && _method != POST && _method != "PUT" && _method != DELETE && _method != HEAD)
+  if (_method != GET && _method != POST && _method != "PUT" &&
+      _method != DELETE && _method != HEAD)
     throw logic_error("501");
   if (_http_version != "HTTP/1.1") throw logic_error("505");
   firstLine.erase(0, j + 2);
@@ -307,12 +308,8 @@ void UnknownNetworkTask::print() {
        it != _headers.end(); ++it) {
     cout << (*it).first << ":" << (*it).second << endl;
   }
-  // cout << _body << endl;
+  // cout << _body << endl;  //Артём это почему так?
 }
-
-// "HTTP_REFERER="
-// "REQUEST_URI="
-// "SCRIPT_FILENAME="
 
 int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
                                       t_uriInfo uriBlocks) {
@@ -328,9 +325,6 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
       ws::stringFromMap(_headers.find("Content-Type"), _headers.end());
   env["QUERY_STRING"] = uriBlocks.args;
   env["REMOTE_ADDR"] = ws::socketGetIP(getFd());
-  // //env["REMOTE_HOST"] = "empty";
-  // env["REMOTE_IDENT"] =  remote_ident_pwd;
-  // env["REMOTE_USER"] = remote_username;
   env["REQUEST_METHOD"] = _method;
   env["SCRIPT_NAME"] = ws::stringFromMap(
       server_config.cgi.find("." + ws::stringTail(uriBlocks.uri, '.')),
@@ -338,14 +332,12 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
   env["SERVER_PORT"] = ws::intToStr(server_config.port);
   env["SERVER_PROTOCOL"] = _http_version;
   env["SERVER_SOFTWARE"] = PROGRAMM_NAME;
-
   std::map<std::string, std::string>::iterator it = _headers.begin();
   std::map<std::string, std::string>::iterator en = _headers.end();
   while (it != en) {
     env["HTTP_" + ws::stringToCGIFormat(it->first)] = it->second;
     ++it;
   }
-
   t_z_array zc_env;
   z_array_init(&zc_env);
   std::map<std::string, std::string>::iterator i = env.begin();
@@ -381,7 +373,10 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
     close(fd_input[1]);
     return -1;
   }
-  if (fcntl(fd_input[0], F_SETFL, O_NONBLOCK) < 0) {
+  if (fcntl(fd_input[0], F_SETFL, O_NONBLOCK) < 0 ||
+      fcntl(fd_input[1], F_SETFL, O_NONBLOCK) < 0 ||
+      fcntl(fd_output[0], F_SETFL, O_NONBLOCK) < 0 ||
+      fcntl(fd_output[1], F_SETFL, O_NONBLOCK) < 0) {
     ws::printE(ERROR_CGI_PIPE, "\n");
     close(fd_input[0]);
     close(fd_input[1]);
@@ -389,30 +384,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
     close(fd_output[1]);
     return -1;
   }
-  if (fcntl(fd_input[1], F_SETFL, O_NONBLOCK) < 0) {
-    ws::printE(ERROR_CGI_PIPE, "\n");
-    close(fd_input[0]);
-    close(fd_input[1]);
-    close(fd_output[0]);
-    close(fd_output[1]);
-    return -1;
-  }
-  if (fcntl(fd_output[0], F_SETFL, O_NONBLOCK) < 0) {
-    ws::printE(ERROR_CGI_PIPE, "\n");
-    close(fd_input[0]);
-    close(fd_input[1]);
-    close(fd_output[0]);
-    close(fd_output[1]);
-    return -1;
-  }
-  if (fcntl(fd_output[1], F_SETFL, O_NONBLOCK) < 0) {
-    ws::printE(ERROR_CGI_PIPE, "\n");
-    close(fd_input[0]);
-    close(fd_input[1]);
-    close(fd_output[0]);
-    close(fd_output[1]);
-    return -1;
-  }
+
   pid = fork();
   if (pid < 0) {
     ws::printE(ERROR_CGI_EXECVE_FORK, "\n");
@@ -432,16 +404,10 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
     ws::printE(ERROR_CGI_EXECVE, "\n");
     exit(status);
   }
-
   close(fd_input[0]);
   close(fd_output[1]);
   z_array_free(&zc_env);
   z_array_free(&zc_cgi_path);
-
-  // if you need to write something to cgi - use fd_input[1]
-  // if you need to read something from cgi - use fd_output[0]
-
-
   LocalConnection* tmpConnectionInput =
       new LocalConnection(_connection->getConnectionManager(), fd_input[1],
                           &_server_config.error_pages);
@@ -450,7 +416,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
       new LocalConnection(_connection->getConnectionManager(), fd_output[0],
                           &_server_config.error_pages);
   CgiParentTask* tmpParent =
-      new CgiParentTask(_connection, getFd(), fd_input[1], fd_output[0]);
+      new CgiParentTask(_connection, getFd(), fd_input[1], fd_output[0], pid);
   CgiInputTask* tmpInput =
       new CgiInputTask(tmpConnectionInput, fd_input[1], getFd());
   CgiOutputTask* tmpOutput =

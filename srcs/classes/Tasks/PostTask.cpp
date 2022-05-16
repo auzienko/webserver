@@ -3,7 +3,7 @@
 #include "classes/HTTPCodes.hpp"
 
 PostTask::PostTask(AConnection* connection, int const& fd, t_uriInfo parsedURI, std::string &inputBody)
-    : ATask(NETWORK_GET, fd, connection), _parsedURI(parsedURI), _inputBody(inputBody) {}
+    : ATask(NETWORK_POST, fd, connection), _parsedURI(parsedURI), _inputBody(inputBody) {}
 
 PostTask::~PostTask() {}
 

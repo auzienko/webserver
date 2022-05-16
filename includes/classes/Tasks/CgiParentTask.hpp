@@ -12,6 +12,7 @@ class CgiParentTask : public ATask {
   std::stringstream _response;
   int const _childInputFd;
   int const _childOutputFd;
+  int const _pid;
 
   CgiParentTask(void);
   CgiParentTask(CgiParentTask const& src);
@@ -19,7 +20,7 @@ class CgiParentTask : public ATask {
 
  public:
   CgiParentTask(AConnection* connection, int const& fd, int const& childInputFd,
-                int const& childOutputFd);
+                int const& childOutputFd, int pid);
   virtual ~CgiParentTask();
   int collectData(void);
   int executeTask(void);
