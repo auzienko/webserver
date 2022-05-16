@@ -1,8 +1,8 @@
 #ifndef POSTTASK_HPP
 #define POSTTASK_HPP
 
-#include "classes/Connections/AConnection.hpp"
-#include "classes/Tasks/ATask.hpp"
+#include "../Connections/AConnection.hpp"
+#include "ATask.hpp"
 class AConnection;
 
 class PostTask : public ATask {
@@ -16,7 +16,7 @@ class PostTask : public ATask {
   PostTask& operator=(PostTask const& rhs);
 
  public:
-  PostTask(AConnection* connection, int const& fd, t_uriInfo parsedURI, std::string &inputBody);
+  PostTask(AConnection* connection, int const& fd, t_uriInfo const& parsedURI, std::string &inputBody);
   virtual ~PostTask();
   int collectData(void);
   int executeTask(void);

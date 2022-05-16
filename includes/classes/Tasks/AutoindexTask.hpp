@@ -1,8 +1,8 @@
 #ifndef AUTOINDEXTASK_HPP
 #define AUTOINDEXTASK_HPP
 
-#include "classes/Connections/AConnection.hpp"
-#include "classes/Tasks/ATask.hpp"
+#include "../Connections/AConnection.hpp"
+#include "ATask.hpp"
 class AConnection;
 
 class AutoindexTask : public ATask {
@@ -18,8 +18,8 @@ class AutoindexTask : public ATask {
   AutoindexTask& operator=(AutoindexTask const& rhs);
 
  public:
-  AutoindexTask(AConnection* connection, int const& fd, std::string realPath,
-                std::string publicPath);
+  AutoindexTask(AConnection* connection, int const& fd, std::string const& realPath,
+                std::string const& publicPath);
   virtual ~AutoindexTask();
   int collectData(void);
   int executeTask(void);

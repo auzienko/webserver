@@ -1,8 +1,8 @@
 #ifndef REDIRTASK_HPP
 #define REDIRTASK_HPP
 
-#include "classes/Connections/AConnection.hpp"
-#include "classes/Tasks/ATask.hpp"
+#include "../Connections/AConnection.hpp"
+#include "ATask.hpp"
 class AConnection;
 
 class RedirTask : public ATask {
@@ -15,7 +15,7 @@ class RedirTask : public ATask {
   RedirTask& operator=(RedirTask const& rhs);
 
  public:
-  RedirTask(AConnection* connection, int const& fd, t_uriInfo parsedURI);
+  RedirTask(AConnection* connection, int const& fd, t_uriInfo const& parsedURI);
   virtual ~RedirTask();
   int collectData(void);
   int executeTask(void);

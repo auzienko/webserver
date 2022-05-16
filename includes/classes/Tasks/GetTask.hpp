@@ -1,8 +1,8 @@
 #ifndef GETTASK_HPP
 #define GETTASK_HPP
 
-#include "classes/Connections/AConnection.hpp"
-#include "classes/Tasks/ATask.hpp"
+#include "../Connections/AConnection.hpp"
+#include "ATask.hpp"
 class AConnection;
 
 class GetTask : public ATask {
@@ -18,7 +18,7 @@ class GetTask : public ATask {
   GetTask& operator=(GetTask const& rhs);
 
  public:
-  GetTask(AConnection* connection, int const& fd, t_uriInfo parsedURI);
+  GetTask(AConnection* connection, int const& fd, t_uriInfo const& parsedURI);
   virtual ~GetTask();
   int collectData(void);
   int executeTask(void);

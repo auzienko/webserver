@@ -1,11 +1,9 @@
 #ifndef ACONNECTION_HPP
 #define ACONNECTION_HPP
 
-#include "main.hpp"
-#include "classes/Connections/ConnectionManager.hpp"
-#include "classes/Tasks/ATask.hpp"
-
-enum ConnectionType { NETWORK_CONNECTION, LOCAL_CONNECTION };
+#include "../../main.hpp"
+#include "ConnectionManager.hpp"
+#include "../Tasks/ATask.hpp"
 
 class ATask;
 class ConnectionManager;
@@ -17,7 +15,6 @@ class AConnection {
   char _buf[DEFAULT_BUFLEN];
   ConnectionManager* _connectionManager;
   int _idFd;
-  int _type;
   ATask* _task;
   long int _lastActivity;
   std::stringstream _input;
@@ -48,7 +45,7 @@ class AConnection {
   ConnectionManager* getConnectionManager(void) const;
 
   std::stringstream& getInputData(void);
-  void addToOutput(std::string str);
+  void addToOutput(std::string const& str);
 };
 
 #endif

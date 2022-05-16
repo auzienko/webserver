@@ -1,8 +1,8 @@
-#include "classes/Tasks/RedirTask.hpp"
-#include "classes/MimeTypes.hpp"
-#include "classes/HTTPCodes.hpp"
+#include "../../../includes/classes/Tasks/RedirTask.hpp"
+#include "../../../includes/classes/MimeTypes.hpp"
+#include "../../../includes/classes/HTTPCodes.hpp"
 
-RedirTask::RedirTask(AConnection* connection, int const& fd, t_uriInfo parsedURI)
+RedirTask::RedirTask(AConnection* connection, int const& fd, t_uriInfo const& parsedURI)
     : ATask(NETWORK_REDIRECT, fd, connection), _parsedURI(parsedURI) {}
 
 RedirTask::~RedirTask() {}

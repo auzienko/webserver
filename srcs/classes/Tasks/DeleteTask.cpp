@@ -1,7 +1,7 @@
-#include "classes/Tasks/DeleteTask.hpp"
-#include "classes/HTTPCodes.hpp"
+#include "../../../includes/classes/Tasks/DeleteTask.hpp"
+#include "../../../includes/classes/HTTPCodes.hpp"
 
-DeleteTask::DeleteTask(AConnection* connection, int const& fd, t_uriInfo parsedURI)
+DeleteTask::DeleteTask(AConnection* connection, int const& fd, t_uriInfo const& parsedURI)
     : ATask(NETWORK_DELETE, fd, connection), _parsedURI(parsedURI) {}
 
 DeleteTask::~DeleteTask() {}

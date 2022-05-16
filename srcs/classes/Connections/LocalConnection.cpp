@@ -1,6 +1,6 @@
-#include "classes/Connections/LocalConnection.hpp"
-#include "classes/Tasks/CgiOutputTask.hpp"
-#include "classes/Tasks/ATask.hpp"
+#include "../../../includes/classes/Connections/LocalConnection.hpp"
+#include "../../../includes/classes/Tasks/CgiOutputTask.hpp"
+#include "../../../includes/classes/Tasks/ATask.hpp"
 
 class ATask;
 class CgiOutputTask;
@@ -8,7 +8,6 @@ class CgiOutputTask;
 LocalConnection::LocalConnection(ConnectionManager* cm, int fd,
                                  const std::map<int, std::string>* error_pages)
     : AConnection(cm, fd, error_pages) {
-  _type = LOCAL_CONNECTION;
 }
 
 LocalConnection::~LocalConnection() {}
@@ -38,11 +37,11 @@ int LocalConnection::_reading(void) {
 
 int LocalConnection::_writing(void) {
   _task->setLastActivity();
-  int nbytes = 0;
   if (!_len) _len = _output.str().length();
   if (static_cast<std::string::size_type>(_wrote) < _len) {
     int size = (_len - _wrote) > DEFAULT_BUFLEN ? DEFAULT_BUFLEN : _len - _wrote;
     _output.rdbuf()->sgetn(_buf, size);
+    int nbytes = 0;
     nbytes = write(_idFd, _buf, size);
     _wrote += nbytes;
 

@@ -1,7 +1,7 @@
-#include "classes/Tasks/AutoindexTask.hpp"
+#include "../../../includes/classes/Tasks/AutoindexTask.hpp"
 
 AutoindexTask::AutoindexTask(AConnection* connection, int const& fd,
-                             std::string realPath, std::string publicPath)
+                             std::string const& realPath, std::string const& publicPath)
     : ATask(NETWORK_AUTOINDEX, fd, connection),
       _realPath(realPath),
       _publicPath(publicPath) {}

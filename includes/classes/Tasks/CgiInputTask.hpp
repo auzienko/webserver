@@ -1,8 +1,8 @@
 #ifndef CGIINPUTTASK_HPP
 #define CGIINPUTTASK_HPP
 
-#include "classes/Connections/AConnection.hpp"
-#include "classes/Tasks/ATask.hpp"
+#include "../Connections/AConnection.hpp"
+#include "ATask.hpp"
 class AConnection;
 
 class CgiInputTask : public ATask {

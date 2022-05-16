@@ -1,11 +1,15 @@
-#include "classes/Tasks/GetTask.hpp"
-#include "classes/MimeTypes.hpp"
-#include "classes/HTTPCodes.hpp"
+#include "../../../includes/classes/Tasks/GetTask.hpp"
+#include "../../../includes/classes/MimeTypes.hpp"
+#include "../../../includes/classes/HTTPCodes.hpp"
 
-GetTask::GetTask(AConnection* connection, int const& fd, t_uriInfo parsedURI)
+GetTask::GetTask(AConnection* connection, int const& fd, t_uriInfo const& parsedURI)
     : ATask(NETWORK_GET, fd, connection), _parsedURI(parsedURI) {}
 
-GetTask::~GetTask() {}
+GetTask::~GetTask() {
+  _Header.str(std::string());
+  _Body.str(std::string());
+  _response.str(std::string());
+}
 
 int GetTask::collectData(void) { return 0; }
 

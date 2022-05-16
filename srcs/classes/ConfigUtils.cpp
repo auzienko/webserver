@@ -1,4 +1,4 @@
-#include "classes/ConfigUtils.hpp"
+#include "../../includes/classes/ConfigUtils.hpp"
 
 ConfigUtils::~ConfigUtils(void){}
 
@@ -26,7 +26,7 @@ std::pair<std::string, t_location const*> ConfigUtils::getLocationSettings(
   return std::make_pair(request_path, &(s.locations.at(0)));
 }
 
-t_uriInfo ConfigUtils::parseURI(std::string &uri, t_server const& server_config, std::string method){
+t_uriInfo ConfigUtils::parseURI(std::string const& uri, t_server const& server_config, std::string method){
   t_uriInfo res;
 
   res.isCgi = false;

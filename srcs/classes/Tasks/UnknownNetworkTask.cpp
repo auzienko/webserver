@@ -1,17 +1,17 @@
-#include "classes/Tasks/UnknownNetworkTask.hpp"
+#include "../../../includes/classes/Tasks/UnknownNetworkTask.hpp"
 
-#include "classes/ConfigUtils.hpp"
-#include "classes/Connections/LocalConnection.hpp"
-#include "classes/MimeTypes.hpp"
-#include "classes/Tasks/AutoindexTask.hpp"
-#include "classes/Tasks/CgiInputTask.hpp"
-#include "classes/Tasks/CgiOutputTask.hpp"
-#include "classes/Tasks/CgiParentTask.hpp"
-#include "classes/Tasks/DeleteTask.hpp"
-#include "classes/Tasks/GetTask.hpp"
-#include "classes/Tasks/HeadTask.hpp"
-#include "classes/Tasks/PostTask.hpp"
-#include "classes/Tasks/RedirTask.hpp"
+#include "../../../includes/classes/ConfigUtils.hpp"
+#include "../../../includes/classes/Connections/LocalConnection.hpp"
+#include "../../../includes/classes/MimeTypes.hpp"
+#include "../../../includes/classes/Tasks/AutoindexTask.hpp"
+#include "../../../includes/classes/Tasks/CgiInputTask.hpp"
+#include "../../../includes/classes/Tasks/CgiOutputTask.hpp"
+#include "../../../includes/classes/Tasks/CgiParentTask.hpp"
+#include "../../../includes/classes/Tasks/DeleteTask.hpp"
+#include "../../../includes/classes/Tasks/GetTask.hpp"
+#include "../../../includes/classes/Tasks/HeadTask.hpp"
+#include "../../../includes/classes/Tasks/PostTask.hpp"
+#include "../../../includes/classes/Tasks/RedirTask.hpp"
 
 using namespace std;
 
@@ -132,11 +132,10 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
     }
   }
   throw std::logic_error("501");
-  return 0;
 }
 
 void UnknownNetworkTask::getSimple(string& body) {
-  if (_content_len < 0) throw logic_error("400");
+  if (_content_len < 0) throw logic_error("400"); // тут проблема, тип ансайн проверяется на меньше нуля
   if (_client_max_body_size &&
       (_content_len > _client_max_body_size ||
        _body.size() + body.size() > _client_max_body_size))
@@ -226,7 +225,7 @@ void UnknownNetworkTask::parseHeaders(string head) {
   if (i == strnpos) throw logic_error("400");
   key = head.substr(0, i);
   try {
-    head.at(i + 2);
+    head.at(i + 2); // NOT USED?
     value = head.substr(i + 2);  // TRIM?
   } catch (...) {
     value = "";

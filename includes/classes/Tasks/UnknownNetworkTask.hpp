@@ -8,8 +8,8 @@
 #define CRLF "\r\n"
 #define strnpos std::string::npos
 
-#include "classes/Connections/AConnection.hpp"
-#include "classes/Tasks/ATask.hpp"
+#include "../Connections/AConnection.hpp"
+#include "ATask.hpp"
 
 class AConnection;
 

@@ -1,7 +1,7 @@
 #ifndef CONFIGUTILS_HPP
 #define CONFIGUTILS_HPP
 
-#include "main.hpp"
+#include "../main.hpp"
 
 class ConfigUtils {
  private:
@@ -14,7 +14,7 @@ class ConfigUtils {
 
   static std::pair<std::string, t_location const*> getLocationSettings(
       t_server const& s, std::string const& request_path);
-  static t_uriInfo parseURI(std::string &uri, t_server const& server_config, std::string method);
+  static t_uriInfo parseURI(std::string const& uri, t_server const& server_config, std::string method);
 };
 
 #endif

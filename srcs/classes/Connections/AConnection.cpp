@@ -1,14 +1,18 @@
-#include "classes/Connections/AConnection.hpp"
+#include "../../../includes/classes/Connections/AConnection.hpp"
 
-#include "classes/HTTPCodes.hpp"
-#include "classes/MimeTypes.hpp"
+#include "../../../includes/classes/HTTPCodes.hpp"
+#include "../../../includes/classes/MimeTypes.hpp"
 
 AConnection::AConnection()
     : _wrote(0),
       _len(0),
       _connectionManager(nullptr),
       _idFd(-1),
-      _task(nullptr) {}
+      _task(nullptr),
+      _lastActivity(0L),
+      _error_pages(nullptr) {
+  memset(_buf, 0, DEFAULT_BUFLEN);
+}
 
 AConnection::~AConnection() {
   killTask();
@@ -29,7 +33,7 @@ AConnection::AConnection(ConnectionManager* cm, int fd,
       _task(nullptr),
       _error_pages(error_pages) {
   setLastActivity();
-
+  memset(_buf, 0, DEFAULT_BUFLEN);
 #ifdef DEBUG
   std::cout << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~> 🐣 NEW FD : "
             << _idFd << std::endl;
@@ -81,7 +85,6 @@ void AConnection::error(const std::exception& ex) {
   if (code == -1)
     throw ex;
   else {
-
 #ifdef DEBUG
     std::cout << "Error " << ex.what() << std::endl;
 #endif
@@ -119,7 +122,7 @@ void AConnection::killTask(void) {
   _task = nullptr;
 }
 
-void AConnection::addToOutput(std::string str) { _output << str; }
+void AConnection::addToOutput(std::string const& str) { _output << str; }
 
 int AConnection::getFd(void) { return _idFd; }
 

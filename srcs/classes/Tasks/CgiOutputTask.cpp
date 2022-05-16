@@ -1,6 +1,6 @@
-#include "classes/Tasks/CgiOutputTask.hpp"
-#include "classes/MimeTypes.hpp"
-#include "classes/HTTPCodes.hpp"
+#include "../../../includes/classes/Tasks/CgiOutputTask.hpp"
+#include "../../../includes/classes/MimeTypes.hpp"
+#include "../../../includes/classes/HTTPCodes.hpp"
 
 CgiOutputTask::CgiOutputTask(AConnection* connection, int const& fd,
                              int const& parentFd)
@@ -28,7 +28,6 @@ int CgiOutputTask::setLastActivity(void) {
 int CgiOutputTask::executeTask(void) {
   setStatus(EXECUTION);
   std::cout << "\n~~~ CgiOutputTask::executeTask\n";
-  //status hardcode
   int status = 200;
   std::stringstream result;
   result << "HTTP/1.1 " + HTTPCodes::getHTTPCodeString(status) + "\r\n";

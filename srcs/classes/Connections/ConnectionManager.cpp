@@ -1,4 +1,4 @@
-#include "classes/Connections/ConnectionManager.hpp"
+#include "../../../includes/classes/Connections/ConnectionManager.hpp"
 
 ConnectionManager::ConnectionManager(Webserver* webserver)
     : _webserver(webserver) {}
@@ -37,8 +37,8 @@ int ConnectionManager::hasDataToReadEvent(int fd) {
   AConnection* tmp = at(fd);
   try {
     if (tmp != nullptr) return (tmp->io() == 1 ? fd : 0);
-  } catch (const std::exception &ex) {
-    tmp->error(ex);
+  } catch (const std::exception& ex) {
+    if (tmp != nullptr) tmp->error(ex);
   }
   return 0;
 }
@@ -48,7 +48,7 @@ int ConnectionManager::readyToAcceptDataEvent(int fd) {
   try {
     if (tmp != nullptr) return tmp->io();
   } catch (const std::exception &ex) {
-    tmp->error(ex);
+    if (tmp != nullptr) tmp->error(ex);
   }
   return 0;
 }

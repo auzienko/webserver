@@ -1,8 +1,8 @@
 #ifndef CGIOUTPUTTASK_HPP
 #define CGIOUTPUTTASK_HPP
 
-#include "classes/Connections/AConnection.hpp"
-#include "classes/Tasks/ATask.hpp"
+#include "../Connections/AConnection.hpp"
+#include "ATask.hpp"
 class AConnection;
 
 class CgiOutputTask : public ATask {

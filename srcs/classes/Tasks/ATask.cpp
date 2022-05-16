@@ -1,6 +1,5 @@
-#include "classes/Tasks/ATask.hpp"
-
-#include "classes/Connections/AConnection.hpp"
+#include "../../../includes/classes/Tasks/ATask.hpp"
+#include "../../../includes/classes/Connections/AConnection.hpp"
 
 ATask::ATask(int type, int fd, AConnection* connection)
     : _connection(connection), _isKeepAlive(true), _fd(fd), _status(NEW) {

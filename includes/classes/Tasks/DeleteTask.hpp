@@ -1,8 +1,8 @@
 #ifndef DELETETASK_HPP
 #define DELETETASK_HPP
 
-#include "classes/Connections/AConnection.hpp"
-#include "classes/Tasks/ATask.hpp"
+#include "../Connections/AConnection.hpp"
+#include "ATask.hpp"
 class AConnection;
 
 class DeleteTask : public ATask {
@@ -15,7 +15,7 @@ class DeleteTask : public ATask {
   DeleteTask& operator=(DeleteTask const& rhs);
 
  public:
-  DeleteTask(AConnection* connection, int const& fd, t_uriInfo parsedURI);
+  DeleteTask(AConnection* connection, int const& fd, t_uriInfo const& parsedURI);
   virtual ~DeleteTask();
   int collectData(void);
   int executeTask(void);

@@ -1,6 +1,6 @@
-#include "classes/Config.hpp"
+#include "../../includes/classes/Config.hpp"
 
-Config::Config(std::string const& file_name) : _configFile(file_name), _debugLine(0)
+Config::Config(std::string const& file_name) : _configFile(file_name), _debugLine(0), _server(t_server())
 {
 	_fileStream.open(_configFile);
 }
@@ -307,8 +307,8 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 		{
 			while (line.length() && line[0] != '#')
 			{
-				size_t	len = 0;
-				std::string	spaces = WHITE_SPACES "#";
+				size_t	len = 0;  // переопределение затенение переменной len
+				std::string	spaces = WHITE_SPACES "#"; //аналогично с spaces
 				while (line[len] && spaces.find(line[len]) == std::string::npos)
 					len++;
 				methods.insert(line.substr(0, len));
@@ -344,7 +344,7 @@ int	Config::checkAndParse(void)
 			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 		else if (line[0] == '{')
 		{
-			if (!is_inserver && is_server)
+			if (!is_inserver && is_server)  // is_server всегда true
 				_checkisin(line, is_inserver);
 			else if (!is_inlocation && is_location)
 				_checkisin(line, is_inlocation);

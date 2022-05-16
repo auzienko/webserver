@@ -1,14 +1,14 @@
 #ifndef HEADTASK_HPP
 #define HEADTASK_HPP
 
-#include "classes/Connections/AConnection.hpp"
-#include "classes/Tasks/GetTask.hpp"
+#include "../Connections/AConnection.hpp"
+#include "GetTask.hpp"
 class AConnection;
 
 class HeadTask : public GetTask {
 
  public:
-  HeadTask(AConnection* connection, int const& fd, t_uriInfo parsedURI);
+  HeadTask(AConnection* connection, int const& fd, t_uriInfo const& parsedURI);
   virtual ~HeadTask();
 
  private:

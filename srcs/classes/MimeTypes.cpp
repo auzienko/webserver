@@ -1,4 +1,4 @@
-#include "classes/MimeTypes.hpp"
+#include "../../includes/classes/MimeTypes.hpp"
 
 MimeTypes::MimeTypes(void) {}
 

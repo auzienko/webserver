@@ -1,4 +1,4 @@
-#include "classes/HTTPCodes.hpp"
+#include "../../includes/classes/HTTPCodes.hpp"
 
 HTTPCodes::HTTPCodes(void) {}
 

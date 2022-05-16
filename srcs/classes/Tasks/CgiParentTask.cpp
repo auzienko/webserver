@@ -1,6 +1,6 @@
-#include "classes/Tasks/CgiParentTask.hpp"
+#include "../../../includes/classes/Tasks/CgiParentTask.hpp"
 #include <signal.h>
-#include "classes/MimeTypes.hpp"
+#include "../../../includes/classes/MimeTypes.hpp"
 
 CgiParentTask::CgiParentTask(AConnection* connection, int const& fd,
                              int const& childInputFd, int const& childOutputFd, int pid)
