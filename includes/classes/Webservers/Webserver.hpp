@@ -15,7 +15,7 @@ class Webserver {
   t_server _serverConfig;
 
  public:
-  Webserver(t_server &src, int maxConnection = MAX_CLIENTS);
+  explicit Webserver(t_server &src, int maxConnection = MAX_CLIENTS);
   ~Webserver(void);
   int run(void);
   int getClientsCount(void) const;

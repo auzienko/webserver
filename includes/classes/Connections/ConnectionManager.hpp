@@ -17,7 +17,7 @@ class ConnectionManager {
   ConnectionManager& operator=(ConnectionManager const& rhs);
 
  public:
-  ConnectionManager(Webserver* webserver);
+  explicit ConnectionManager(Webserver* webserver);
   ~ConnectionManager();
 
   int isExist(int const fd) const;

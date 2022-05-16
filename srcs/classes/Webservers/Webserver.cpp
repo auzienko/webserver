@@ -4,7 +4,7 @@
 #include "../../../includes/classes/Tasks/UnknownNetworkTask.hpp"
 
 Webserver::Webserver(t_server& src, int maxConnection)
-    : _maxConnection(maxConnection), _serverConfig(src) {
+    : _maxConnection(maxConnection), _listenSocket(-1), _serverConfig(src) {
   _connectionManager = new ConnectionManager(this);
 }
 
@@ -54,7 +54,7 @@ int Webserver::createServerListenSocket(void) {
     close(_listenSocket);
     return -1;
   }
-  err = bind(_listenSocket, (struct sockaddr*)&addr, sizeof(addr));
+  err = ::bind(_listenSocket, (struct sockaddr*)&addr, sizeof(addr));
   if (err < 0) {
     ws::printE(ERROR_BIND_SOCKET, "\n");
     close(_listenSocket);
@@ -67,7 +67,6 @@ int Webserver::createServerListenSocket(void) {
     close(_listenSocket);
     return -1;
   }
-  // addConnection(_listenSocket);
 
   char str[sizeof(addr)];
   inet_ntop(AF_INET, &(addr.sin_addr), str, sizeof(addr));
@@ -84,7 +83,6 @@ int Webserver::readHandler(int fd) {
     int new_sock = accept(_listenSocket, (struct sockaddr*)&client, &size);
     if (new_sock < 0) {
       ws::printE(ERROR_ACCEPT, "\n");
-      //добавить обработчик
       exit(EXIT_FAILURE);
     }
     if (_connectionManager->getConnectionCount() < _maxConnection) {
@@ -110,12 +108,9 @@ int Webserver::otherHandler(int fd) {
       _connectionManager->at(fd)->getTask() == nullptr)
     return 0;
   if (_connectionManager->readyToAcceptDataEvent(fd) < 0) {
-    //надо другой оброботчик ошибок. сейчас только про отправку.
     ws::print(MESSAGE_FAIL, "\n");
     ws::printE(ERROR_SEND_TO_CLIENT, "\n");
   }
-  //понять когда закрывать коннекшены корректно
-  // closeConnection(fd);
   return 0;
 }
 

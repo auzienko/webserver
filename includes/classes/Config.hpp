@@ -24,7 +24,7 @@ class Config {
   void	_checkisin(std::string &line, bool &isIn);
 
  public:
-  Config(std::string const& file_name);
+  explicit Config(std::string const& file_name);
   ~Config(void);
 
   void      close(void);
