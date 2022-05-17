@@ -313,7 +313,8 @@ void UnknownNetworkTask::print() {
 int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
                                       t_uriInfo uriBlocks) {
   std::map<std::string, std::string> env;
-  env["PATH_INFO"] = "/path/info";
+  env["PATH_INFO"] = uriBlocks.uri;
+  env["REQUEST_URI"] = uriBlocks.uri;
   env["SERVER_NAME"] = server_config.listen;
   env["AUTH_TYPE"] =
       ws::stringFromMap(_headers.find("Authorization"), _headers.end());
@@ -327,7 +328,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
   env["REQUEST_METHOD"] = _method;
   env["SCRIPT_NAME"] = ws::stringFromMap(
       server_config.cgi.find("." + ws::stringTail(uriBlocks.uri, '.')),
-      _headers.end());
+      server_config.cgi.end());
   env["SERVER_PORT"] = ws::intToStr(server_config.port);
   env["SERVER_PROTOCOL"] = _http_version;
   env["SERVER_SOFTWARE"] = PROGRAMM_NAME;
