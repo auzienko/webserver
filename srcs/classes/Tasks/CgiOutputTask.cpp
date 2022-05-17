@@ -1,6 +1,6 @@
-#include "../../../includes/classes/Tasks/CgiOutputTask.hpp"
-#include "../../../includes/classes/MimeTypes.hpp"
-#include "../../../includes/classes/HTTPCodes.hpp"
+#include "classes/Tasks/CgiOutputTask.hpp"
+#include "classes/MimeTypes.hpp"
+#include "classes/HTTPCodes.hpp"
 
 CgiOutputTask::CgiOutputTask(AConnection* connection, int const& fd,
                              int const& parentFd)

@@ -1,5 +1,5 @@
-#include "../../includes/main.hpp"
-#include "../../includes/classes/Config.hpp"
+#include "main.hpp"
+#include "classes/Config.hpp"
 
 std::string ws::stringTail(std::string const& str, char c) {
   size_t len = str.length() - 1;

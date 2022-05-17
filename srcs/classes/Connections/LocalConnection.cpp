@@ -1,6 +1,6 @@
-#include "../../../includes/classes/Connections/LocalConnection.hpp"
-#include "../../../includes/classes/Tasks/CgiOutputTask.hpp"
-#include "../../../includes/classes/Tasks/ATask.hpp"
+#include "classes/Connections/LocalConnection.hpp"
+#include "classes/Tasks/CgiOutputTask.hpp"
+#include "classes/Tasks/ATask.hpp"
 
 class ATask;
 class CgiOutputTask;

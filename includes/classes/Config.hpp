@@ -2,7 +2,7 @@
 #define CONFIG_HPP
 
 #define WHITE_SPACES "\n\t "
-#include "../main.hpp"
+#include "main.hpp"
 
 class Config {
  private:

@@ -1,7 +1,7 @@
 #ifndef CGIPARENTTASK_HPP
 #define CGIPARENTTASK_HPP
 
-#include "../Connections/AConnection.hpp"
+#include "classes/Connections/AConnection.hpp"
 #include "ATask.hpp"
 class AConnection;
 

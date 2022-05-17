@@ -1,7 +1,7 @@
-#include "../../../includes/classes/Connections/AConnection.hpp"
+#include "classes/Connections/AConnection.hpp"
 
-#include "../../../includes/classes/HTTPCodes.hpp"
-#include "../../../includes/classes/MimeTypes.hpp"
+#include "classes/HTTPCodes.hpp"
+#include "classes/MimeTypes.hpp"
 
 AConnection::AConnection()
     : _wrote(0),

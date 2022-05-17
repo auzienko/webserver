@@ -1,7 +1,7 @@
 #ifndef DELETETASK_HPP
 #define DELETETASK_HPP
 
-#include "../Connections/AConnection.hpp"
+#include "classes/Connections/AConnection.hpp"
 #include "ATask.hpp"
 class AConnection;
 

@@ -1,7 +1,7 @@
 #ifndef WEBSERVERMANAGER_HPP
 #define WEBSERVERMANAGER_HPP
 
-#include "../Config.hpp"
+#include "classes/Config.hpp"
 #include "Webserver.hpp"
 
 class Config;

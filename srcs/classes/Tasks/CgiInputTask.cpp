@@ -1,5 +1,5 @@
-#include "../../../includes/classes/Tasks/CgiInputTask.hpp"
-#include "../../../includes/classes/MimeTypes.hpp"
+#include "classes/Tasks/CgiInputTask.hpp"
+#include "classes/MimeTypes.hpp"
 
 CgiInputTask::CgiInputTask(AConnection* connection, int const& fd,
                            int const& parentFd)

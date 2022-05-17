@@ -1,4 +1,4 @@
-#include "../../../includes/classes/Connections/ConnectionManager.hpp"
+#include "classes/Connections/ConnectionManager.hpp"
 
 ConnectionManager::ConnectionManager(Webserver* webserver)
     : _webserver(webserver) {}

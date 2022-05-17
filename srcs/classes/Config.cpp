@@ -1,4 +1,4 @@
-#include "../../includes/classes/Config.hpp"
+#include "classes/Config.hpp"
 
 Config::Config(std::string const& file_name) : _configFile(file_name), _debugLine(0), _server(t_server())
 {

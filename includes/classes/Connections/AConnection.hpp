@@ -1,9 +1,9 @@
 #ifndef ACONNECTION_HPP
 #define ACONNECTION_HPP
 
-#include "../../main.hpp"
+#include "main.hpp"
 #include "ConnectionManager.hpp"
-#include "../Tasks/ATask.hpp"
+#include "classes/Tasks/ATask.hpp"
 
 class ATask;
 class ConnectionManager;

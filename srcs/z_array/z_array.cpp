@@ -6,11 +6,11 @@
 /*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/27 10:20:40 by zcris             #+#    #+#             */
-/*   Updated: 2022/05/16 17:03:54 by zcris            ###   ########.fr       */
+/*   Updated: 2022/05/17 17:19:04 by zcris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/z_array.hpp"
+#include "z_array.hpp"
 
 int	z_array_init(t_z_array *a)
 {

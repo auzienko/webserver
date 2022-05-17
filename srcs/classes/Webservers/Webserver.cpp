@@ -1,7 +1,7 @@
-#include "../../../includes/classes/Webservers/Webserver.hpp"
+#include "classes/Webservers/Webserver.hpp"
 
-#include "../../../includes/classes/Connections/NetworkConnection.hpp"
-#include "../../../includes/classes/Tasks/UnknownNetworkTask.hpp"
+#include "classes/Connections/NetworkConnection.hpp"
+#include "classes/Tasks/UnknownNetworkTask.hpp"
 
 Webserver::Webserver(t_server& src, int maxConnection)
     : _maxConnection(maxConnection), _listenSocket(-1), _serverConfig(src) {

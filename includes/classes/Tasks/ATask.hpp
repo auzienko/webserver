@@ -23,7 +23,7 @@ enum Type {
   LOCAL_CGI_OUTPUT
 };
 
-#include "../Connections/AConnection.hpp"
+#include "classes/Connections/AConnection.hpp"
 
 class AConnection;
 

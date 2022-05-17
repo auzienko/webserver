@@ -1,4 +1,4 @@
-#include "../includes/main.hpp"
+#include "main.hpp"
 
 int main(int argc, char **argv, char **env) {
 	std::string str("");
