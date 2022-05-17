@@ -7,6 +7,11 @@ Config::Config(std::string const& file_name) : _configFile(file_name), _debugLin
 
 Config::~Config(void) {}
 
+bool	Config::is_open()
+{
+	return (_fileStream.is_open());
+}
+
 void	Config::close()
 {
 	_fileStream.close();
@@ -307,12 +312,11 @@ void	Config::_serverArgs(std::string &line, bool &is_location, bool &is_inlocati
 		{
 			while (line.length() && line[0] != '#')
 			{
-				size_t	len = 0;  // переопределение затенение переменной len
-				std::string	spaces = WHITE_SPACES "#"; //аналогично с spaces
-				while (line[len] && spaces.find(line[len]) == std::string::npos)
-					len++;
-				methods.insert(line.substr(0, len));
-				line = line.c_str() + len;
+				size_t	len1 = 0;
+				while (line[len1] && spaces.find(line[len1]) == std::string::npos)
+					len1++;
+				methods.insert(line.substr(0, len1));
+				line = line.c_str() + len1;
 				ws::stringSkipWS(line);
 			}
 			cgi_methods.second = methods;
@@ -344,7 +348,7 @@ int	Config::checkAndParse(void)
 			throw std::logic_error("Find unsuspected char in config file line " + std::to_string(_debugLine));
 		else if (line[0] == '{')
 		{
-			if (!is_inserver && is_server)  // is_server всегда true
+			if (!is_inserver && is_server)
 				_checkisin(line, is_inserver);
 			else if (!is_inlocation && is_location)
 				_checkisin(line, is_inlocation);

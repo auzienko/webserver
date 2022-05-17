@@ -3,7 +3,11 @@
 WebserverManager::WebserverManager(std::string const &config_path)
     : _maxFd(-1) {
   int res;
-  _config = new Config(config_path);  //Нужна проверка найден файл или нет
+  _config = new Config(config_path);
+  if (!_config->is_open()) {
+    std::cerr << "Config file not found" << std::endl;
+    exit(-1);
+  }
   res = 1;
   while (res > 0) {
     try {
@@ -11,8 +15,6 @@ WebserverManager::WebserverManager(std::string const &config_path)
       if (res > 0) _Create_webserver(_config->get_server());
     } catch (...) {
       delete _config;
-      //_Delete_webservers();             Если ошибка в конфиге на очередном
-      //сервере, прошлые не валидны?
       throw;
     }
   }

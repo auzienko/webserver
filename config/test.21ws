@@ -3,6 +3,7 @@ server test {
   error_page 404 /Users/wgaunt/Desktop/ws/errorTest.html
   limit_size 1000
   location / {
+    methods POST
     root ./www-static-site/
     index index.html
   }

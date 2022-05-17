@@ -135,7 +135,6 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
 }
 
 void UnknownNetworkTask::getSimple(string& body) {
-  if (_content_len < 0) throw logic_error("400"); // тут проблема, тип ансайн проверяется на меньше нуля
   if (_client_max_body_size &&
       (_content_len > _client_max_body_size ||
        _body.size() + body.size() > _client_max_body_size))
@@ -225,8 +224,8 @@ void UnknownNetworkTask::parseHeaders(string head) {
   if (i == strnpos) throw logic_error("400");
   key = head.substr(0, i);
   try {
-    head.at(i + 2); // NOT USED?
-    value = head.substr(i + 2);  // TRIM?
+    head.at(i + 2);
+    value = head.substr(i + 2);
   } catch (...) {
     value = "";
   }
@@ -307,13 +306,13 @@ void UnknownNetworkTask::print() {
        it != _headers.end(); ++it) {
     cout << (*it).first << ":" << (*it).second << endl;
   }
-  // cout << _body << endl;  //Артём это почему так?
+  // cout << _body << endl;             // Вывод боди
 }
 
 int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
                                       t_uriInfo uriBlocks) {
   std::map<std::string, std::string> env;
-  env["PATH_INFO"] = uriBlocks.pathInfo;
+  env["PATH_INFO"] = uriBlocks.uri;
   env["REQUEST_URI"] = uriBlocks.uri;
   env["SERVER_NAME"] = server_config.listen;
   env["AUTH_TYPE"] =
@@ -326,7 +325,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
   env["QUERY_STRING"] = uriBlocks.args;
   env["REMOTE_ADDR"] = ws::socketGetIP(getFd());
   env["REQUEST_METHOD"] = _method;
-  env["SCRIPT_NAME"] = "/" + ws::stringTail(uriBlocks.uri, '/');
+  env["SCRIPT_NAME"] = "";
   env["SERVER_PORT"] = ws::intToStr(server_config.port);
   env["SERVER_PROTOCOL"] = _http_version;
   env["SERVER_SOFTWARE"] = PROGRAMM_NAME;

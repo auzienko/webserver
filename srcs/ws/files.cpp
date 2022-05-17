@@ -45,13 +45,9 @@ std::pair<std::ifstream, std::string>* ws::filesErrors(int code, const std::map<
   if (stat(path.c_str(), &file)) {
     isNotFind = true;
   }
-  if (!isNotFind && S_ISDIR(file.st_mode)) {
-    isNotFind = true; // никогда не используется?
-  } else {
+  if (!(!isNotFind && S_ISDIR(file.st_mode))) {
     res->first.open(path, std::ifstream::binary);
-    if (!res->first.is_open()) {
-      isNotFind = true;  // никогда не используется?
-    } else
+    if (res->first.is_open())
       res->second = MimeTypes::getMimeType(path);
   }
   return res;

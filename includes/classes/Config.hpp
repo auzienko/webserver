@@ -27,6 +27,7 @@ class Config {
   explicit Config(std::string const& file_name);
   ~Config(void);
 
+  bool    	is_open();
   void      close(void);
   int       checkAndParse(void);
   t_server  &get_server(void);
