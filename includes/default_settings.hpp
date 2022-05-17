@@ -1,7 +1,7 @@
 #ifndef DEFAULT_SETTINGS_HPP
 #define DEFAULT_SETTINGS_HPP
 
-#define DEFAULT_BUFLEN 65536				// max = 65536
+#define DEFAULT_BUFLEN 3536				// max = 65536
 #define MAX_CLIENTS 512
 #define DEFAULT_LISTEN_QUEUE 1024
 #define TIMEOUT 60							// Время в секундах для закрытия connection по таймауту

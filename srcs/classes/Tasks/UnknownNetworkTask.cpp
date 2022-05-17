@@ -313,7 +313,8 @@ void UnknownNetworkTask::print() {
 int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
                                       t_uriInfo uriBlocks) {
   std::map<std::string, std::string> env;
-  env["PATH_INFO"] = "/path/info";
+  env["PATH_INFO"] = uriBlocks.pathInfo;
+  env["REQUEST_URI"] = uriBlocks.uri;
   env["SERVER_NAME"] = server_config.listen;
   env["AUTH_TYPE"] =
       ws::stringFromMap(_headers.find("Authorization"), _headers.end());
@@ -325,9 +326,7 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
   env["QUERY_STRING"] = uriBlocks.args;
   env["REMOTE_ADDR"] = ws::socketGetIP(getFd());
   env["REQUEST_METHOD"] = _method;
-  env["SCRIPT_NAME"] = ws::stringFromMap(
-      server_config.cgi.find("." + ws::stringTail(uriBlocks.uri, '.')),
-      _headers.end());
+  env["SCRIPT_NAME"] = "/" + ws::stringTail(uriBlocks.uri, '/');
   env["SERVER_PORT"] = ws::intToStr(server_config.port);
   env["SERVER_PROTOCOL"] = _http_version;
   env["SERVER_SOFTWARE"] = PROGRAMM_NAME;
@@ -387,12 +386,20 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
   pid = fork();
   if (pid < 0) {
     ws::printE(ERROR_CGI_EXECVE_FORK, "\n");
+    close(fd_input[0]);
+    close(fd_input[1]);
+    close(fd_output[0]);
+    close(fd_output[1]);
     return -1;
   }
   if (pid == 0) {
     if (dup2(fd_input[0], STDIN_FILENO) < 0 ||
         dup2(fd_output[1], STDOUT_FILENO) < 0) {
       ws::printE(ERROR_CGI_DUP2, "\n");
+      close(fd_input[0]);
+      close(fd_input[1]);
+      close(fd_output[0]);
+      close(fd_output[1]);
       exit(-1);
     }
     close(fd_input[0]);
