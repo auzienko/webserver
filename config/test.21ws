@@ -3,9 +3,14 @@ server test {
   error_page 404 /Users/wgaunt/Desktop/ws/errorTest.html
   limit_size 1000
   location / {
-    methods POST
+    methods POST GET
     root ./www-static-site/
     index index.html
+  }
+  location /post_test/ {
+    methods POST GET
+    root /Users/wgaunt/Downloads/
+    upload /Users/wgaunt/Downloads/
   }
   location /redir/ {
     redir 301 /                    # Никогда так не делайте для тестов (307 вместо 301)

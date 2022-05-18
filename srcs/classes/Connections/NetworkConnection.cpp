@@ -12,7 +12,7 @@ int NetworkConnection::_reading(void) {
   char buf[DEFAULT_BUFLEN];
   memset(buf, 0, DEFAULT_BUFLEN);
   nbytes = recv(_idFd, &buf, DEFAULT_BUFLEN - 1, 0);
-  if (nbytes == 0) {
+  if (nbytes == 0 || nbytes == -1) {
 #ifdef DEBUG
     std::cout << "fd (NetworkConnection) #" << _idFd << ": reading no data\n";
 #endif
@@ -41,6 +41,7 @@ int NetworkConnection::_writing(void) {
     if (nbytes == -1) {
       std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection) #" << _idFd
                 << ": Error on sending response";
+      ++_wrote;
     }
     if (nbytes)
       std::cout << "\n⬆ ⬆ ⬆ fd (NetworkConnection): " << _idFd << " WROTE "
@@ -48,7 +49,8 @@ int NetworkConnection::_writing(void) {
                 << std::endl;
 #endif
 
-    return 0;
+    if (nbytes != -1 && nbytes != 0)
+      return 0;
   }
   _task->setStatus(DONE);
 

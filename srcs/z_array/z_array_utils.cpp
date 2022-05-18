@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   z_array_utils.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zcris <zcris@student.21-school.ru>         +#+  +:+       +#+        */
+/*   By: wgaunt <wgaunt@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/05 08:51:11 by zcris             #+#    #+#             */
-/*   Updated: 2022/05/17 17:19:04 by zcris            ###   ########.fr       */
+/*   Updated: 2022/05/18 13:34:25 by wgaunt           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,8 @@ void	*z_array_utls_ft_alloc(size_t size)
 		if (Z_ARRAY_EXIT_IF_NULL)
 		{
 			write(2, "〰✖️: Heap memory error. Out of memory.\n", 40);
-			exit(12);
+			return 0;
+//			exit(12);
 		}
 	}
 	return ((void *)res);

@@ -13,7 +13,7 @@ server {
   location /post_body {
     methods POST
     limit_size 100
-    root /Users/wgaunt/post/
+    upload /Users/wgaunt/post/
   }
   location /directory/ {
     methods GET

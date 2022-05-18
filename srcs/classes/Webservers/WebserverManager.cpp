@@ -46,7 +46,7 @@ int WebserverManager::start(void) {
     select_result = select(_maxFd + 1, &read_fds, &write_fds, 0, 0);
     if (select_result < 0) {
       ws::printE(ERROR_SELECT, "\n");
-      exit(EXIT_FAILURE);
+      continue;
     }
     int max_fd = _maxFd;
     for (int i = 0; i <= max_fd && select_result > 0; ++i) {

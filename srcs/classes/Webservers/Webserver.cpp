@@ -83,7 +83,7 @@ int Webserver::readHandler(int fd) {
     int new_sock = accept(_listenSocket, (struct sockaddr*)&client, &size);
     if (new_sock < 0) {
       ws::printE(ERROR_ACCEPT, "\n");
-      exit(EXIT_FAILURE);
+      return -1;
     }
     if (_connectionManager->getConnectionCount() < _maxConnection) {
       fcntl(new_sock, F_SETFL, O_NONBLOCK);

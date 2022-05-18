@@ -23,7 +23,7 @@ DIR_OBJS = objs
 
 OBJECTS = $(sort $(dir $(OBJS)))
 
-CC = c++ -DDEBUG -g #-fsanitize=address
+CC = c++ -g #-DDEBUG #-fsanitize=address
 
 FLAGS = -Wall -Wextra -Werror -std=c++98 -pedantic-errors -I./includes
 

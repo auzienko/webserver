@@ -43,6 +43,10 @@ int LocalConnection::_writing(void) {
     _output.rdbuf()->sgetn(_buf, size);
     int nbytes = 0;
     nbytes = write(_idFd, _buf, size);
+    if (nbytes == -1 || nbytes == 0) {
+      _task->setStatus(DONE);
+      return 0;
+    }
     _wrote += nbytes;
 
 #ifdef DEBUG

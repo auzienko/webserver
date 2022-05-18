@@ -82,9 +82,10 @@ void AConnection::setTask(ATask* task) { _task = task; }
 
 void AConnection::error(const std::exception& ex) {
   int code = ws::stringTakeErrCode(ex.what());
-  if (code == -1)
-    throw ex;
-  else {
+  if (code == -1) {
+    std::cerr << "Error [" << _idFd << "]: " << ex.what() << std::endl;
+    _task->setStatus(DONE);
+  } else {
 #ifdef DEBUG
     std::cout << "Error " << ex.what() << std::endl;
 #endif

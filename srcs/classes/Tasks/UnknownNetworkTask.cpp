@@ -32,7 +32,7 @@ int UnknownNetworkTask::collectData(void) {
   parse(_connection->getInputData());
   if (!_done) return 0;
 
-  print();
+  // print();
   setStatus(READY_TO_HANDLE);
   executeTask();
   return 0;
@@ -73,8 +73,8 @@ int UnknownNetworkTask::_MakeKnownTask(t_uriInfo& cur) {
     } else if (cur.loc->autoindex) {
       // Autoindex flow
 
-      std::cout << "~~~~~~~~~~~~~~~> CREATE AUTOINDEX TASK uri '"
-                << _UnknownNetworkTask_uri << "' \n\n";
+      // std::cout << "~~~~~~~~~~~~~~~> CREATE AUTOINDEX TASK uri '"
+                // << _UnknownNetworkTask_uri << "' \n\n";
       if (cur.loc->root == cur.uri && ws::filesIsDir(cur.uri)) {
         AutoindexTask* tmp = new AutoindexTask(_connection, getFd(),
                                                cur.loc->root, cur.loc->path);
@@ -319,6 +319,8 @@ int UnknownNetworkTask::_MakeCgiTasks(t_server const& server_config,
       ws::stringFromMap(_headers.find("Authorization"), _headers.end());
   env["CONTENT_LENGTH"] = ws::intToStr(_content_len);
   env["GATEWAY_INTERFACE"] = "CGI/1.1";
+  if (uriBlocks.loc)
+    env["DOCUMENT_ROOT"] = uriBlocks.loc->root;
   env["PATH_TRANSLATED"] = uriBlocks.uri;
   env["CONTENT_TYPE"] =
       ws::stringFromMap(_headers.find("Content-Type"), _headers.end());

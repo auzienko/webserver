@@ -17,12 +17,15 @@ int PostTask::executeTask(void) {
 int PostTask::_MakeHeader() {
   _response.clear();
 
+  if (!_parsedURI.loc->file_uploads)
+    throw std::logic_error("400");
+
   std::ofstream outFile;
   struct stat file;
   bool isExists = true;
 
   // Заполнение информации о файле и проверка на его существование
-  if (stat(_parsedURI.uri.c_str(), &file)) {
+  if (stat(_parsedURI.upload.c_str(), &file)) {
     if (errno == ENOENT) {
       isExists = false;
     } else {
@@ -33,7 +36,7 @@ int PostTask::_MakeHeader() {
   if (isExists) {
     if (S_ISDIR(file.st_mode)) {    // Это папка
       // Создаем новый файл
-      outFile.open(_parsedURI.uri);
+      outFile.open(_parsedURI.upload);
       outFile << _inputBody;
       outFile.close();
       _resBodyType = "";
@@ -42,7 +45,9 @@ int PostTask::_MakeHeader() {
     }
   } else {
     // Создаем новый файл
-    outFile.open(_parsedURI.uri);
+    outFile.open(_parsedURI.upload);
+    if (!outFile.is_open())
+      throw std::logic_error("400");
     outFile << _inputBody;
     outFile.close();
     _resBodyType = "";

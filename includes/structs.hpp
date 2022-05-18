@@ -39,6 +39,7 @@ typedef struct tag_server {
 
 typedef struct s_uriInfo{
     std::string uri;
+    std::string upload;
     bool isCgi;
     std::set<std::string> cgi_methods;
     std::string args;

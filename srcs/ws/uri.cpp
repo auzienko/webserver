@@ -70,10 +70,12 @@ void ws::uriFill(std::string const &line, t_server const& server_config, t_uriIn
           isFind = true;
           res.loc = it.base();
           res.uri = it->root;
+          res.upload = it->uploads_path;
           while (dirs.size() > i)
             dirs.erase(dirs.begin());
           while (!dirs.empty())
           {
+            res.upload = res.upload + dirs.front() + (dirs.size() > 1 ? "/" : "");
             res.uri = res.uri + dirs.front() + (dirs.size() > 1 ? "/" : "");
             dirs.erase(dirs.begin());
           }
