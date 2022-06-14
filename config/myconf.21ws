@@ -1,14 +1,15 @@
-server <name> {                 #name может отсутствовать
-  host:port                     #первая строка всегда имеет такой формат
-  error_page <num> some.html
+server <name> {                       #name может отсутствовать
+  host:port                           #первая строка всегда имеет такой формат
+  error_page <code> some.html
   limit_size <num>
-  location <path> {             #path обязательно (HTTP redirection)
-    methods <name> ...          #доступные методы, перечисление через пробел
-    root <path>                 #где будут искаться файлы (это может быть 1 файл)
+  location <path> {                   #path обязательно
+    redir <code> <path>               #редирект с кодом возврата и путем
+    methods <name> ...                #доступные методы, перечисление через пробел
+    root <path>                       #где будут искаться файлы (это может быть 1 файл)
     autoindex <on/off>
     limit_size <num>
-    index <file>                #default file to answer if the request is a directory
-    upload <path>               #path - путь сохранения файлов. Загрузка файлов разрешена, когда есть эта строка
+    index <file>                      #default file to answer if the request is a directory
+    upload <path>                     #path - путь сохранения файлов. Загрузка файлов разрешена, когда есть эта строка
   }
-  cgi <extension> <path>
+  cgi <extension> <path> <methods>    #methods - методы через пробел
 }
